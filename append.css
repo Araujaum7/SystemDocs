@@ -1,0 +1,41 @@
+
+/* 8. GENERATION & SELECTION PANELS */
+.documentos-container {
+  display: grid; grid-template-columns: 2fr 1fr; gap: 32px;
+  align-items: start;
+}
+@media (max-width: 1024px) {
+  .documentos-container { grid-template-columns: 1fr; }
+}
+
+.selection-panel { display: flex; flex-direction: column; gap: 32px; }
+.selection-section h3 { font-size: 1.1rem; color: var(--text-main); margin-bottom: 16px; font-weight: 600;}
+
+.selection-list {
+  background: var(--bg-panel); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md); max-height: 400px; overflow-y: auto;
+  box-shadow: var(--shadow-sm); padding: 8px;
+}
+.selection-list::-webkit-scrollbar { width: 6px; }
+.selection-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 6px; }
+
+.selection-list label {
+  display: flex; align-items: center; gap: 12px; padding: 16px;
+  border-bottom: 1px solid var(--border-subtle); cursor: pointer;
+  transition: all 0.2s ease; border-radius: 8px; margin-bottom: 4px;
+}
+.selection-list label:last-child { border-bottom: none; margin-bottom: 0; }
+.selection-list label:hover { background: var(--bg-panel-muted); transform: translateX(4px); }
+.selection-list input[type="checkbox"] {
+  width: 20px; height: 20px; accent-color: var(--primary-600);
+  cursor: pointer; flex-shrink: 0;
+}
+.selection-list .item-content { flex: 1; }
+.selection-list .item-title { font-weight: 600; color: var(--text-main); display: block; font-size: 0.95rem; }
+.selection-list .item-subtitle { color: var(--text-light); font-size: 0.85rem; display: block; margin-top: 4px; }
+
+.actions-panel {
+  background: var(--bg-panel); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-md);
+  position: sticky; top: 24px;
+}

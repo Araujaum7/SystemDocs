@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentos - Sistema de Documentos</title>
+    <link rel="stylesheet" href="css/style.css?v=1784057472976">
+
+    <!-- Frameworks (Phosphor Icons & Tailwind) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: { preflight: false }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <button class="sidebar-toggle">☰</button>
+                <div class="logo-section">
+                    <span class="icon"><i class="ph ph-files"
+                            style="font-size: 1.8rem; color: var(--primary-500)"></i></span>
+                    <h2>DocSystem</h2>
+                </div>
+                <div class="user-info" id="userInfo">
+                    <div class="user-avatar">
+                        <span class="icon"><i class="ph ph-user"></i></span>
+                    </div>
+                    <div class="user-details">
+                        <strong id="userName">Carregando...</strong>
+                        <span class="user-role" id="userRole">Carregando...</span>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="icon"><i class="ph-fill ph-squares-four"></i></span>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="clientes.html" class="nav-item">
+                    <span class="icon"><i class="ph-fill ph-users"></i></span>
+                    <span>Clientes</span>
+                </a>
+
+                <a href="documentos.html" class="nav-item active">
+                    <span class="icon"><i class="ph-fill ph-file-text"></i></span>
+                    <span>Documentos</span>
+                </a>
+
+                <a href="templates.html" class="nav-item">
+                    <span class="icon"><i class="ph-fill ph-copy"></i></span>
+                    <span>Templates</span>
+                </a>
+
+                <!-- Apenas para Master -->
+                <div class="nav-section admin-master-only">
+                    <div class="nav-section-title">Administração</div>
+                    <a href="empresas.html" class="nav-item">
+                        <span class="icon"><i class="ph-fill ph-buildings"></i></span>
+                        <span>Empresas</span>
+                    </a>
+                    <a href="usuarios.html" class="nav-item">
+                        <span class="icon"><i class="ph-fill ph-user-gear"></i></span>
+                        <span>Usuários</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="btn btn-secondary btn-block">
+                    <span class="icon"><i class="ph ph-sign-out"></i></span>
+                    Sair do Sistema
+                </button>
+            </div>
+        </div>
+
+        <!-- Overlay para mobile -->
+        <div class="sidebar-overlay"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header class="content-header">
+                <div class="header-left">
+                    <div>
+                        <h1>Geração de Documentos</h1>
+                        <div class="breadcrumb">Selecione clientes e templates para gerar documentos</div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button id="editarCamposBtn" class="btn btn-warning">
+                        <span class="icon"><i class="ph ph-pencil-simple"></i></span>
+                        Editar Campos
+                    </button>
+                </div>
+            </header>
+
+            <div class="content">
+                <div class="documentos-container">
+                    <div class="selection-panel">
+                        <div class="selection-section">
+                            <h3>Selecionar Clientes</h3>
+                            <div class="search-box mb-4">
+                                <span
+                                    class="icon absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--text-light)]"><i
+                                        class="ph ph-magnifying-glass"></i></span>
+                                <input type="text" id="searchClientesDoc"
+                                    class="w-full pl-10 pr-4 py-2 bg-[var(--bg-panel-muted)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-main)] focus:ring-2 focus:ring-[var(--primary-500)] outline-none transition-all"
+                                    placeholder="Buscar clientes...">
+                            </div>
+                            <div id="clientesSelection" class="selection-list styled-list"></div>
+                        </div>
+
+                        <div class="selection-section">
+                            <h3>Selecionar Templates</h3>
+                            <div class="search-box mb-4">
+                                <span
+                                    class="icon absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--text-light)]"><i
+                                        class="ph ph-magnifying-glass"></i></span>
+                                <input type="text" id="searchTemplatesDoc"
+                                    class="w-full pl-10 pr-4 py-2 bg-[var(--bg-panel-muted)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-main)] focus:ring-2 focus:ring-[var(--primary-500)] outline-none transition-all"
+                                    placeholder="Buscar templates...">
+                            </div>
+                            <div id="templatesSelection" class="selection-list styled-list"></div>
+                        </div>
+                    </div>
+
+                    <div class="actions-panel sticky-panel">
+                        <div class="selection-stats cards-grid mb-6">
+                            <div
+                                class="stat-item kpi-card p-4 rounded-xl bg-[var(--bg-panel)] border border-[var(--border-subtle)] shadow-sm">
+                                <span
+                                    class="kpi-label text-xs uppercase font-bold text-[var(--text-light)]">Clientes</span>
+                                <strong class="kpi-value text-2xl font-display text-[var(--primary-500)]"
+                                    id="clientesSelecionadosCount">0</strong>
+                            </div>
+                            <div
+                                class="stat-item kpi-card p-4 rounded-xl bg-[var(--bg-panel)] border border-[var(--border-subtle)] shadow-sm">
+                                <span
+                                    class="kpi-label text-xs uppercase font-bold text-[var(--text-light)]">Templates</span>
+                                <strong class="kpi-value text-2xl font-display text-[var(--primary-500)]"
+                                    id="templatesSelecionadosCount">0</strong>
+                            </div>
+                            <div
+                                class="stat-item kpi-card primary p-4 rounded-xl bg-gradient-to-r from-[var(--primary-600)] to-[var(--primary-500)] text-white shadow-md col-span-2">
+                                <span class="kpi-label text-xs uppercase font-bold text-white/80">A Gerar</span>
+                                <strong class="kpi-value text-3xl font-display" id="totalDocumentosCount">0</strong>
+                            </div>
+                        </div>
+
+                        <div class="generation-options space-y-6 mb-8">
+                            <div class="option-group">
+                                <p class="option-title text-sm font-semibold text-[var(--text-muted)] mb-3">Formato de
+                                    saída</p>
+                                <div class="option-row segmented flex gap-2">
+                                    <label class="option-chip flex-1 text-center">
+                                        <input type="radio" name="outputFormat" value="docx" class="hidden peer">
+                                        <span
+                                            class="block py-2 px-4 rounded-lg border border-[var(--border-strong)] bg-[var(--bg-panel)] text-[var(--text-main)] peer-checked:bg-[var(--primary-600)] peer-checked:text-white peer-checked:border-[var(--primary-600)] peer-checked:shadow-[0_4px_12px_rgba(124,58,237,0.3)] transition-all cursor-pointer font-medium text-sm">Word</span>
+                                    </label>
+                                    <label class="option-chip flex-1 text-center">
+                                        <input type="radio" name="outputFormat" value="pdf" class="hidden peer">
+                                        <span
+                                            class="block py-2 px-4 rounded-lg border border-[var(--border-strong)] bg-[var(--bg-panel)] text-[var(--text-main)] peer-checked:bg-[var(--primary-600)] peer-checked:text-white peer-checked:border-[var(--primary-600)] peer-checked:shadow-[0_4px_12px_rgba(124,58,237,0.3)] transition-all cursor-pointer font-medium text-sm">PDF</span>
+                                    </label>
+                                    <label class="option-chip flex-1 text-center">
+                                        <input type="radio" name="outputFormat" value="both" checked
+                                            class="hidden peer">
+                                        <span
+                                            class="block py-2 px-4 rounded-lg border border-[var(--border-strong)] bg-[var(--bg-panel)] text-[var(--text-main)] peer-checked:bg-[var(--primary-600)] peer-checked:text-white peer-checked:border-[var(--primary-600)] peer-checked:shadow-[0_4px_12px_rgba(124,58,237,0.3)] transition-all cursor-pointer font-medium text-sm">Ambos</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="option-group">
+                                <p class="option-title text-sm font-semibold text-[var(--text-muted)] mb-3">Destino do
+                                    download</p>
+                                <div class="option-row">
+                                    <select id="downloadMode"
+                                        class="form-control w-full p-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-panel-muted)] text-[var(--text-main)] focus:ring-2 focus:ring-[var(--primary-500)] outline-none transition-all">
+                                        <option value="browser">Perguntar no navegador (Manual)</option>
+                                        <option value="auto">Download Automático (Pasta Downloads)</option>
+                                        <option value="folder">Escolher pasta específica (Chrome/Edge)</option>
+                                    </select>
+                                </div>
+                                <small class="option-hint text-xs text-[var(--text-light)] mt-2 block">No modo pasta,
+                                    você seleciona a pasta e o sistema baixa automaticamente tudo para lá.</small>
+                            </div>
+                        </div>
+
+                        <button id="gerarDocumentosBtn"
+                            class="w-full flex justify-center items-center gap-2 py-4 px-4 rounded-xl shadow-lg text-lg font-bold text-white bg-gradient-to-r from-[var(--primary-600)] to-[var(--primary-500)] hover:from-[var(--primary-700)] hover:to-[var(--primary-600)] transition-all transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none animate-pulse-if-active">
+                            <span class="icon"><i class="ph-fill ph-lightning text-xl"></i></span>
+                            Gerar Documentos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para edição de campos específicos -->
+    <div id="modalEditarCampos" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Campos para Documentos</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-info">
+                    <p><strong>Editando campos necessários para os templates selecionados</strong></p>
+                    <p>Cliente: <span id="clienteEditandoNome">-</span></p>
+                </div>
+
+                <form id="formEditarCampos">
+                    <div id="camposEspecificos">
+                        <!-- Campos dinâmicos serão inseridos aqui -->
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                        <button type="button" class="btn btn-secondary"
+                            onclick="closeModal('modalEditarCampos')">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js?v=2"></script>
+    <script src="js/sidebar.js?v=2"></script>
+    <script src="js/documentos.js?v=2"></script>
+    <script src="js/ui-core.js?v=2"></script>
+</body>
+
+</html>

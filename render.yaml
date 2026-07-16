@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: documentospro
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        value: seu_segredo_super_secreto_aqui_altere_isso
+      - key: PORT
+        value: 10000</content>
+<parameter name="filePath">c:\Users\vitor\OneDrive\Documentos\DocumentosPro\DocumentosPro\render.yaml

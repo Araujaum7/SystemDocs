@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuários - Sistema de Documentos</title>
+    <link rel="stylesheet" href="css/style.css?v=1784057472980">
+
+    <!-- Frameworks (Phosphor Icons & Tailwind) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: { preflight: false }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <button class="sidebar-toggle">☰</button>
+                <div class="logo-section">
+                    <span class="icon"><i class="ph ph-files"
+                            style="font-size: 1.8rem; color: var(--primary-500)"></i></span>
+                    <h2>DocSystem</h2>
+                </div>
+                <div class="user-info" id="userInfo">
+                    <div class="user-avatar">
+                        <span class="icon"><i class="ph ph-user"></i></span>
+                    </div>
+                    <div class="user-details">
+                        <strong id="userName">Carregando...</strong>
+                        <span class="user-role" id="userRole">Carregando...</span>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="icon"><i class="ph-fill ph-squares-four"></i></span>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="clientes.html" class="nav-item">
+                    <span class="icon"><i class="ph-fill ph-users"></i></span>
+                    <span>Clientes</span>
+                </a>
+
+                <a href="documentos.html" class="nav-item">
+                    <span class="icon"><i class="ph-fill ph-file-text"></i></span>
+                    <span>Documentos</span>
+                </a>
+
+                <a href="templates.html" class="nav-item">
+                    <span class="icon"><i class="ph-fill ph-copy"></i></span>
+                    <span>Templates</span>
+                </a>
+
+                <div class="nav-section admin-master-only">
+                    <div class="nav-section-title">Administração</div>
+                    <a href="empresas.html" class="nav-item">
+                        <span class="icon"><i class="ph-fill ph-buildings"></i></span>
+                        <span>Empresas</span>
+                    </a>
+                    <a href="usuarios.html" class="nav-item active">
+                        <span class="icon"><i class="ph-fill ph-user-gear"></i></span>
+                        <span>Usuários</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="btn btn-secondary btn-block">
+                    <span class="icon"><i class="ph ph-sign-out"></i></span>
+                    Sair do Sistema
+                </button>
+            </div>
+        </div>
+
+        <!-- Overlay para mobile -->
+        <div class="sidebar-overlay"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header class="content-header">
+                <div class="header-left">
+                    <div>
+                        <h1>Gestão de Usuários</h1>
+                        <div class="breadcrumb">Cadastro e gerenciamento de usuários</div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button id="addUsuarioBtn" class="btn btn-primary">
+                        <span class="icon"><i class="ph ph-plus"></i></span>
+                        Novo Usuário
+                    </button>
+                </div>
+            </header>
+
+            <div class="content">
+                <div id="usuariosList" class="cards-grid">
+                    <!-- Usuários serão carregados aqui -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para adicionar usuário -->
+    <div id="modalUsuario" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Novo Usuário</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="usuarioForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="usuarioNome">Nome *</label>
+                            <input type="text" id="usuarioNome" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="usuarioEmail">Email *</label>
+                            <input type="email" id="usuarioEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="usuarioSenha">Senha *</label>
+                            <input type="password" id="usuarioSenha" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="usuarioCargo">Cargo *</label>
+                            <select id="usuarioCargo" required>
+                                <option value="user">Usuário Padrão</option>
+                                <option value="admin">Administrador da Empresa</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Criar Usuário</button>
+                        <button type="button" class="btn btn-secondary"
+                            onclick="closeModal('modalUsuario')">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para redefinir senha -->
+    <div id="modalRedefinirSenha" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Redefinir Senha</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-info">
+                    <p>Você está redefinindo a senha do usuário <strong id="resetSenhaUsuarioNome"></strong>.</p>
+                    <p class="text-warning">A senha antiga será sobrescrita permanentemente.</p>
+                </div>
+                <form id="resetSenhaForm">
+                    <input type="hidden" id="resetSenhaUsuarioId">
+                    <div class="form-group">
+                        <label for="novaSenha">Nova Senha *</label>
+                        <input type="password" id="novaSenha" required minlength="6"
+                            placeholder="Mínimo de 6 caracteres">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-warning">Salvar Nova Senha</button>
+                        <button type="button" class="btn btn-secondary"
+                            onclick="closeModal('modalRedefinirSenha')">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para alterar cargo -->
+    <div id="modalAlterarCargo" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Alterar Cargo</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-info">
+                    <p>Você está alterando o cargo de <strong id="alterarCargoUsuarioNome"></strong>.</p>
+                </div>
+                <form id="alterarCargoForm">
+                    <input type="hidden" id="alterarCargoUsuarioId">
+                    <div class="form-group">
+                        <label for="novoCargo">Novo Cargo *</label>
+                        <select id="novoCargo" required>
+                            <option value="user">Usuário Padrão</option>
+                            <option value="admin">Administrador da Empresa</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Salvar Alteração</button>
+                        <button type="button" class="btn btn-secondary"
+                            onclick="closeModal('modalAlterarCargo')">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js?v=2"></script>
+    <script src="js/sidebar.js?v=2"></script>
+    <script src="js/usuarios.js?v=2"></script>
+    <script src="js/ui-core.js?v=2"></script>
+</body>
+
+</html>

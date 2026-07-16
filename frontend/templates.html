@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Templates - Sistema de Documentos</title>
+    <link rel="stylesheet" href="css/style.css?v=1784057472979">
+
+    <!-- Frameworks (Phosphor Icons & Tailwind) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: { preflight: false }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <button class="sidebar-toggle">☰</button>
+                <div class="logo-section">
+                    <span class="icon"><i class="ph ph-files"
+                            style="font-size: 1.8rem; color: var(--primary-500)"></i></span>
+                    <h2>DocSystem</h2>
+                </div>
+                <div class="user-info" id="userInfo">
+                    <div class="user-avatar">
+                        <span class="icon"><i class="ph ph-user"></i></span>
+                    </div>
+                    <div class="user-details">
+                        <strong id="userName">Carregando...</strong>
+                        <span class="user-role" id="userRole">Carregando...</span>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="icon"><i class="ph-fill ph-squares-four"></i></span>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="clientes.html" class="nav-item">
+                    <span class="icon"><i class="ph-fill ph-users"></i></span>
+                    <span>Clientes</span>
+                </a>
+
+                <a href="documentos.html" class="nav-item">
+                    <span class="icon"><i class="ph-fill ph-file-text"></i></span>
+                    <span>Documentos</span>
+                </a>
+
+                <a href="templates.html" class="nav-item active">
+                    <span class="icon"><i class="ph-fill ph-copy"></i></span>
+                    <span>Templates</span>
+                </a>
+
+                <div class="nav-section admin-master-only">
+                    <div class="nav-section-title">Administração</div>
+                    <a href="empresas.html" class="nav-item">
+                        <span class="icon"><i class="ph-fill ph-buildings"></i></span>
+                        <span>Empresas</span>
+                    </a>
+                    <a href="usuarios.html" class="nav-item">
+                        <span class="icon"><i class="ph-fill ph-user-gear"></i></span>
+                        <span>Usuários</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="btn btn-secondary btn-block">
+                    <span class="icon"><i class="ph ph-sign-out"></i></span>
+                    Sair do Sistema
+                </button>
+            </div>
+        </div>
+
+        <!-- Overlay para mobile -->
+        <div class="sidebar-overlay"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header class="content-header">
+                <div class="header-left">
+                    <div>
+                        <h1>Gerenciar Templates</h1>
+                        <div class="breadcrumb">Upload e gestáão de templates de documentos</div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <!-- BOTÃO APENAS PARA MASTER -->
+                    <button id="addTemplateBtn" class="btn btn-primary admin-master-only">
+                        <span class="emoji"></span>
+                        Upload Template
+                    </button>
+                </div>
+            </header>
+
+            <div class="content">
+                <div id="templatesList" class="cards-grid">
+                    <!-- Templates serão carregados aqui -->
+                </div>
+
+                <!-- Mensagem para usuários não master -->
+                <div id="userMessage" class="não-data" style="display: nãone;">
+                    <span class="emoji">ℹ️</span>
+                    <h3>Acesso Restárito</h3>
+                    <p>Esta funcionalidade está disponível apenas para usuários master.</p>
+                    <p>Entre em contato com o administrador do sistema.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para upload de template (apenas master) -->
+    <div id="modalTemplate" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Upload de Template</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="templateForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="templateNome">Nome do Template *</label>
+                        <input type="text" id="templateNome" required placeholder="Ex: Contrato de Serviços">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="templateArquivo">Arquivo .docx *</label>
+                        <input type="file" id="templateArquivo" accept=".docx" required>
+                        <small>Selecione um arquivo Word (.docx) com campos entre {{ }}</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="templateCampos">Campos do Template *</label>
+                        <input type="text" id="templateCampos" required placeholder="nãome,cpf,email,endereco">
+                        <small>Liste os campos separados por vírgula. Use estáes nãomes entre {{ }} não seu documento
+                            Word</small>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <span class="emoji"></span>
+                            Upload Template
+                        </button>
+                        <button type="button" class="btn btn-secondary"
+                            onclick="closeModal('modalTemplate')">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js?v=2"></script>
+    <script src="js/sidebar.js?v=2"></script>
+    <script src="js/templates.js?v=2"></script>
+    <script src="js/ui-core.js?v=2"></script>
+</body>
+
+</html>

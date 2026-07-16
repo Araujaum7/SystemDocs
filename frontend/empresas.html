@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empresas - Sistema de Documentos</title>
+    <link rel="stylesheet" href="css/style.css?v=1784057472977">
+
+    <!-- Frameworks (Phosphor Icons & Tailwind) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: { preflight: false }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <button class="sidebar-toggle">☰</button>
+                <div class="logo-section">
+                    <span class="icon"><i class="ph ph-files"
+                            style="font-size: 1.8rem; color: var(--primary-500)"></i></span>
+                    <h2>DocSystem</h2>
+                </div>
+                <div class="user-info" id="userInfo">
+                    <div class="user-avatar">
+                        <span class="icon"><i class="ph ph-user"></i></span>
+                    </div>
+                    <div class="user-details">
+                        <strong id="userName">Carregando...</strong>
+                        <span class="user-role" id="userRole">Carregando...</span>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="icon"><i class="ph-fill ph-squares-four"></i></span>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="clientes.html" class="nav-item">
+                    <span class="icon"><i class="ph-fill ph-users"></i></span>
+                    <span>Clientes</span>
+                </a>
+
+                <a href="documentos.html" class="nav-item">
+                    <span class="icon"><i class="ph-fill ph-file-text"></i></span>
+                    <span>Documentos</span>
+                </a>
+
+                <a href="templates.html" class="nav-item">
+                    <span class="icon"><i class="ph-fill ph-copy"></i></span>
+                    <span>Templates</span>
+                </a>
+
+                <div class="nav-section admin-master-only">
+                    <div class="nav-section-title">Administração</div>
+                    <a href="empresas.html" class="nav-item active">
+                        <span class="icon"><i class="ph-fill ph-buildings"></i></span>
+                        <span>Empresas</span>
+                    </a>
+                    <a href="usuarios.html" class="nav-item">
+                        <span class="icon"><i class="ph-fill ph-user-gear"></i></span>
+                        <span>Usuários</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="btn btn-secondary btn-block">
+                    <span class="icon"><i class="ph ph-sign-out"></i></span>
+                    Sair do Sistema
+                </button>
+            </div>
+        </div>
+
+        <!-- Overlay para mobile -->
+        <div class="sidebar-overlay"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header class="content-header">
+                <div class="header-left">
+                    <div>
+                        <h1>Gestão de Empresas</h1>
+                        <div class="breadcrumb">Cadastro e gerenciamento de empresas</div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button id="addEmpresaBtn" class="btn btn-primary">
+                        <span class="icon"><i class="ph ph-plus"></i></span>
+                        Nova Empresa
+                    </button>
+                </div>
+            </header>
+
+            <div class="content">
+                <div id="empresasList" class="cards-grid">
+                    <!-- Empresas serão carregadas aqui -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js?v=2"></script>
+    <script src="js/sidebar.js?v=2"></script>
+    <script src="js/empresas.js?v=2"></script>
+    <script src="js/ui-core.js?v=2"></script>
+</body>
+
+</html>

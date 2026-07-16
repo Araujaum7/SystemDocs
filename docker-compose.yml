@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  documentospro:
+    build: .
+    container_name: documentospro_app
+    restart: always
+    ports:
+      - "80:7000"
+    environment:
+      - NODE_ENV=production
+      - PORT=7000
+      - JWT_SECRET=sua_chave_secreta_longa_aqui_gerada_na_nuvem
+      - ALLOW_NON_LAN=true
+      - ENABLE_PDF=true
+    volumes:
+      - ./backend/data:/app/backend/data
+      - ./backend/uploads:/app/backend/uploads
+    # Limita recursos do Docker (opcional, bom para não travar a VPS inteira se o LibreOffice pesar)
+    deploy:
+      resources:
+        limits:
+          cpus: '0.90'
+          memory: 3G
