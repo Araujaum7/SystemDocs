@@ -4,61 +4,60 @@ Sistema multi-tenant de geração de documentos DOCX/PDF com templates personali
 
 ## 🚀 Funcionalidades Implementadas
 
-- ✅ **Autenticação JWT** com isolamento por empresa
-- ✅ **Geração de documentos DOCX** com templates Handlebars
+- ✅ **Autenticação JWT** com isolamento por empresa (Multi-tenant)
+- ✅ **Geração de documentos DOCX** com templates Handlebars (Docxtemplater)
 - ✅ **Conversão automática para PDF** usando LibreOffice
-- ✅ **Pré-processamento de templates** para resolver quebras de tags
+- ✅ **Pré-processamento de templates** para resolver quebras de tags comuns do Word
 - ✅ **Geração em lote** com acompanhamento de progresso em tempo real
 - ✅ **Importação de clientes via CSV**
-- ✅ **Interface responsiva** com Vanilla JavaScript
-- ✅ **Isolamento multi-tenant** (Master vs Usuários regulares)
-- ✅ **Sistema de templates** com campos dinâmicos
-- ✅ **Download de documentos** gerados
+- ✅ **Interface responsiva** e limpa construída com Vanilla JavaScript e CSS
+- ✅ **Níveis de Acesso**: Usuário Master (gestão global) vs Usuários regulares (gestão isolada por empresa)
+- ✅ **Download** facilitado de todos os documentos gerados
 
 ## 🛠️ Instalação e Execução
 
 ### Pré-requisitos
 
 - **Node.js** 16+ (recomendado 18+)
-- **LibreOffice** (para conversão DOCX→PDF)
-- **Windows PowerShell** com permissões de execução
+- **LibreOffice** instalado e configurado (necessário para a conversão DOCX→PDF funcionar corretamente)
+- **Git** (opcional, mas recomendado para versionamento)
 
-### 1. Instalar Dependências
+### 1. Clonar e Instalar Dependências
 
-```powershell
-cd backend
+```bash
+git clone https://github.com/Araujaum7/SystemDocs.git
+cd SystemDocs/backend
 npm install
 ```
 
-### 2. Resolver Política de Execução do PowerShell (se necessário)
+### 2. Iniciar Servidor de Desenvolvimento
 
-Se receber erro de política de execução:
+O projeto pode ser iniciado facilmente usando o `npm`:
 
-```powershell
-# Executar como Administrador
-Set-ExecutionPolicy RemoteSigned
-```
-
-### 3. Iniciar Servidor de Desenvolvimento
-
-```powershell
-# Opção 1: Usando npm (recomendado)
+```bash
 cd backend
 npm run dev
+```
+*(O `nodemon` está configurado para recarregar o servidor a cada alteração salva)*
 
-# Opção 2: Usando Node diretamente
+Caso precise rodar em produção ou usar o Node diretamente:
+```bash
 cd backend
+npm start
+# ou
 node server.js
-
-# Opção 3: Porta específica (se 3000 estiver ocupada)
-cd backend
-$env:PORT=3001; node server.js
 ```
 
-### 4. Acessar a Aplicação
+Se a porta 3000 já estiver em uso, você pode defini-la via variável de ambiente:
+```powershell
+# No PowerShell do Windows
+$env:PORT=3001; npm run dev
+```
 
-- **URL**: http://localhost:3000 (ou porta configurada)
-- **Login padrão**:
+### 3. Acessar a Aplicação
+
+- **URL**: [http://localhost:3000](http://localhost:3000) (ou porta configurada)
+- **Login Master Padrão** (criado automaticamente no primeiro acesso):
   - Email: `admin@admin.com`
   - Senha: `admin123`
 
@@ -67,343 +66,76 @@ $env:PORT=3001; node server.js
 ```
 DocumentosPro/
 ├── backend/
-│   ├── server.js              # Servidor principal Express
-│   ├── docx-preprocessor.js   # Pré-processamento de templates
+│   ├── server.js              # Servidor principal (Express)
+│   ├── docx-preprocessor.js   # Pré-processamento e correção de templates DOCX
 │   ├── lib/
-│   │   └── convert-wrapper.js # Conversão DOCX→PDF
-│   ├── package.json           # Dependências Node.js
-│   └── uploads/               # Arquivos enviados
-│       ├── templates/         # Templates DOCX
-│       └── gerados/           # Documentos gerados
+│   │   └── convert-wrapper.js # Lógica de conversão DOCX → PDF
+│   ├── middlewares/           # Middlewares (auth, tenant, upload, firewall, ratelimit)
+│   ├── routes/                # Rotas da API (auth, clientes, documentos, empresas, etc.)
+│   ├── package.json           # Dependências Node.js e scripts
+│   └── uploads/               # Arquivos enviados e gerados
+│       ├── templates/         # Templates base enviados (.docx)
+│       └── gerados/           # Documentos finais processados
 ├── frontend/
 │   ├── index.html             # Página de login
-│   ├── dashboard.html         # Dashboard principal
-│   ├── clientes.html          # Gestão de clientes
-│   ├── documentos.html        # Geração de documentos
-│   ├── templates.html         # Gestão de templates
-│   ├── empresas.html          # Gestão de empresas
-│   ├── usuarios.html          # Gestão de usuários
+│   ├── dashboard.html         # Painel principal
+│   ├── clientes.html          # Gestão e importação de clientes
+│   ├── documentos.html        # Geração em lote e relatórios
+│   ├── templates.html         # Cadastro de templates
+│   ├── empresas.html          # Gestão de empresas (Master)
+│   ├── usuarios.html          # Gestão de usuários (Master)
 │   ├── css/
-│   │   └── style.css          # Estilos CSS
-│   └── js/                    # Scripts JavaScript
-│       ├── auth.js
-│       ├── clientes.js
-│       ├── documentos.js
-│       ├── templates.js
-│       └── sidebar.js
-└── database.db                # Banco SQLite
+│   │   └── style.css          # Estilos globais CSS
+│   └── js/                    # Scripts do client-side
+│       ├── api.js             # Módulo de requisições para o Backend
+│       ├── auth.js            # Lógica de login/sessão
+│       ├── clientes.js        # Lógica da tela de clientes e upload de CSV
+│       ├── documentos.js      # Geração, websocket e polling
+│       └── templates.js       # Gerenciamento de arquivos .docx
+├── database.db                # Banco de Dados SQLite (gerado automaticamente)
+└── .gitignore                 # Arquivos ignorados no Git (node_modules, banco de dados, etc.)
 ```
 
 ## 🔧 Configuração
 
 ### Variáveis de Ambiente
 
-Crie um arquivo `.env` na pasta `backend/`:
+Crie um arquivo `.env` na pasta `backend/` caso deseje sobrescrever as opções padrão:
 
 ```env
 PORT=3000
-JWT_SECRET=seu_segredo_super_secreto_aqui_altere_isso
-```
-
-### Banco de Dados
-
-O sistema usa SQLite e cria automaticamente as tabelas na primeira execução. O usuário master padrão é criado automaticamente.
-
-## 🌐 Implantação em Produção
-
-### Opção 1: Render.com (Recomendado)
-
-1. **Criar conta** no [Render.com](https://render.com)
-
-2. **Criar novo serviço Web**:
-   - Conectar repositório GitHub
-   - **Runtime**: Node.js
-   - **Build Command**: `npm install`
-   - **Start Command**: `npm start`
-   - **Environment Variables**:
-     - `PORT`: (Render define automaticamente)
-     - `JWT_SECRET`: seu segredo seguro
-
-3. **Configurar domínio** (opcional)
-
-### Opção 2: Railway
-
-1. **Criar conta** no [Railway.app](https://railway.app)
-
-2. **Criar novo projeto**:
-   - Conectar repositório GitHub
-   - Railway detectará automaticamente como projeto Node.js
-   - **Environment Variables**:
-     - `JWT_SECRET`: seu segredo seguro
-
-### Opção 3: VPS Manual
-
-```bash
-# 1. Instalar Node.js e LibreOffice no servidor
-sudo apt update
-sudo apt install nodejs npm libreoffice
-
-# 2. Clonar repositório
-git clone seu-repositorio
-cd DocumentosPro/backend
-
-# 3. Instalar dependências
-npm install
-
-# 4. Configurar variáveis de ambiente
-export JWT_SECRET=seu_segredo_seguro
-
-# 5. Iniciar aplicação
-npm start
-
-# 6. Configurar proxy reverso (nginx/apache)
-```
-
-## 📊 Uso da Aplicação
-
-### 1. Login
-- Use as credenciais padrão ou crie uma empresa/usuário
-
-### 2. Criar Empresa (Master)
-- Acesse `/empresas` e crie uma empresa
-
-### 3. Criar Usuário (Master)
-- Acesse `/usuarios` e crie usuários vinculados à empresa
-
-### 4. Importar Clientes
-- Acesse `/clientes` → "Importar CSV"
-- Formato CSV: `nome,email,cpf,telefone,endereco`
-
-### 5. Criar Template (Master)
-- Acesse `/templates`
-- Faça upload de arquivo DOCX com campos `{{NOME_CAMPO}}`
-- Defina os campos disponíveis
-
-### 6. Gerar Documentos
-- Acesse `/documentos`
-- Selecione clientes e templates
-- Clique "Gerar Documentos"
-- Acompanhe o progresso em tempo real
-- Baixe os documentos gerados
-
-## 🔍 Solução de Problemas
-
-### Erro: "execução de scripts foi desabilitada"
-```powershell
-Set-ExecutionPolicy RemoteSigned
-```
-
-### Erro: "Porta já em uso"
-```powershell
-# Usar porta diferente
-$env:PORT=3001; node server.js
-```
-
-### Erro: "LibreOffice não encontrado"
-- Instale LibreOffice: `sudo apt install libreoffice` (Linux)
-- Ou `choco install libreoffice` (Windows)
-
-### Erro: "Template não processado"
-- Verifique se o template DOCX foi criado no Word
-- Use `{{CAMPO}}` sem formatação especial
-- O pré-processador corrige quebras de tags automaticamente
-
-## 📝 Notas Técnicas
-
-- **Templates**: Use MS Word para criar templates com `{{CAMPO}}`
-- **PDF**: Conversão automática usando LibreOffice
-- **Progresso**: Acompanhamento em tempo real via WebSocket-like polling
-- **Segurança**: JWT tokens, isolamento por empresa
-- **Performance**: Geração paralela de documentos
-
-## 🤝 Suporte
-
-Para dúvidas ou problemas, verifique:
-1. Logs do servidor no terminal
-2. Console do navegador (F12)
-3. Arquivos de configuração
-4. Documentação das dependências
-
----
-
-**Desenvolvido com**: Node.js, Express, SQLite, Docxtemplater, PizZip, LibreOffice
-npm start
-```
-
-## 🌐 Deploy em Plataformas Gratuitas
-
-### 1. **Render.com** (Recomendado) ⭐
-
-1. **Criar conta**: [render.com](https://render.com)
-2. **Novo Web Service**:
-   - Conectar GitHub repo
-   - **Runtime**: Node
-   - **Build Command**: `npm install`
-   - **Start Command**: `npm start`
-   - **Environment**: `NODE_ENV=production`
-3. **Configurar variáveis** (se necessário):
-   - `JWT_SECRET`: seu_segredo_super_secreto_aqui_altere_isso
-   - `PORT`: 10000 (padrão do Render)
-
-**Atenção**: Render tem limite de 750h/mês gratuito.
-
-### 2. **Railway.app**
-
-1. **Criar conta**: [railway.app](https://railway.app)
-2. **Novo projeto**:
-   - Conectar GitHub
-   - Railway detecta automaticamente Node.js
-3. **Configurar variáveis**:
-   - `JWT_SECRET`
-   - `NODE_ENV=production`
-
-**Vantagem**: Deploy mais rápido, limite de 512MB RAM gratuito.
-
-### 3. **Vercel** (Frontend + API)
-
-```bash
-# Instalar Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel --prod
-```
-
-**Limitação**: Melhor para frontend, backend pode ter limitações.
-
-### 4. **Heroku** (Clássico)
-
-```bash
-# Criar app
-heroku create seu-app-documentospro
-
-# Configurar variáveis
-heroku config:set JWT_SECRET=seu_segredo_super_secreto_aqui_altere_isso
-heroku config:set NODE_ENV=production
-
-# Deploy
-git push heroku main
-```
-
-**Atenção**: Heroku free tier foi descontinuado.
-
-## 📁 Estrutura do Projeto
-
-```
-DocumentosPro/
-├── backend/
-│   ├── server.js              # API principal
-│   ├── docx-preprocessor.js   # Processamento de templates
-│   ├── lib/
-│   │   └── convert-wrapper.js # Conversão DOCX→PDF
-│   └── uploads/               # Arquivos gerados
-├── frontend/
-│   ├── index.html            # Login
-│   ├── dashboard.html        # Home
-│   ├── clientes.html         # CRUD clientes
-│   ├── documentos.html       # Geração em massa
-│   ├── templates.html        # Upload templates
-│   ├── css/style.css         # Estilos modernos
-│   └── js/                   # Módulos JavaScript
-└── package.json              # Dependências
-```
-
-## 🎯 Como Usar
-
-### 1. **Primeiro Acesso**
-- Login: `admin@admin.com` / `admin123`
-- Crie empresas e usuários
-
-### 2. **Cadastrar Templates**
-- Faça upload de arquivo `.docx`
-- Use `{{CAMPO}}` para campos dinâmicos
-- Exemplo: `{{NOME}}`, `{{CPF}}`, `{{ENDERECO}}`
-
-### 3. **Cadastrar Clientes**
-- Via interface ou **importação CSV**
-- Campos suportados: nome, cpf, email, telefone, endereco
-
-### 4. **Gerar Documentos**
-- Selecione clientes + templates
-- Sistema gera automaticamente DOCX + PDF
-- Acompanhe progresso em tempo real
-
-## 📊 Formato CSV para Importação
-
-```csv
-nome,cpf,email,telefone,endereco
-João Silva,12345678901,joao@email.com,11999999999,Rua A, 123
-Maria Santos,98765432100,maria@email.com,11888888888,Av B, 456
-```
-
-## 🔧 Configurações
-
-### Variáveis de Ambiente
-
-```bash
-# Produção
-NODE_ENV=production
-JWT_SECRET=seu_segredo_super_secreto_aqui_altere_isso
-PORT=3000
-
-# Desenvolvimento
 NODE_ENV=development
+JWT_SECRET=seu_segredo_super_secreto_aqui_altere_isso
 ```
 
-### Banco de Dados
+### Banco de Dados (SQLite)
 
-- **Arquivo**: `database.db` (SQLite)
-- **Reset**: Delete o arquivo para recriar tabelas
-- **Backup**: Copie o arquivo `database.db`
+O sistema usa **SQLite** e cria automaticamente as tabelas na primeira vez que o servidor (`server.js`) for executado.
+Para "resetar" os dados em desenvolvimento, basta excluir o arquivo `database.db` e reiniciar a aplicação.
 
-## 🐛 Troubleshooting
+## 📊 Como Usar a Aplicação
 
-### Erro: "Template not found"
-- Verifique se arquivo foi uploaded corretamente
-- Caminho: `backend/uploads/templates/`
+1. **Login Inicial**
+   - Acesse com `admin@admin.com` e a senha `admin123`.
+2. **Cadastrar Empresa e Usuários**
+   - Na aba Empresas, crie os ambientes isolados para os Tenants.
+   - Na aba Usuários, crie os logins vinculados a cada empresa.
+3. **Templates**
+   - Faça upload de arquivos `.docx`.
+   - Adicione campos no formato Handlebars: `{{NOME_DO_CAMPO}}`, `{{CPF}}`, `{{ENDERECO}}`.
+4. **Clientes**
+   - Você pode inserir os clientes manualmente na interface ou importar via **CSV**.
+5. **Geração em Massa**
+   - Acesse "Documentos", escolha os clientes desejados, selecione o template.
+   - Aguarde o processo gerar tanto a via DOCX quanto a via PDF para cada registro e baixe os resultados!
 
-### Erro: "LibreOffice not found" (PDF)
-- Instale LibreOffice no servidor
-- Ou comente geração PDF se não precisar
+## 🌐 Deploy em Produção
 
-### Erro: "Multiple runs" (DOCX)
-- Nosso `docx-preprocessor.js` resolve isso
-- Teste templates editados no Word
+Recomenda-se utilizar plataformas como **Render.com** ou **Railway**.
+O projeto já conta com arquivos preparados para serviços de hospedagem modernos (como `render.yaml` caso precise, ou configurações simples de `package.json` onde o comando de build é `npm install` e o de produção é `npm start`).
 
-## 📈 Melhorias Implementadas
-
-### ✅ **PDF Automático**
-- Geração simultânea DOCX + PDF
-- Usa LibreOffice internamente
-
-### ✅ **Importação CSV**
-- Upload direto via interface
-- Validação automática
-- Suporte a múltiplos campos
-
-### ✅ **Progresso em Tempo Real**
-- Modal com barra de progresso
-- Atualização automática
-- Resultados detalhados
-
-### ✅ **Validações Aprimoradas**
-- Campos vazios → `[CAMPO NÃO INFORMADO]`
-- Normalização case-insensitive
-- Suporte a acentos e caracteres especiais
-
-## 🤝 Contribuição
-
-1. Fork o projeto
-2. Crie branch: `git checkout -b feature/nova-funcionalidade`
-3. Commit: `git commit -m 'Adiciona nova funcionalidade'`
-4. Push: `git push origin feature/nova-funcionalidade`
-5. Abra Pull Request
-
-## 📄 Licença
-
-MIT - Veja [LICENSE](LICENSE) para detalhes.
+**Nota Importante para Hospedagens Web:** Como o sistema utiliza o LibreOffice em segundo plano (SO) para conversão para PDF, caso opte por usar provedores de VPS ou plataformas como o Render.com, certifique-se de que o LibreOffice está instalado na imagem do SO/Docker em que a aplicação Node.js roda. A conversão de DOCX para PDF **falhará** em contêineres sem o binário do LibreOffice disponível (`soffice`).
 
 ---
 
-**Desenvolvido com ❤️ para simplificar a geração de documentos empresariais**</content>
-<parameter name="filePath">c:\Users\vitor\OneDrive\Documentos\DocumentosPro\DocumentosPro\README.md
+**Desenvolvido com ❤️ para simplificar e escalar a geração de documentos empresariais.**
