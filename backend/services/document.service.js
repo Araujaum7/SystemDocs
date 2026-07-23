@@ -188,9 +188,9 @@ export async function processGeneration({ generationId, tenantId, userId, client
 
         const saved = await dbRun(
           `INSERT INTO documentos_gerados
-          (empresa_id, cliente_id, template_id, nome_arquivo, arquivo_docx, arquivo_pdf, created_by)
-          VALUES (?, ?, ?, ?, ?, ?, ?)`,
-          [tenantId, clienteId, templateId, fileBase, savedDocxFileName || docxName, pdfName, userId],
+          (empresa_id, cliente_id, template_id, nome_arquivo, arquivo_docx, arquivo_pdf, campos_usados, created_by)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          [tenantId, clienteId, templateId, fileBase, savedDocxFileName || docxName, pdfName, JSON.stringify(data), userId],
         );
 
         progress.documentos.push({

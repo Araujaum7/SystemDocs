@@ -122,6 +122,7 @@ export async function ensureSchema() {
     nome_arquivo TEXT NOT NULL,
     arquivo_docx TEXT NOT NULL,
     arquivo_pdf TEXT,
+    campos_usados TEXT,
     created_by INTEGER,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(empresa_id) REFERENCES empresas(id),
@@ -139,6 +140,7 @@ export async function ensureSchema() {
   await ensureColumn('empresas', 'config', "config TEXT DEFAULT '{}'");
   await ensureColumn('empresas', 'ativo', 'ativo INTEGER DEFAULT 1');
   await ensureColumn('usuarios', 'ativo', 'ativo INTEGER DEFAULT 1');
+  await ensureColumn('documentos_gerados', 'campos_usados', 'campos_usados TEXT');
 
   const empresasSemSlug = await dbAll('SELECT id, nome FROM empresas WHERE slug IS NULL OR slug = ""');
   for (const empresa of empresasSemSlug) {

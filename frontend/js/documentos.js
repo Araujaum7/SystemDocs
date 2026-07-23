@@ -207,7 +207,7 @@ class DocumentosManager {
         });
     }
 
-    abrirEdicaoCampos() {
+    async abrirEdicaoCampos() {
         if (!this.selectedClientes.size || !this.selectedTemplates.size) {
             window.auth.showNotification('Selecione ao menos um cliente e um template', 'error');
             return;
@@ -300,7 +300,66 @@ class DocumentosManager {
             this.salvarCamposEspecificos(clienteId);
         };
 
+        // Carregar histórico
+        await this.carregarHistoricoCliente(clienteId);
+
         openModal('modalEditarCampos');
+    }
+
+    async carregarHistoricoCliente(clienteId) {
+        const historyContainer = document.getElementById('historyContainer');
+        if (!historyContainer) return;
+        
+        historyContainer.innerHTML = '<div class="text-center text-[var(--text-muted)] text-sm py-4">Carregando histórico...</div>';
+
+        try {
+            const response = await window.auth.fetchWithAuth(`/api/clientes/${clienteId}/historico`);
+            if (!response.ok) throw new Error('Erro ao carregar histórico');
+            const historico = await response.json();
+
+            if (!historico || historico.length === 0) {
+                historyContainer.innerHTML = '<div class="text-center text-[var(--text-muted)] text-sm py-4 italic">Nenhum documento gerado recentemente.</div>';
+                return;
+            }
+
+            historyContainer.innerHTML = historico.map(doc => {
+                const date = new Date(doc.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                const camposHtml = doc.campos_usados && Object.keys(doc.campos_usados).length > 0
+                    ? `<div class="mt-3 text-sm text-[var(--text-muted)] bg-[var(--bg-panel-muted)] p-3 rounded-lg border border-[var(--border-strong)]" id="campos-hist-${doc.id}" style="display: none;">
+                        <strong class="block mb-2 text-[var(--text-main)]">Campos Preenchidos:</strong>
+                        <ul class="list-disc pl-4 space-y-1">
+                            ${Object.entries(doc.campos_usados).map(([k, v]) => `<li><span class="font-bold text-[var(--primary-500)]">${this.escapeHtml(String(k).toUpperCase())}:</span> ${this.escapeHtml(String(v))}</li>`).join('')}
+                        </ul>
+                       </div>`
+                    : `<div class="mt-2 text-xs text-[var(--text-muted)] italic" id="campos-hist-${doc.id}" style="display: none;">Nenhum campo registrado.</div>`;
+
+                return `
+                <div class="border border-[var(--border-subtle)] rounded-xl p-4 hover:border-[var(--primary-500)] transition-all bg-[var(--bg-panel)] mb-3 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <strong class="text-sm text-[var(--text-main)] truncate block w-48" title="${this.escapeHtml(doc.nome_arquivo)}">${this.escapeHtml(doc.nome_arquivo)}</strong>
+                        <span class="text-xs text-[var(--text-muted)] whitespace-nowrap">${date}</span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <span class="text-xs bg-[var(--primary-600)] text-white px-2.5 py-1 rounded-md font-medium inline-flex items-center gap-1 shadow-sm">
+                            <i class="ph ph-user"></i> ${this.escapeHtml(doc.usuario_nome || 'Usuário')}
+                        </span>
+                    </div>
+                    
+                    <button type="button" 
+                        style="background: none; border: none; padding: 0; margin: 0; outline: none; box-shadow: none;"
+                        onclick="const el = document.getElementById('campos-hist-${doc.id}'); el.style.display = el.style.display === 'none' ? 'block' : 'none';" 
+                        class="text-xs font-bold text-[var(--primary-500)] hover:text-[var(--primary-400)] inline-flex items-center gap-1 cursor-pointer transition-colors">
+                        <i class="ph ph-caret-down"></i> Ver campos preenchidos
+                    </button>
+                    ${camposHtml}
+                </div>
+                `;
+            }).join('');
+        } catch (error) {
+            console.error('History fetch error:', error);
+            historyContainer.innerHTML = '<div class="text-center text-red-500 text-sm py-4">Erro ao carregar histórico.</div>';
+        }
     }
 
     async salvarCamposEspecificos(clienteId) {

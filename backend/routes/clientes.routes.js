@@ -42,6 +42,30 @@ router.get('/:id', authenticateToken, tenantRequired(), asyncHandler(async (req,
   return res.json({ ...row, dados: safeJsonParse(row.dados, {}) });
 }));
 
+router.get('/:id/historico', authenticateToken, tenantRequired(), asyncHandler(async (req, res) => {
+  const id = parseTenantId(req.params.id);
+  if (!id) {
+    return res.status(400).json({ error: 'Cliente inválido' });
+  }
+
+  const sql = `
+    SELECT d.*, u.nome AS usuario_nome
+    FROM documentos_gerados d
+    LEFT JOIN usuarios u ON d.created_by = u.id
+    WHERE d.cliente_id = ? AND d.empresa_id = ?
+    ORDER BY d.created_at DESC
+    LIMIT 10
+  `;
+  const rows = await dbAll(sql, [id, req.tenantId]);
+  
+  const history = rows.map((row) => ({
+    ...row,
+    campos_usados: safeJsonParse(row.campos_usados, {})
+  }));
+
+  return res.json(history);
+}));
+
 router.post('/', authenticateToken, tenantRequired(), asyncHandler(async (req, res) => {
   const dadosCliente = req.body || {};
   if (!String(dadosCliente.nome || '').trim()) {

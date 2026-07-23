@@ -208,27 +208,38 @@
 
     <!-- Modal para edição de campos específicos -->
     <div id="modalEditarCampos" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 900px;">
             <div class="modal-header">
-                <h3>Editar Campos para Documentos</h3>
+                <h3>Editar Campos e Histórico</h3>
                 <button class="modal-close">&times;</button>
             </div>
-            <div class="modal-body">
-                <div class="modal-info">
-                    <p><strong>Editando campos necessários para os templates selecionados</strong></p>
-                    <p>Cliente: <span id="clienteEditandoNome">-</span></p>
+            <div class="modal-body" style="display: grid; grid-template-columns: 1fr 350px; gap: 24px; padding: 24px;">
+                <!-- Lado Esquerdo: Formulário Normal -->
+                <div class="modal-form-section">
+                    <div class="modal-info mb-4">
+                        <p><strong>Editando campos necessários para os templates selecionados</strong></p>
+                        <p>Cliente: <strong id="clienteEditandoNome" class="text-[var(--primary-600)]">-</strong></p>
+                    </div>
+
+                    <form id="formEditarCampos">
+                        <div id="camposEspecificos" class="form-grid" style="grid-template-columns: 1fr;">
+                            <!-- Campos dinâmicos serão inseridos aqui -->
+                        </div>
+                        <div class="form-actions mt-6 pt-4 border-t border-[var(--border-subtle)] flex justify-end gap-3">
+                            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                            <button type="button" class="btn btn-secondary"
+                                onclick="closeModal('modalEditarCampos')">Cancelar</button>
+                        </div>
+                    </form>
                 </div>
 
-                <form id="formEditarCampos">
-                    <div id="camposEspecificos">
-                        <!-- Campos dinâmicos serão inseridos aqui -->
+                <!-- Lado Direito: Histórico -->
+                <div class="modal-history-section border-l border-[var(--border-subtle)] pl-6" style="max-height: 60vh; overflow-y: auto;">
+                    <h4 class="text-md font-bold mb-4 flex items-center gap-2"><i class="ph ph-clock-counter-clockwise"></i> Últimos Documentos</h4>
+                    <div id="historyContainer" class="flex flex-col gap-3">
+                        <div class="text-center text-[var(--text-muted)] text-sm py-4">Carregando histórico...</div>
                     </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                        <button type="button" class="btn btn-secondary"
-                            onclick="closeModal('modalEditarCampos')">Cancelar</button>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
