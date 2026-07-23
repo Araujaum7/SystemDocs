@@ -66,7 +66,11 @@ class EmpresasManager {
                     <p><strong>Usuários:</strong> ${empresa.total_usuarios || 0}</p>
                     <p><strong>Clientes:</strong> ${empresa.total_clientes || 0}</p>
                     <p><strong>Templates:</strong> ${empresa.total_templates || 0}</p>
-                    <p><strong>Cor do Tema:</strong> <span style="display:inline-block; width:15px; height:15px; background-color:${(typeof empresa.config === 'string' ? JSON.parse(empresa.config || '{}') : (empresa.config || {})).temaCor || '#7c3aed'}; border-radius:50%; vertical-align:middle;"></span></p>
+                    <p>
+                        <strong>Cores:</strong> 
+                        <span style="display:inline-block; width:15px; height:15px; background-color:${(typeof empresa.config === 'string' ? JSON.parse(empresa.config || '{}') : (empresa.config || {})).temaCor || '#7c3aed'}; border-radius:50%; vertical-align:middle; margin-right:4px;" title="Primária"></span>
+                        <span style="display:inline-block; width:15px; height:15px; background-color:${(typeof empresa.config === 'string' ? JSON.parse(empresa.config || '{}') : (empresa.config || {})).temaCorSecundaria || '#3b82f6'}; border-radius:50%; vertical-align:middle;" title="Secundária"></span>
+                    </p>
                     <small>Slug: ${this.escapeHtml(empresa.slug || '-')}</small>
                 </div>
                 <div class="card-footer">
@@ -112,8 +116,12 @@ class EmpresasManager {
         const nome = prompt('Nome da empresa:');
         if (!nome || !nome.trim()) return;
         
-        const corHex = prompt('Cor do tema (Hex, ex: #7c3aed):', '#7c3aed');
-        const config = { temaCor: corHex || '#7c3aed' };
+        const corHex = prompt('Cor Primária (Hex, ex: #7c3aed):', '#7c3aed');
+        const corSecHex = prompt('Cor Secundária (Hex, ex: #3b82f6):', '#3b82f6');
+        const config = { 
+            temaCor: corHex || '#7c3aed',
+            temaCorSecundaria: corSecHex || '#3b82f6'
+        };
 
         try {
             const response = await window.auth.fetchWithAuth('/api/empresas', {
@@ -143,9 +151,16 @@ class EmpresasManager {
         
         const currentConfig = typeof empresa.config === 'string' ? JSON.parse(empresa.config || '{}') : (empresa.config || {});
         const corAtual = currentConfig.temaCor || '#7c3aed';
+        const corSecAtual = currentConfig.temaCorSecundaria || '#3b82f6';
         
-        const corHex = prompt('Nova cor do tema (Hex, ex: #7c3aed):', corAtual);
-        const newConfig = { ...currentConfig, temaCor: corHex || corAtual };
+        const corHex = prompt('Nova Cor Primária (Hex, ex: #7c3aed):', corAtual);
+        const corSecHex = prompt('Nova Cor Secundária (Hex, ex: #3b82f6):', corSecAtual);
+        
+        const newConfig = { 
+            ...currentConfig, 
+            temaCor: corHex || corAtual,
+            temaCorSecundaria: corSecHex || corSecAtual
+        };
 
         try {
             const response = await window.auth.fetchWithAuth(`/api/empresas/${id}`, {

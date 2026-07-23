@@ -323,6 +323,22 @@ class DashboardManager {
         const isDark = document.body.classList.contains('dark-theme');
         const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
         const textColor = isDark ? '#cbd5e1' : '#475569';
+        
+        const rootStyle = getComputedStyle(document.body);
+        const primaryColorHex = rootStyle.getPropertyValue('--primary-500').trim() || '#7c3aed';
+        const secondaryColorHex = rootStyle.getPropertyValue('--secondary-500').trim() || '#3b82f6';
+        
+        // Converte hex para rgba para o background
+        const hexToRgb = (hex) => {
+            let h = hex.replace('#', '');
+            if(h.length === 3) h = h.split('').map(c => c+c).join('');
+            return parseInt(h, 16);
+        };
+        const num = hexToRgb(primaryColorHex);
+        const r = (num >> 16) & 255;
+        const g = (num >> 8) & 255;
+        const b = num & 255;
+        const primaryBg = `rgba(${r}, ${g}, ${b}, 0.2)`;
 
         const labels = stats?.graficos?.docsPorDia?.map(d => d.data.split('-').reverse().join('/')) || ['Sem dados'];
         const data = stats?.graficos?.docsPorDia?.map(d => d.quantidade) || [0];
@@ -334,8 +350,8 @@ class DashboardManager {
                 datasets: [{
                     label: 'Documentos Gerados',
                     data: data,
-                    backgroundColor: 'rgba(124, 58, 237, 0.2)',
-                    borderColor: 'rgb(124, 58, 237)',
+                    backgroundColor: primaryBg,
+                    borderColor: primaryColorHex,
                     borderWidth: 2,
                     tension: 0.3,
                     fill: true

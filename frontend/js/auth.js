@@ -203,17 +203,21 @@ class Auth {
                 }
             }
 
-            if (config && config.temaCor) {
-                // Injeta no body em vez de root para garantir que sobreponha a classe .dark-theme
+            if (config) {
                 const target = document.body;
-                target.style.setProperty('--primary-500', config.temaCor);
+                const isDark = target.classList.contains('dark-theme');
+
+                if (config.temaCor) {
+                    target.style.setProperty('--primary-500', config.temaCor);
+                    target.style.setProperty('--primary-600', this.adjustColor(config.temaCor, isDark ? 20 : -20));
+                    target.style.setProperty('--primary-700', this.adjustColor(config.temaCor, isDark ? -20 : -40));
+                }
                 
-                // Se estiver no tema escuro, o hover pode ser um pouco mais claro. Se for claro, mais escuro.
-                const isDark = document.body.classList.contains('dark-theme');
-                target.style.setProperty('--primary-600', this.adjustColor(config.temaCor, isDark ? 20 : -20));
-                
-                // Também altera os orbs de background
-                target.style.setProperty('--primary-700', this.adjustColor(config.temaCor, isDark ? -20 : -40));
+                if (config.temaCorSecundaria) {
+                    target.style.setProperty('--secondary-500', config.temaCorSecundaria);
+                    target.style.setProperty('--secondary-600', this.adjustColor(config.temaCorSecundaria, isDark ? 20 : -20));
+                    target.style.setProperty('--secondary-700', this.adjustColor(config.temaCorSecundaria, isDark ? -20 : -40));
+                }
             }
         } catch (e) {
             console.error('Erro ao aplicar tema:', e);
