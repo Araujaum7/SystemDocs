@@ -86,6 +86,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 localStorage.setItem('darkTheme', 'true');
                 themeBtn.innerHTML = '<span class="emoji">☀️</span> Modo Claro';
             }
+            // Re-aplica a cor do tema customizado (pois a cor do hover muda dependendo do modo)
+            if (window.auth && typeof window.auth.applyThemeColor === 'function') {
+                window.auth.applyThemeColor();
+            }
         });
 
         headerActions.insertBefore(themeBtn, headerActions.firstChild);

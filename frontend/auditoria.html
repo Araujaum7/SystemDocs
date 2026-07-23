@@ -1,22 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Empresas - Sistema de Documentos</title>
-    <link rel="stylesheet" href="css/style.css?v=1784057472977">
-
-    <!-- Frameworks (Phosphor Icons & Tailwind) -->
+    <title>Auditoria | DocumentosPro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            corePlugins: { preflight: false }
-        }
-    </script>
 </head>
-
 <body>
     <div class="dashboard-layout">
         <!-- Sidebar -->
@@ -24,8 +17,7 @@
             <div class="sidebar-header">
                 <button class="sidebar-toggle">☰</button>
                 <div class="logo-section">
-                    <span class="icon"><i class="ph ph-files"
-                            style="font-size: 1.8rem; color: var(--primary-500)"></i></span>
+                    <span class="icon"><i class="ph ph-files" style="font-size: 1.8rem; color: var(--primary-500)"></i></span>
                     <h2>DocSystem</h2>
                 </div>
                 <div class="user-info" id="userInfo">
@@ -60,14 +52,14 @@
                     <span>Templates</span>
                 </a>
 
-                <a href="auditoria.html" class="nav-item">
+                <a href="auditoria.html" class="nav-item active">
                     <span class="icon"><i class="ph-fill ph-shield-check"></i></span>
                     <span>Auditoria</span>
                 </a>
 
                 <div class="nav-section admin-master-only">
                     <div class="nav-section-title">Administração</div>
-                    <a href="empresas.html" class="nav-item active">
+                    <a href="empresas.html" class="nav-item">
                         <span class="icon"><i class="ph-fill ph-buildings"></i></span>
                         <span>Empresas</span>
                     </a>
@@ -86,38 +78,70 @@
             </div>
         </div>
 
-        <!-- Overlay para mobile -->
         <div class="sidebar-overlay"></div>
 
         <!-- Main Content -->
         <div class="main-content">
             <header class="content-header">
                 <div class="header-left">
+                    <button class="mobile-sidebar-toggle">☰</button>
                     <div>
-                        <h1>Gestão de Empresas</h1>
-                        <div class="breadcrumb">Cadastro e gerenciamento de empresas</div>
+                        <h1>Auditoria & Logs</h1>
+                        <div class="breadcrumb">Monitoramento de atividades no sistema</div>
                     </div>
                 </div>
                 <div class="header-actions">
-                    <button id="addEmpresaBtn" class="btn btn-primary">
-                        <span class="icon"><i class="ph ph-plus"></i></span>
-                        Nova Empresa
-                    </button>
+                    <div class="tenant-badge" id="tenantBadge" style="display: none;">
+                        <span class="icon"><i class="ph-fill ph-buildings"></i></span>
+                        <span id="tenantName">Carregando...</span>
+                    </div>
                 </div>
             </header>
 
-            <div class="content">
-                <div id="empresasList" class="cards-grid">
-                    <!-- Empresas serão carregadas aqui -->
+            <div class="content-wrapper">
+                <div class="stats-grid mb-6">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(124, 58, 237, 0.1); color: var(--primary-600);">
+                            <i class="ph ph-shield-check"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Ações Monitoradas</span>
+                            <strong class="stat-value" id="totalLogsCount">-</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold">Histórico de Atividades</h2>
+                        <button class="btn btn-secondary" onclick="window.auditoria.carregarLogs()"><i class="ph ph-arrows-clockwise"></i> Atualizar</button>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Data / Hora</th>
+                                    <th>Usuário</th>
+                                    <th>Ação</th>
+                                    <th>Detalhes</th>
+                                    <th>IP</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logsTableBody">
+                                <tr>
+                                    <td colspan="5" class="text-center text-[var(--text-muted)] py-8">Carregando logs de auditoria...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="js/auth.js?v=2"></script>
-    <script src="js/sidebar.js?v=2"></script>
-    <script src="js/empresas.js?v=2"></script>
-    <script src="js/ui-core.js?v=2"></script>
+    <script src="js/auth.js?v=3"></script>
+    <script src="js/sidebar.js?v=3"></script>
+    <script src="js/auditoria.js?v=2"></script>
 </body>
-
 </html>

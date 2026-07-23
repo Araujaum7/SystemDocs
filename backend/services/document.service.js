@@ -6,6 +6,7 @@ import crypto from 'crypto';
 import { TEMPLATES_DIR, GENERATED_DIR, ROOT_DIR } from '../config/paths.js';
 import { DOCXTEMPLATER_OPTIONS, ENABLE_PDF } from '../config/env.js';
 import { dbGet, dbAll, dbRun } from '../database/db.js';
+import { auditLog, AcoesAuditoria } from '../utils/logger.js';
 import { fixDocxTemplate } from '../docx-preprocessor.js';
 import { convertToPDF } from '../lib/convert-wrapper.js';
 import { formatDocxTemplateError, safeJsonParse, sanitizeFileName } from '../utils/helpers.js';
@@ -192,6 +193,12 @@ export async function processGeneration({ generationId, tenantId, userId, client
           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
           [tenantId, clienteId, templateId, fileBase, savedDocxFileName || docxName, pdfName, JSON.stringify(data), userId],
         );
+
+        await auditLog(tenantId, userId, AcoesAuditoria.DOCUMENTO_GERADO, {
+          id: saved.lastID,
+          template: templateRow.nome,
+          cliente: clienteNome
+        });
 
         progress.documentos.push({
           id: saved.lastID,

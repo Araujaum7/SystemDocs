@@ -1,24 +1,66 @@
 import cron from 'node-cron';
 import fs from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import { dbRun, dbGet } from '../database/db.js';
-import { GENERATED_DIR, TEMP_DIR } from '../config/paths.js';
+import { DB_PATH, GENERATED_DIR, TEMP_DIR } from '../config/paths.js';
 
-// Tempo máximo de retenção de arquivos gerados (ex: 24 horas)
-const MAX_AGE_MS = 24 * 60 * 60 * 1000;
+// Tempo máximo de retenção de arquivos gerados: 30 dias
+const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
 export function initCleanerJobs() {
   // Roda todos os dias às 03:00 da manhã
   cron.schedule('0 3 * * *', async () => {
     console.log('[CRON] Iniciando limpeza de arquivos temporários e gerados...');
     try {
-      await cleanDirectory(TEMP_DIR, MAX_AGE_MS);
+      await cleanDirectory(TEMP_DIR, 24 * 60 * 60 * 1000); // 24h temp
       await cleanGeneratedDocuments();
       console.log('[CRON] Limpeza concluída.');
     } catch (error) {
       console.error('[CRON] Erro durante a limpeza:', error);
     }
   });
+
+  // Roda todos os dias às 02:00 da manhã
+  cron.schedule('0 2 * * *', async () => {
+    console.log('[CRON] Iniciando backup do banco de dados...');
+    try {
+      await backupDatabase();
+      console.log('[CRON] Backup concluído.');
+    } catch (error) {
+      console.error('[CRON] Erro durante o backup:', error);
+    }
+  });
+}
+
+async function backupDatabase() {
+  const backupDir = join(dirname(DB_PATH), 'backups');
+  if (!fs.existsSync(backupDir)) {
+    fs.mkdirSync(backupDir, { recursive: true });
+  }
+
+  const dateStr = new Date().toISOString().split('T')[0];
+  const backupPath = join(backupDir, `database_${dateStr}.db`);
+
+  if (fs.existsSync(DB_PATH)) {
+    fs.copyFileSync(DB_PATH, backupPath);
+    console.log(`[CRON] Backup salvo: ${backupPath}`);
+  }
+
+  const MAX_BACKUP_AGE_DAYS = 7;
+  const now = Date.now();
+  const files = fs.readdirSync(backupDir);
+
+  for (const file of files) {
+    if (!file.endsWith('.db')) continue;
+    const filePath = join(backupDir, file);
+    const stats = fs.statSync(filePath);
+    const ageInDays = (now - stats.mtimeMs) / (1000 * 60 * 60 * 24);
+
+    if (ageInDays > MAX_BACKUP_AGE_DAYS) {
+      fs.unlinkSync(filePath);
+      console.log(`[CRON] Backup antigo removido: ${file}`);
+    }
+  }
 }
 
 async function cleanDirectory(dirPath, maxAge) {
@@ -60,21 +102,9 @@ async function cleanGeneratedDocuments() {
 
     // Se o arquivo tiver mais que MAX_AGE_MS
     if (stats.isFile() && now - stats.mtimeMs > MAX_AGE_MS) {
-      // Verifica se ele ainda está sendo referenciado no banco de dados
-      const stillUsed = await dbGet(
-        'SELECT id FROM documentos_gerados WHERE arquivo_docx = ? OR arquivo_pdf = ? LIMIT 1',
-        [file, file]
-      );
-
-      // Se não for usado por ninguém, ou se for uma política excluir mesmo os referenciados (como um sistema de cache)
-      // Aqui vamos excluir do disco e do banco se existir (como é um sistema de geracao, talvez seja desejado manter o histórico mas deletar o arquivo físico para economizar espaço).
-      // Mas para ser seguro, vamos apenas apagar arquivos físicos que não estão mais no DB, ou podemos apagar os registros do DB também.
-      // O requisito diz "limpeza de documentos gerados antigos que lotam o servidor". 
-      // Vamos assumir que deletar os registros de documentos gerados > 24h é o comportamento esperado.
-
-      if (stillUsed) {
-        await dbRun('DELETE FROM documentos_gerados WHERE id = ?', [stillUsed.id]);
-      }
+      // Importante: NÃO vamos deletar do banco de dados (documentos_gerados)
+      // para manter o "Histórico" (CRM) do cliente intacto. Quando o usuário tentar
+      // baixar, a API retornará 404 (Arquivo Expirado).
 
       try {
         fs.unlinkSync(fullPath);

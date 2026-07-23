@@ -17,6 +17,8 @@ import usuariosRoutes from './routes/usuarios.routes.js';
 import clientesRoutes from './routes/clientes.routes.js';
 import templatesRoutes from './routes/templates.routes.js';
 import documentosRoutes from './routes/documentos.routes.js';
+import auditoriaRoutes from './routes/auditoria.routes.js';
+import dashboardRoutes from './routes/dashboard.routes.js';
 
 // Initialization
 validateEnv();
@@ -61,6 +63,8 @@ app.use('/api/empresas', empresasRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/clientes', clientesRoutes);
 app.use('/api/templates', templatesRoutes);
+app.use('/api/auditoria', auditoriaRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 app.use('/api', documentosRoutes); // It defines /gerar-documentos, /gerar-documentos/progresso, /download
 
 // Frontend Routes (Fallback)

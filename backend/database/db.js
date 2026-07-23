@@ -131,10 +131,24 @@ export async function ensureSchema() {
     FOREIGN KEY(created_by) REFERENCES usuarios(id)
   )`);
 
+  await dbRun(`CREATE TABLE IF NOT EXISTS auditoria (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    empresa_id INTEGER,
+    usuario_id INTEGER,
+    acao TEXT NOT NULL,
+    detalhe TEXT,
+    ip TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(empresa_id) REFERENCES empresas(id),
+    FOREIGN KEY(usuario_id) REFERENCES usuarios(id)
+  )`);
+
   await dbRun('CREATE INDEX IF NOT EXISTS idx_clientes_empresa ON clientes (empresa_id)');
   await dbRun('CREATE INDEX IF NOT EXISTS idx_templates_empresa ON templates (empresa_id)');
   await dbRun('CREATE INDEX IF NOT EXISTS idx_usuarios_empresa ON usuarios (empresa_id)');
   await dbRun('CREATE INDEX IF NOT EXISTS idx_doc_gerados_empresa ON documentos_gerados (empresa_id)');
+  await dbRun('CREATE INDEX IF NOT EXISTS idx_auditoria_empresa ON auditoria (empresa_id)');
+  await dbRun('CREATE INDEX IF NOT EXISTS idx_auditoria_usuario ON auditoria (usuario_id)');
 
   await ensureColumn('empresas', 'slug', 'slug TEXT');
   await ensureColumn('empresas', 'config', "config TEXT DEFAULT '{}'");

@@ -127,6 +127,7 @@ class DashboardManager {
                 this.fetchJson('/api/clientes'),
                 this.fetchJson('/api/templates'),
                 this.fetchJson('/api/health').catch(() => null),
+                this.fetchJson('/api/dashboard/stats').catch(() => null),
             ];
 
             if (this.usuario.role === 'master') {
@@ -139,8 +140,9 @@ class DashboardManager {
             this.state.clientes = results[0] || [];
             this.state.templates = results[1] || [];
             this.state.health = results[2] || null;
-            this.state.usuarios = this.usuario.role === 'master' ? (results[3] || []) : [];
-            this.state.empresas = this.usuario.role === 'master' ? (results[4] || []) : [];
+            this.state.stats = results[3] || null;
+            this.state.usuarios = this.usuario.role === 'master' ? (results[4] || []) : [];
+            this.state.empresas = this.usuario.role === 'master' ? (results[5] || []) : [];
 
             this.setHealthStatus(!!this.state.health?.ok);
 
@@ -161,7 +163,7 @@ class DashboardManager {
 
             this.renderOperationalInsights(this.buildOperationalInsights(capacidade));
             this.renderRecentActivity(this.state.clientes);
-            this.renderChart(this.state.clientes.length, this.state.templates.length, this.usuario.role === 'master' ? this.state.usuarios.length : 1);
+            this.renderChart(this.state.stats);
 
             if (this.usuario.role === 'master') {
                 this.renderMasterInsights(this.state.empresas, this.state.usuarios);
@@ -310,7 +312,7 @@ class DashboardManager {
         });
     }
 
-    renderChart(clientes, templates, usuarios) {
+    renderChart(stats) {
         const ctx = document.getElementById('mainChart');
         if (!ctx) return;
         
@@ -322,25 +324,21 @@ class DashboardManager {
         const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
         const textColor = isDark ? '#cbd5e1' : '#475569';
 
+        const labels = stats?.graficos?.docsPorDia?.map(d => d.data.split('-').reverse().join('/')) || ['Sem dados'];
+        const data = stats?.graficos?.docsPorDia?.map(d => d.quantidade) || [0];
+
         this.chartInstance = new Chart(ctx, {
-            type: 'bar',
+            type: 'line',
             data: {
-                labels: ['Clientes', 'Templates', 'Usuários'],
+                labels: labels,
                 datasets: [{
-                    label: 'Registros',
-                    data: [clientes, templates, usuarios],
-                    backgroundColor: [
-                        'rgba(124, 58, 237, 0.8)', // Primary
-                        'rgba(59, 130, 246, 0.8)', // Blue
-                        'rgba(16, 185, 129, 0.8)'  // Green
-                    ],
-                    borderColor: [
-                        'rgb(124, 58, 237)',
-                        'rgb(59, 130, 246)',
-                        'rgb(16, 185, 129)'
-                    ],
-                    borderWidth: 1,
-                    borderRadius: 8
+                    label: 'Documentos Gerados',
+                    data: data,
+                    backgroundColor: 'rgba(124, 58, 237, 0.2)',
+                    borderColor: 'rgb(124, 58, 237)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true
                 }]
             },
             options: {
@@ -354,7 +352,7 @@ class DashboardManager {
                     y: {
                         beginAtZero: true,
                         grid: { color: gridColor },
-                        ticks: { color: textColor }
+                        ticks: { color: textColor, stepSize: 1 }
                     },
                     x: {
                         grid: { display: false },
@@ -362,7 +360,8 @@ class DashboardManager {
                     }
                 },
                 plugins: {
-                    legend: { display: false }
+                    legend: { display: false },
+                    tooltip: { mode: 'index', intersect: false }
                 }
             }
         });

@@ -7,6 +7,7 @@ import { tenantRequired } from '../middlewares/tenant.middleware.js';
 import { csvUpload } from '../middlewares/upload.middleware.js';
 import { asyncHandler, parseTenantId, safeJsonParse, parseCsvLine } from '../utils/helpers.js';
 import { GENERATED_DIR } from '../config/paths.js';
+import { auditLog, AcoesAuditoria } from '../utils/logger.js';
 
 const router = Router();
 
@@ -74,6 +75,8 @@ router.post('/', authenticateToken, tenantRequired(), asyncHandler(async (req, r
 
   const dados = JSON.stringify(dadosCliente);
   const result = await dbRun('INSERT INTO clientes (empresa_id, dados) VALUES (?, ?)', [req.tenantId, dados]);
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  await auditLog(req.tenantId, req.user.id, AcoesAuditoria.CLIENTE_CRIADO, { id: result.lastID, nome: dadosCliente.nome }, ip);
 
   return res.status(201).json({
     id: result.lastID,
@@ -101,6 +104,9 @@ router.put('/:id', authenticateToken, tenantRequired(), asyncHandler(async (req,
   if (result.changes === 0) {
     return res.status(404).json({ error: 'Cliente não encontrado' });
   }
+  
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  await auditLog(req.tenantId, req.user.id, AcoesAuditoria.CLIENTE_EDITADO, { id, nome: dadosCliente.nome }, ip);
 
   return res.json({ id, empresa_id: req.tenantId, dados: dadosCliente });
 }));
@@ -150,6 +156,9 @@ router.delete('/:id', authenticateToken, tenantRequired(), asyncHandler(async (r
       fs.unlinkSync(filePath);
     }
   }
+
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  await auditLog(req.tenantId, req.user.id, AcoesAuditoria.CLIENTE_EXCLUIDO, { id, documentos_removidos: linkedDocs.length }, ip);
 
   return res.json({
     message: 'Cliente excluido com sucesso',

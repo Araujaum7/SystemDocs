@@ -8,6 +8,7 @@ class Auth {
         this.setupEventListeners();
         this.updateUserInfo();
         this.applyRoleVisibility();
+        this.applyThemeColor();
     }
 
     setupEventListeners() {
@@ -179,6 +180,48 @@ class Auth {
         } else if (usuario.role === 'admin') {
             document.body.classList.add('user-admin');
         }
+    }
+
+    applyThemeColor() {
+        try {
+            const usuario = this.getUsuario();
+            if (!usuario) return;
+
+            let config = null;
+            if (usuario.role === 'master') {
+                // Para master, tenta pegar a config da empresa selecionada no cache
+                const empresaId = this.getEmpresaContextoId();
+                const empresas = this.getEmpresas();
+                const empresa = empresas.find(e => e.id === empresaId);
+                if (empresa && empresa.config) {
+                    config = typeof empresa.config === 'string' ? JSON.parse(empresa.config) : empresa.config;
+                }
+            } else {
+                // Usuário comum pega a config direto do seu objeto
+                if (usuario.empresa_config) {
+                    config = typeof usuario.empresa_config === 'string' ? JSON.parse(usuario.empresa_config) : usuario.empresa_config;
+                }
+            }
+
+            if (config && config.temaCor) {
+                // Injeta no body em vez de root para garantir que sobreponha a classe .dark-theme
+                const target = document.body;
+                target.style.setProperty('--primary-500', config.temaCor);
+                
+                // Se estiver no tema escuro, o hover pode ser um pouco mais claro. Se for claro, mais escuro.
+                const isDark = document.body.classList.contains('dark-theme');
+                target.style.setProperty('--primary-600', this.adjustColor(config.temaCor, isDark ? 20 : -20));
+                
+                // Também altera os orbs de background
+                target.style.setProperty('--primary-700', this.adjustColor(config.temaCor, isDark ? -20 : -40));
+            }
+        } catch (e) {
+            console.error('Erro ao aplicar tema:', e);
+        }
+    }
+
+    adjustColor(color, amount) {
+        return '#' + color.replace(/^#/, '').replace(/../g, color => ('0'+Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
     }
 
     updateUserInfo() {

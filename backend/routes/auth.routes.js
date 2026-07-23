@@ -6,6 +6,7 @@ import { JWT_SECRET } from '../config/env.js';
 import { authenticateToken } from '../middlewares/auth.middleware.js';
 import { authLimiter } from '../middlewares/ratelimit.middleware.js';
 import { asyncHandler } from '../utils/helpers.js';
+import { auditLog, AcoesAuditoria } from '../utils/logger.js';
 
 const router = Router();
 
@@ -49,12 +50,15 @@ router.post('/login', authLimiter, asyncHandler(async (req, res) => {
 
   let empresa = null;
   if (usuario.empresa_id) {
-    empresa = await dbGet('SELECT id, nome, slug FROM empresas WHERE id = ?', [usuario.empresa_id]);
+    empresa = await dbGet('SELECT id, nome, slug, config FROM empresas WHERE id = ?', [usuario.empresa_id]);
   }
 
   const empresas = usuario.role === 'master'
-    ? await dbAll('SELECT id, nome, slug FROM empresas WHERE ativo = 1 ORDER BY nome')
+    ? await dbAll('SELECT id, nome, slug, config FROM empresas WHERE ativo = 1 ORDER BY nome')
     : [];
+
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  await auditLog(usuario.empresa_id, usuario.id, AcoesAuditoria.LOGIN, 'Login bem-sucedido', ip);
 
   return res.json({
     token,
@@ -65,6 +69,7 @@ router.post('/login', authLimiter, asyncHandler(async (req, res) => {
       role: usuario.role,
       empresa_id: usuario.empresa_id,
       empresa_nome: empresa?.nome || null,
+      empresa_config: empresa?.config || null,
     },
     empresas,
   });
@@ -84,7 +89,7 @@ router.get('/me', authenticateToken, asyncHandler(async (req, res) => {
   }
 
   const empresas = user.role === 'master'
-    ? await dbAll('SELECT id, nome, slug FROM empresas WHERE ativo = 1 ORDER BY nome')
+    ? await dbAll('SELECT id, nome, slug, config FROM empresas WHERE ativo = 1 ORDER BY nome')
     : [];
 
   return res.json({ usuario: user, empresas });

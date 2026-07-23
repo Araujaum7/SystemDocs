@@ -66,6 +66,7 @@ class EmpresasManager {
                     <p><strong>Usuários:</strong> ${empresa.total_usuarios || 0}</p>
                     <p><strong>Clientes:</strong> ${empresa.total_clientes || 0}</p>
                     <p><strong>Templates:</strong> ${empresa.total_templates || 0}</p>
+                    <p><strong>Cor do Tema:</strong> <span style="display:inline-block; width:15px; height:15px; background-color:${(typeof empresa.config === 'string' ? JSON.parse(empresa.config || '{}') : (empresa.config || {})).temaCor || '#7c3aed'}; border-radius:50%; vertical-align:middle;"></span></p>
                     <small>Slug: ${this.escapeHtml(empresa.slug || '-')}</small>
                 </div>
                 <div class="card-footer">
@@ -110,12 +111,15 @@ class EmpresasManager {
     async criarEmpresaPrompt() {
         const nome = prompt('Nome da empresa:');
         if (!nome || !nome.trim()) return;
+        
+        const corHex = prompt('Cor do tema (Hex, ex: #7c3aed):', '#7c3aed');
+        const config = { temaCor: corHex || '#7c3aed' };
 
         try {
             const response = await window.auth.fetchWithAuth('/api/empresas', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nome: nome.trim() })
+                body: JSON.stringify({ nome: nome.trim(), config })
             });
             const data = await response.json();
 
@@ -135,13 +139,19 @@ class EmpresasManager {
         if (!empresa) return;
 
         const nome = prompt('Novo nome da empresa:', empresa.nome);
-        if (!nome || !nome.trim() || nome.trim() === empresa.nome) return;
+        if (!nome || !nome.trim()) return;
+        
+        const currentConfig = typeof empresa.config === 'string' ? JSON.parse(empresa.config || '{}') : (empresa.config || {});
+        const corAtual = currentConfig.temaCor || '#7c3aed';
+        
+        const corHex = prompt('Nova cor do tema (Hex, ex: #7c3aed):', corAtual);
+        const newConfig = { ...currentConfig, temaCor: corHex || corAtual };
 
         try {
             const response = await window.auth.fetchWithAuth(`/api/empresas/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nome: nome.trim() })
+                body: JSON.stringify({ nome: nome.trim(), config: newConfig })
             });
             const data = await response.json();
 

@@ -33,6 +33,8 @@ router.get('/', authenticateToken, requireMaster, asyncHandler(async (_req, res)
 
 router.post('/', authenticateToken, requireMaster, asyncHandler(async (req, res) => {
   const nome = String(req.body?.nome || '').trim();
+  const config = typeof req.body?.config === 'object' ? JSON.stringify(req.body.config) : '{}';
+
   if (!nome) {
     return res.status(400).json({ error: 'Nome da empresa é obrigatório' });
   }
@@ -51,27 +53,28 @@ router.post('/', authenticateToken, requireMaster, asyncHandler(async (req, res)
 
   const result = await dbRun(
     'INSERT INTO empresas (nome, slug, config, ativo) VALUES (?, ?, ?, 1)',
-    [nome, slug, '{}'],
+    [nome, slug, config],
   );
 
-  return res.status(201).json({ id: result.lastID, nome, slug });
+  return res.status(201).json({ id: result.lastID, nome, slug, config });
 }));
 
 router.put('/:id', authenticateToken, requireMaster, asyncHandler(async (req, res) => {
   const id = parseTenantId(req.params.id);
   const nome = String(req.body?.nome || '').trim();
+  const config = typeof req.body?.config === 'object' ? JSON.stringify(req.body.config) : (req.body.config || '{}');
 
   if (!id || !nome) {
     return res.status(400).json({ error: 'Empresa inválida' });
   }
 
-  const existing = await dbGet('SELECT id FROM empresas WHERE id = ? AND ativo = 1', [id]);
-  if (!existing) {
+  const result = await dbRun('UPDATE empresas SET nome = ?, config = ? WHERE id = ?', [nome, config, id]);
+  
+  if (result.changes === 0) {
     return res.status(404).json({ error: 'Empresa não encontrada' });
   }
 
-  await dbRun('UPDATE empresas SET nome = ? WHERE id = ?', [nome, id]);
-  return res.json({ id, nome });
+  return res.json({ id, nome, config });
 }));
 
 router.delete('/:id', authenticateToken, requireMaster, asyncHandler(async (req, res) => {
