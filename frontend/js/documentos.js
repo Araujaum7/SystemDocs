@@ -227,12 +227,70 @@ class DocumentosManager {
         campos.forEach((campo) => {
             const safeId = String(campo).replace(/\s+/g, '_');
             const val = cliente.dados?.[campo] || '';
+            const campoLower = String(campo).toLowerCase().replace(/[\s_]+/g, '');
             const div = document.createElement('div');
             div.className = 'form-group';
-            div.innerHTML = `
-                <label for="campo_${safeId}">${this.escapeHtml(String(campo).toUpperCase())}</label>
-                <input type="text" id="campo_${safeId}" name="${this.escapeHtml(campo)}" value="${this.escapeHtml(val)}">
-            `;
+
+            if (campoLower === 'produtovendido' || campoLower === 'produto') {
+                div.innerHTML = `
+                    <label for="campo_${safeId}">${this.escapeHtml(String(campo).toUpperCase())}</label>
+                    <select id="campo_${safeId}" name="${this.escapeHtml(campo)}">
+                        <option value="">Selecione o produto...</option>
+                        <option value="Prestação de Serviços" ${val === 'Prestação de Serviços' ? 'selected' : ''}>Prestação de Serviços</option>
+                        <option value="Averbação" ${val === 'Averbação' ? 'selected' : ''}>Averbação</option>
+                        <option value="Defesa de Busca e Apreensão" ${val === 'Defesa de Busca e Apreensão' ? 'selected' : ''}>Defesa de Busca e Apreensão</option>
+                        <option value="Emissão de Documentos (Atualização de Parecer Técnico)" ${val === 'Emissão de Documentos (Atualização de Parecer Técnico)' ? 'selected' : ''}>Emissão de Documentos (Atualização de Parecer Técnico)</option>
+                        <option value="Emissão de Documentos (Certidão)" ${val === 'Emissão de Documentos (Certidão)' ? 'selected' : ''}>Emissão de Documentos (Certidão)</option>
+                        <option value="Emissão de Documentos (Parecer Técnico)" ${val === 'Emissão de Documentos (Parecer Técnico)' ? 'selected' : ''}>Emissão de Documentos (Parecer Técnico)</option>
+                        <option value="Emissão de Documentos (Litispendencia)" ${val === 'Emissão de Documentos (Litispendencia)' ? 'selected' : ''}>Emissão de Documentos (Litispendencia)</option>
+                        <option value="Citação" ${val === 'Citação' ? 'selected' : ''}>Citação</option>
+                        <option value="Custas" ${val === 'Custas' ? 'selected' : ''}>Custas</option>
+                        <option value="Audiencia" ${val === 'Audiencia' ? 'selected' : ''}>Audiencia</option>
+                        <option value="Distrato" ${val === 'Distrato' ? 'selected' : ''}>Distrato</option>
+                        <option value="Despacho" ${val === 'Despacho' ? 'selected' : ''}>Despacho</option>
+                        <option value="Homologação" ${val === 'Homologação' ? 'selected' : ''}>Homologação</option>
+                    </select>
+                `;
+            } else if (campoLower === 'estado' || campoLower === 'uf') {
+                div.innerHTML = `
+                    <label for="campo_${safeId}">${this.escapeHtml(String(campo).toUpperCase())}</label>
+                    <select id="campo_${safeId}" name="${this.escapeHtml(campo)}">
+                        <option value="">Selecione o estado...</option>
+                        <option value="Acre" ${val === 'Acre' ? 'selected' : ''}>Acre (AC)</option>
+                        <option value="Alagoas" ${val === 'Alagoas' ? 'selected' : ''}>Alagoas (AL)</option>
+                        <option value="Amapá" ${val === 'Amapá' ? 'selected' : ''}>Amapá (AP)</option>
+                        <option value="Amazonas" ${val === 'Amazonas' ? 'selected' : ''}>Amazonas (AM)</option>
+                        <option value="Bahia" ${val === 'Bahia' ? 'selected' : ''}>Bahia (BA)</option>
+                        <option value="Ceará" ${val === 'Ceará' ? 'selected' : ''}>Ceará (CE)</option>
+                        <option value="Distrito Federal" ${val === 'Distrito Federal' ? 'selected' : ''}>Distrito Federal (DF)</option>
+                        <option value="Espírito Santo" ${val === 'Espírito Santo' ? 'selected' : ''}>Espírito Santo (ES)</option>
+                        <option value="Goiás" ${val === 'Goiás' ? 'selected' : ''}>Goiás (GO)</option>
+                        <option value="Maranhão" ${val === 'Maranhão' ? 'selected' : ''}>Maranhão (MA)</option>
+                        <option value="Mato Grosso" ${val === 'Mato Grosso' ? 'selected' : ''}>Mato Grosso (MT)</option>
+                        <option value="Mato Grosso do Sul" ${val === 'Mato Grosso do Sul' ? 'selected' : ''}>Mato Grosso do Sul (MS)</option>
+                        <option value="Minas Gerais" ${val === 'Minas Gerais' ? 'selected' : ''}>Minas Gerais (MG)</option>
+                        <option value="Pará" ${val === 'Pará' ? 'selected' : ''}>Pará (PA)</option>
+                        <option value="Paraíba" ${val === 'Paraíba' ? 'selected' : ''}>Paraíba (PB)</option>
+                        <option value="Paraná" ${val === 'Paraná' ? 'selected' : ''}>Paraná (PR)</option>
+                        <option value="Pernambuco" ${val === 'Pernambuco' ? 'selected' : ''}>Pernambuco (PE)</option>
+                        <option value="Piauí" ${val === 'Piauí' ? 'selected' : ''}>Piauí (PI)</option>
+                        <option value="Rio de Janeiro" ${val === 'Rio de Janeiro' ? 'selected' : ''}>Rio de Janeiro (RJ)</option>
+                        <option value="Rio Grande do Norte" ${val === 'Rio Grande do Norte' ? 'selected' : ''}>Rio Grande do Norte (RN)</option>
+                        <option value="Rio Grande do Sul" ${val === 'Rio Grande do Sul' ? 'selected' : ''}>Rio Grande do Sul (RS)</option>
+                        <option value="Rondônia" ${val === 'Rondônia' ? 'selected' : ''}>Rondônia (RO)</option>
+                        <option value="Roraima" ${val === 'Roraima' ? 'selected' : ''}>Roraima (RR)</option>
+                        <option value="Santa Catarina" ${val === 'Santa Catarina' ? 'selected' : ''}>Santa Catarina (SC)</option>
+                        <option value="São Paulo" ${val === 'São Paulo' ? 'selected' : ''}>São Paulo (SP)</option>
+                        <option value="Sergipe" ${val === 'Sergipe' ? 'selected' : ''}>Sergipe (SE)</option>
+                        <option value="Tocantins" ${val === 'Tocantins' ? 'selected' : ''}>Tocantins (TO)</option>
+                    </select>
+                `;
+            } else {
+                div.innerHTML = `
+                    <label for="campo_${safeId}">${this.escapeHtml(String(campo).toUpperCase())}</label>
+                    <input type="text" id="campo_${safeId}" name="${this.escapeHtml(campo)}" value="${this.escapeHtml(val)}">
+                `;
+            }
             container.appendChild(div);
         });
 
