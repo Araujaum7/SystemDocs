@@ -189,7 +189,6 @@ class Auth {
 
             let config = null;
             if (usuario.role === 'master') {
-                // Para master, tenta pegar a config da empresa selecionada no cache
                 const empresaId = this.getEmpresaContextoId();
                 const empresas = this.getEmpresas();
                 const empresa = empresas.find(e => e.id === empresaId);
@@ -197,7 +196,6 @@ class Auth {
                     config = typeof empresa.config === 'string' ? JSON.parse(empresa.config) : empresa.config;
                 }
             } else {
-                // Usuário comum pega a config direto do seu objeto
                 if (usuario.empresa_config) {
                     config = typeof usuario.empresa_config === 'string' ? JSON.parse(usuario.empresa_config) : usuario.empresa_config;
                 }
@@ -208,15 +206,11 @@ class Auth {
                 const isDark = target.classList.contains('dark-theme');
 
                 if (config.temaCor) {
-                    target.style.setProperty('--primary-500', config.temaCor);
-                    target.style.setProperty('--primary-600', this.adjustColor(config.temaCor, isDark ? 20 : -20));
-                    target.style.setProperty('--primary-700', this.adjustColor(config.temaCor, isDark ? -20 : -40));
+                    this.injectPalette(target, 'primary', config.temaCor, isDark);
                 }
                 
                 if (config.temaCorSecundaria) {
-                    target.style.setProperty('--secondary-500', config.temaCorSecundaria);
-                    target.style.setProperty('--secondary-600', this.adjustColor(config.temaCorSecundaria, isDark ? 20 : -20));
-                    target.style.setProperty('--secondary-700', this.adjustColor(config.temaCorSecundaria, isDark ? -20 : -40));
+                    this.injectPalette(target, 'secondary', config.temaCorSecundaria, isDark);
                 }
             }
         } catch (e) {
@@ -224,8 +218,87 @@ class Auth {
         }
     }
 
-    adjustColor(color, amount) {
-        return '#' + color.replace(/^#/, '').replace(/../g, color => ('0'+Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
+    injectPalette(target, prefix, baseHex, isDark) {
+        const { h, s, l } = this.hexToHsl(baseHex);
+        
+        // Garante contraste visual agradável
+        let baseL = l;
+        if (isDark && baseL < 30) baseL = 30; // Se a cor base for escura demais no dark mode, clareia
+        if (!isDark && baseL > 80) baseL = 80; // Se a cor base for clara demais no light mode, escurece
+
+        let shades = {};
+        
+        if (isDark) {
+            shades = {
+                '50':  this.hslToHex(h, s, 10),
+                '100': this.hslToHex(h, s, 15),
+                '400': this.hslToHex(h, s, Math.max(0, baseL - 10)),
+                '500': this.hslToHex(h, s, baseL),
+                '600': this.hslToHex(h, s, Math.min(100, baseL + 10)), // Mais claro no hover escuro
+                '700': this.hslToHex(h, s, Math.min(100, baseL + 20)),
+            };
+        } else {
+            shades = {
+                '50':  this.hslToHex(h, s, 98),
+                '100': this.hslToHex(h, s, 95),
+                '400': this.hslToHex(h, s, Math.min(100, baseL + 10)),
+                '500': this.hslToHex(h, s, baseL),
+                '600': this.hslToHex(h, s, Math.max(0, baseL - 10)), // Mais escuro no hover claro
+                '700': this.hslToHex(h, s, Math.max(0, baseL - 20)),
+            };
+        }
+
+        Object.keys(shades).forEach(weight => {
+            target.style.setProperty(`--${prefix}-${weight}`, shades[weight]);
+        });
+    }
+
+    hexToHsl(hex) {
+        let r = 0, g = 0, b = 0;
+        if (hex.length === 4) {
+            r = parseInt(hex[1] + hex[1], 16);
+            g = parseInt(hex[2] + hex[2], 16);
+            b = parseInt(hex[3] + hex[3], 16);
+        } else if (hex.length === 7) {
+            r = parseInt(hex.substring(1, 3), 16);
+            g = parseInt(hex.substring(3, 5), 16);
+            b = parseInt(hex.substring(5, 7), 16);
+        }
+        r /= 255; g /= 255; b /= 255;
+        let cmax = Math.max(r,g,b), cmin = Math.min(r,g,b);
+        let delta = cmax - cmin;
+        let h = 0, s = 0, l = (cmax + cmin) / 2;
+
+        if (delta === 0) h = 0;
+        else if (cmax === r) h = ((g - b) / delta) % 6;
+        else if (cmax === g) h = (b - r) / delta + 2;
+        else h = (r - g) / delta + 4;
+
+        h = Math.round(h * 60);
+        if (h < 0) h += 360;
+        s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+
+        return { h, s: +(s * 100).toFixed(1), l: +(l * 100).toFixed(1) };
+    }
+
+    hslToHex(h, s, l) {
+        s /= 100; l /= 100;
+        let c = (1 - Math.abs(2 * l - 1)) * s;
+        let x = c * (1 - Math.abs((h / 60) % 2 - 1));
+        let m = l - c/2;
+        let r = 0, g = 0, b = 0;
+
+        if (0 <= h && h < 60) { r = c; g = x; b = 0; }
+        else if (60 <= h && h < 120) { r = x; g = c; b = 0; }
+        else if (120 <= h && h < 180) { r = 0; g = c; b = x; }
+        else if (180 <= h && h < 240) { r = 0; g = x; b = c; }
+        else if (240 <= h && h < 300) { r = x; g = 0; b = c; }
+        else if (300 <= h && h < 360) { r = c; g = 0; b = x; }
+
+        r = Math.round((r + m) * 255).toString(16).padStart(2, '0');
+        g = Math.round((g + m) * 255).toString(16).padStart(2, '0');
+        b = Math.round((b + m) * 255).toString(16).padStart(2, '0');
+        return `#${r}${g}${b}`;
     }
 
     updateUserInfo() {
