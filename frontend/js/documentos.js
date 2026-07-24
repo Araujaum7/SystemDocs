@@ -249,6 +249,8 @@ class DocumentosManager {
                         <option value="Distrato" ${val === 'Distrato' ? 'selected' : ''}>Distrato</option>
                         <option value="Despacho" ${val === 'Despacho' ? 'selected' : ''}>Despacho</option>
                         <option value="Homologação" ${val === 'Homologação' ? 'selected' : ''}>Homologação</option>
+                        <option value="Solicitação de Consignação de Parcelas" ${val === 'Solicitação de Consignação de Parcelas' ? 'selected' : ''}>Solicitação de Consignação de Parcelas</option>
+                        <option value="Consignação de Parcela" ${val === 'Consignação de Parcela' ? 'selected' : ''}>Consignação de Parcela</option>
                     </select>
                 `;
             } else if (campoLower === 'estado' || campoLower === 'uf') {
