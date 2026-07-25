@@ -232,26 +232,42 @@ class DocumentosManager {
             div.className = 'form-group';
 
             if (campoLower === 'produtovendido' || campoLower === 'produto') {
+                const produtosList = [
+                    'Prestação de Serviços', 'Averbação', 'Defesa de Busca e Apreensão',
+                    'Emissão de Documentos (Atualização de Parecer Técnico)',
+                    'Emissão de Documentos (Certidão)', 'Emissão de Documentos (Parecer Técnico)',
+                    'Emissão de Documentos (Litispendencia)', 'Citação', 'Custas', 'Audiencia',
+                    'Distrato', 'Despacho', 'Homologação', 'Solicitação de Consignação de Parcelas',
+                    'Consignação de Parcela'
+                ];
+                const isOutros = val && !produtosList.includes(val);
+                
                 div.innerHTML = `
-                    <label for="campo_${safeId}">${this.escapeHtml(String(campo).toUpperCase())}</label>
-                    <select id="campo_${safeId}" name="${this.escapeHtml(campo)}">
+                    <label for="select_${safeId}">${this.escapeHtml(String(campo).toUpperCase())}</label>
+                    <select id="select_${safeId}" 
+                            ${isOutros ? '' : `name="${this.escapeHtml(campo)}"`}
+                            onchange="
+                                const input = document.getElementById('input_${safeId}');
+                                if(this.value === 'Outros') {
+                                    input.style.display = 'block';
+                                    input.name = '${this.escapeHtml(campo)}';
+                                    this.name = '';
+                                    input.focus();
+                                } else {
+                                    input.style.display = 'none';
+                                    input.name = '';
+                                    this.name = '${this.escapeHtml(campo)}';
+                                }
+                            ">
                         <option value="">Selecione o produto...</option>
-                        <option value="Prestação de Serviços" ${val === 'Prestação de Serviços' ? 'selected' : ''}>Prestação de Serviços</option>
-                        <option value="Averbação" ${val === 'Averbação' ? 'selected' : ''}>Averbação</option>
-                        <option value="Defesa de Busca e Apreensão" ${val === 'Defesa de Busca e Apreensão' ? 'selected' : ''}>Defesa de Busca e Apreensão</option>
-                        <option value="Emissão de Documentos (Atualização de Parecer Técnico)" ${val === 'Emissão de Documentos (Atualização de Parecer Técnico)' ? 'selected' : ''}>Emissão de Documentos (Atualização de Parecer Técnico)</option>
-                        <option value="Emissão de Documentos (Certidão)" ${val === 'Emissão de Documentos (Certidão)' ? 'selected' : ''}>Emissão de Documentos (Certidão)</option>
-                        <option value="Emissão de Documentos (Parecer Técnico)" ${val === 'Emissão de Documentos (Parecer Técnico)' ? 'selected' : ''}>Emissão de Documentos (Parecer Técnico)</option>
-                        <option value="Emissão de Documentos (Litispendencia)" ${val === 'Emissão de Documentos (Litispendencia)' ? 'selected' : ''}>Emissão de Documentos (Litispendencia)</option>
-                        <option value="Citação" ${val === 'Citação' ? 'selected' : ''}>Citação</option>
-                        <option value="Custas" ${val === 'Custas' ? 'selected' : ''}>Custas</option>
-                        <option value="Audiencia" ${val === 'Audiencia' ? 'selected' : ''}>Audiencia</option>
-                        <option value="Distrato" ${val === 'Distrato' ? 'selected' : ''}>Distrato</option>
-                        <option value="Despacho" ${val === 'Despacho' ? 'selected' : ''}>Despacho</option>
-                        <option value="Homologação" ${val === 'Homologação' ? 'selected' : ''}>Homologação</option>
-                        <option value="Solicitação de Consignação de Parcelas" ${val === 'Solicitação de Consignação de Parcelas' ? 'selected' : ''}>Solicitação de Consignação de Parcelas</option>
-                        <option value="Consignação de Parcela" ${val === 'Consignação de Parcela' ? 'selected' : ''}>Consignação de Parcela</option>
+                        ${produtosList.map(p => `<option value="${p}" ${val === p ? 'selected' : ''}>${p}</option>`).join('')}
+                        <option value="Outros" ${isOutros ? 'selected' : ''}>Outros (Digitar manualmente)</option>
                     </select>
+                    <input type="text" id="input_${safeId}" 
+                           ${isOutros ? `name="${this.escapeHtml(campo)}" style="display:block; margin-top:8px;" value="${this.escapeHtml(val)}"` 
+                                      : `style="display:none; margin-top:8px;" value=""`} 
+                           placeholder="Digite o nome do produto..." 
+                           class="form-control" />
                 `;
             } else if (campoLower === 'estado' || campoLower === 'uf') {
                 div.innerHTML = `
