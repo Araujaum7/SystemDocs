@@ -72,7 +72,7 @@ export async function convertToPDF(docxBuffer) {
     const result = await execFileAsync(sofficePath, args, {
       windowsHide: true,
       timeout: 180000,
-      maxBuffer: 10 * 1024 * 1024,
+      maxBuffer: 50 * 1024 * 1024, // 50MB
     });
 
     if (!fs.existsSync(outputPath)) {

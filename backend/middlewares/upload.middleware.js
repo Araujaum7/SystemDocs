@@ -21,7 +21,7 @@ const csvStorage = multer.diskStorage({
 
 export const templateUpload = multer({
   storage: templateStorage,
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
   fileFilter: (_req, file, cb) => {
     if (extname(file.originalname).toLowerCase() !== '.docx') {
       cb(new Error('Apenas arquivos .docx são permitidos'));
@@ -33,7 +33,7 @@ export const templateUpload = multer({
 
 export const csvUpload = multer({
   storage: csvStorage,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: 25 * 1024 * 1024 }, // 25MB
   fileFilter: (_req, file, cb) => {
     const ext = extname(file.originalname).toLowerCase();
     if (ext !== '.csv') {
