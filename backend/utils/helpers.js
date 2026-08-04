@@ -34,22 +34,46 @@ export function sanitizeFileName(str) {
 
 export function formatDocxTemplateError(error) {
   const nestedErrors = error?.properties?.errors;
+  let details = [];
+
   if (Array.isArray(nestedErrors) && nestedErrors.length > 0) {
-    const details = nestedErrors
+    details = nestedErrors
       .map((entry) => entry?.properties?.explanation || entry?.message)
       .filter(Boolean)
       .slice(0, 3);
+  } else if (error?.properties?.explanation) {
+    details = [error.properties.explanation];
+  } else if (error?.message) {
+    details = [error.message];
+  }
 
-    if (details.length > 0) {
-      return `Template invalido: ${details.join(' | ')}`;
+  if (details.length === 0) {
+    return 'O modelo Word não pôde ser lido. Verifique se o arquivo não está corrompido ou com tags incompletas.';
+  }
+
+  const translated = details.map((msg = '') => {
+    const str = String(msg);
+    if (str.includes('Unclosed tag')) {
+      const match = str.match(/Unclosed tag : ['"]?([^'"\s]+)['"]?/i);
+      const tag = match ? match[1] : '';
+      return `Tag não fechada no Word${tag ? ` (tag: "${tag}")` : ''}: Há uma abertura '{{' ou '{' que não foi fechada com '}}' ou '}'.`;
     }
-  }
+    if (str.includes('Unopened tag')) {
+      return 'Tag não aberta no Word: Há um fechamento "}}" ou "}" sem o respectivo fecho de abertura "{{".';
+    }
+    if (str.includes('Tag') && str.includes('is not closed')) {
+      return `Tag incompleta no documento Word: ${str}`;
+    }
+    if (str.includes('Corrupted zip') || str.includes('Can\'t find end of central directory') || str.includes('End of data reached')) {
+      return 'O arquivo não é um documento Microsoft Word (.docx) válido ou o arquivo está corrompido.';
+    }
+    if (str.includes('File too large') || str.includes('LIMIT_FILE_SIZE')) {
+      return 'O arquivo excede o tamanho máximo permitido de 50 MB.';
+    }
+    return str;
+  });
 
-  if (error?.properties?.explanation) {
-    return `Template invalido: ${error.properties.explanation}`;
-  }
-
-  return error?.message || 'Template invalido para o Docxtemplater';
+  return `Falha na validação do arquivo Word:\n• ${translated.join('\n• ')}`;
 }
 
 export function parseCsvLine(line) {

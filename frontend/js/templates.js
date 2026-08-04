@@ -97,9 +97,9 @@ class TemplatesManager {
                 </div>
                 <div class="card-footer">
                     ${(this.usuario?.role === 'master' || this.usuario?.role === 'admin')
-                        ? `<button class="btn btn-danger" onclick="templatesManager.deletarTemplate(${template.id})">Excluir</button>`
-                        : ''
-                    }
+                ? `<button class="btn btn-danger" onclick="templatesManager.deletarTemplate(${template.id})">Excluir</button>`
+                : ''
+            }
                 </div>
             </div>
         `).join('');
@@ -123,18 +123,43 @@ class TemplatesManager {
             window.auth.showNotification('Selecione uma empresa no menu Empresas', 'error');
             return;
         }
+        const errDiv = document.getElementById('templateUploadError');
+        if (errDiv) errDiv.style.display = 'none';
         openModal('modalTemplate');
+    }
+
+    showUploadError(msg) {
+        window.auth.showNotification(msg, 'error');
+        const errDiv = document.getElementById('templateUploadError');
+        if (errDiv) {
+            errDiv.style.display = 'block';
+            errDiv.innerHTML = `<strong>❌ Erro ao enviar template:</strong><br>${this.escapeHtml(msg)}`;
+        }
     }
 
     async uploadTemplate() {
         if (this.usuario?.role !== 'master' && this.usuario?.role !== 'admin') return;
+
+        const errDiv = document.getElementById('templateUploadError');
+        if (errDiv) errDiv.style.display = 'none';
 
         const nome = document.getElementById('templateNome')?.value?.trim();
         const arquivo = document.getElementById('templateArquivo')?.files?.[0];
         const camposTxt = document.getElementById('templateCampos')?.value?.trim();
 
         if (!nome || !arquivo || !camposTxt) {
-            window.auth.showNotification('Preencha todos os campos obrigatórios', 'error');
+            this.showUploadError('Preencha todos os campos obrigatórios (Nome, Arquivo .docx e Campos).');
+            return;
+        }
+
+        if (arquivo.size > 50 * 1024 * 1024) {
+            const sizeMB = (arquivo.size / (1024 * 1024)).toFixed(1);
+            this.showUploadError(`O arquivo selecionado tem ${sizeMB} MB e excede o limite máximo permitido de 50 MB.`);
+            return;
+        }
+
+        if (!arquivo.name.toLowerCase().endsWith('.docx')) {
+            this.showUploadError(`O arquivo "${arquivo.name}" não é um documento Microsoft Word (.docx) compatível. Salve seu modelo no formato .docx.`);
             return;
         }
 
@@ -144,7 +169,7 @@ class TemplatesManager {
             .filter(Boolean);
 
         if (!campos.length) {
-            window.auth.showNotification('Informe ao menos um campo', 'error');
+            this.showUploadError('Informe ao menos um campo válido separado por vírgula.');
             return;
         }
 
@@ -166,10 +191,10 @@ class TemplatesManager {
 
             closeModal('modalTemplate');
             document.getElementById('templateForm')?.reset();
-            window.auth.showNotification('Template cadastrado com sucesso');
+            window.auth.showNotification('Template cadastrado com sucesso!');
             await this.loadTemplates();
         } catch (error) {
-            window.auth.showNotification(error.message, 'error');
+            this.showUploadError(error.message || 'Falha desconhecida ao enviar template.');
         }
     }
 

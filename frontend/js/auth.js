@@ -208,7 +208,7 @@ class Auth {
                 if (config.temaCor) {
                     this.injectPalette(target, 'primary', config.temaCor, isDark);
                 }
-                
+
                 if (config.temaCorSecundaria) {
                     this.injectPalette(target, 'secondary', config.temaCorSecundaria, isDark);
                 }
@@ -220,17 +220,17 @@ class Auth {
 
     injectPalette(target, prefix, baseHex, isDark) {
         const { h, s, l } = this.hexToHsl(baseHex);
-        
+
         // Garante contraste visual agradável
         let baseL = l;
         if (isDark && baseL < 30) baseL = 30; // Se a cor base for escura demais no dark mode, clareia
         if (!isDark && baseL > 80) baseL = 80; // Se a cor base for clara demais no light mode, escurece
 
         let shades = {};
-        
+
         if (isDark) {
             shades = {
-                '50':  this.hslToHex(h, s, 10),
+                '50': this.hslToHex(h, s, 10),
                 '100': this.hslToHex(h, s, 15),
                 '400': this.hslToHex(h, s, Math.max(0, baseL - 10)),
                 '500': this.hslToHex(h, s, baseL),
@@ -239,7 +239,7 @@ class Auth {
             };
         } else {
             shades = {
-                '50':  this.hslToHex(h, s, 98),
+                '50': this.hslToHex(h, s, 98),
                 '100': this.hslToHex(h, s, 95),
                 '400': this.hslToHex(h, s, Math.min(100, baseL + 10)),
                 '500': this.hslToHex(h, s, baseL),
@@ -265,7 +265,7 @@ class Auth {
             b = parseInt(hex.substring(5, 7), 16);
         }
         r /= 255; g /= 255; b /= 255;
-        let cmax = Math.max(r,g,b), cmin = Math.min(r,g,b);
+        let cmax = Math.max(r, g, b), cmin = Math.min(r, g, b);
         let delta = cmax - cmin;
         let h = 0, s = 0, l = (cmax + cmin) / 2;
 
@@ -285,7 +285,7 @@ class Auth {
         s /= 100; l /= 100;
         let c = (1 - Math.abs(2 * l - 1)) * s;
         let x = c * (1 - Math.abs((h / 60) % 2 - 1));
-        let m = l - c/2;
+        let m = l - c / 2;
         let r = 0, g = 0, b = 0;
 
         if (0 <= h && h < 60) { r = c; g = x; b = 0; }
@@ -356,14 +356,41 @@ class Auth {
 
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
-        notification.textContent = message;
+        const icon = type === 'error' ? '❌' : (type === 'warning' ? '⚠️' : '✅');
+        const borderColor = type === 'error' ? '#ef4444' : (type === 'warning' ? '#f59e0b' : '#22c55e');
+        
+        notification.style.cssText = `
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 999999;
+            background: var(--bg-panel, #1e293b);
+            color: var(--text-main, #ffffff);
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border-left: 4px solid ${borderColor};
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: fadeIn 0.3s ease;
+            cursor: pointer;
+            max-width: 420px;
+            line-height: 1.4;
+        `;
+        notification.innerHTML = `<span style="font-size: 1.25rem;">${icon}</span><span>${message}</span>`;
+        notification.title = 'Clique para fechar';
+        notification.onclick = () => notification.remove();
+
         document.body.appendChild(notification);
 
+        const duration = type === 'error' ? 9000 : 4000;
         setTimeout(() => {
             if (notification.parentNode) {
                 notification.parentNode.removeChild(notification);
             }
-        }, 4000);
+        }, duration);
     }
 }
 
