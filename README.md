@@ -1,141 +1,143 @@
-# DocumentosPro
+<div align="center">
 
-Sistema multi-tenant de geração de documentos DOCX/PDF com templates personalizáveis.
+# 📑 DocumentosPro
 
-## 🚀 Funcionalidades Implementadas
+**Sistema Multi-Tenant Inteligente para Geração e Gestão de Documentos DOCX/PDF com Templates Personalizáveis**
 
-- ✅ **Autenticação JWT** com isolamento por empresa (Multi-tenant)
-- ✅ **Geração de documentos DOCX** com templates Handlebars (Docxtemplater)
-- ✅ **Conversão automática para PDF** usando LibreOffice
-- ✅ **Pré-processamento de templates** para resolver quebras de tags comuns do Word
-- ✅ **Geração em lote** com acompanhamento de progresso em tempo real
-- ✅ **Importação de clientes via CSV**
-- ✅ **Interface responsiva** e limpa construída com Vanilla JavaScript e CSS
-- ✅ **Níveis de Acesso**: Usuário Master (gestão global) vs Usuários regulares (gestão isolada por empresa)
-- ✅ **Download** facilitado de todos os documentos gerados
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![SQLite](https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-## 🛠️ Instalação e Execução
-
-### Pré-requisitos
-
-- **Node.js** 16+ (recomendado 18+)
-- **LibreOffice** instalado e configurado (necessário para a conversão DOCX→PDF funcionar corretamente)
-- **Git** (opcional, mas recomendado para versionamento)
-
-### 1. Clonar e Instalar Dependências
-
-```bash
-git clone https://github.com/Araujaum7/SystemDocs.git
-cd SystemDocs/backend
-npm install
-```
-
-### 2. Iniciar Servidor de Desenvolvimento
-
-O projeto pode ser iniciado facilmente usando o `npm`:
-
-```bash
-cd backend
-npm run dev
-```
-*(O `nodemon` está configurado para recarregar o servidor a cada alteração salva)*
-
-Caso precise rodar em produção ou usar o Node diretamente:
-```bash
-cd backend
-npm start
-# ou
-node server.js
-```
-
-Se a porta 3000 já estiver em uso, você pode defini-la via variável de ambiente:
-```powershell
-# No PowerShell do Windows
-$env:PORT=3001; npm run dev
-```
-
-### 3. Acessar a Aplicação
-
-- **URL**: [http://localhost:3000](http://localhost:3000) (ou porta configurada)
-- **Login Master Padrão** (criado automaticamente no primeiro acesso):
-  - Email: `admin@admin.com`
-  - Senha: `admin123`
-
-## 📁 Estrutura do Projeto
-
-```
-DocumentosPro/
-├── backend/
-│   ├── server.js              # Servidor principal (Express)
-│   ├── docx-preprocessor.js   # Pré-processamento e correção de templates DOCX
-│   ├── lib/
-│   │   └── convert-wrapper.js # Lógica de conversão DOCX → PDF
-│   ├── middlewares/           # Middlewares (auth, tenant, upload, firewall, ratelimit)
-│   ├── routes/                # Rotas da API (auth, clientes, documentos, empresas, etc.)
-│   ├── package.json           # Dependências Node.js e scripts
-│   └── uploads/               # Arquivos enviados e gerados
-│       ├── templates/         # Templates base enviados (.docx)
-│       └── gerados/           # Documentos finais processados
-├── frontend/
-│   ├── index.html             # Página de login
-│   ├── dashboard.html         # Painel principal
-│   ├── clientes.html          # Gestão e importação de clientes
-│   ├── documentos.html        # Geração em lote e relatórios
-│   ├── templates.html         # Cadastro de templates
-│   ├── empresas.html          # Gestão de empresas (Master)
-│   ├── usuarios.html          # Gestão de usuários (Master)
-│   ├── css/
-│   │   └── style.css          # Estilos globais CSS
-│   └── js/                    # Scripts do client-side
-│       ├── api.js             # Módulo de requisições para o Backend
-│       ├── auth.js            # Lógica de login/sessão
-│       ├── clientes.js        # Lógica da tela de clientes e upload de CSV
-│       ├── documentos.js      # Geração, websocket e polling
-│       └── templates.js       # Gerenciamento de arquivos .docx
-├── database.db                # Banco de Dados SQLite (gerado automaticamente)
-└── .gitignore                 # Arquivos ignorados no Git (node_modules, banco de dados, etc.)
-```
-
-## 🔧 Configuração
-
-### Variáveis de Ambiente
-
-Crie um arquivo `.env` na pasta `backend/` caso deseje sobrescrever as opções padrão:
-
-```env
-PORT=3000
-NODE_ENV=development
-JWT_SECRET=seu_segredo_super_secreto_aqui_altere_isso
-```
-
-### Banco de Dados (SQLite)
-
-O sistema usa **SQLite** e cria automaticamente as tabelas na primeira vez que o servidor (`server.js`) for executado.
-Para "resetar" os dados em desenvolvimento, basta excluir o arquivo `database.db` e reiniciar a aplicação.
-
-## 📊 Como Usar a Aplicação
-
-1. **Login Inicial**
-   - Acesse com `admin@admin.com` e a senha `admin123`.
-2. **Cadastrar Empresa e Usuários**
-   - Na aba Empresas, crie os ambientes isolados para os Tenants.
-   - Na aba Usuários, crie os logins vinculados a cada empresa.
-3. **Templates**
-   - Faça upload de arquivos `.docx`.
-   - Adicione campos no formato Handlebars: `{{NOME_DO_CAMPO}}`, `{{CPF}}`, `{{ENDERECO}}`.
-4. **Clientes**
-   - Você pode inserir os clientes manualmente na interface ou importar via **CSV**.
-5. **Geração em Massa**
-   - Acesse "Documentos", escolha os clientes desejados, selecione o template.
-   - Aguarde o processo gerar tanto a via DOCX quanto a via PDF para cada registro e baixe os resultados!
-
-## 🌐 Deploy em Produção
-
-Recomenda-se utilizar plataformas como **Render.com** ou **Railway**.
-O projeto já conta com arquivos preparados para serviços de hospedagem modernos (como `render.yaml` caso precise, ou configurações simples de `package.json` onde o comando de build é `npm install` e o de produção é `npm start`).
-
-**Nota Importante para Hospedagens Web:** Como o sistema utiliza o LibreOffice em segundo plano (SO) para conversão para PDF, caso opte por usar provedores de VPS ou plataformas como o Render.com, certifique-se de que o LibreOffice está instalado na imagem do SO/Docker em que a aplicação Node.js roda. A conversão de DOCX para PDF **falhará** em contêineres sem o binário do LibreOffice disponível (`soffice`).
+</div>
 
 ---
 
-**Desenvolvido com ❤️ para simplificar e escalar a geração de documentos empresariais.**
+## 🌟 Visão Geral
+
+O **DocumentosPro** é uma plataforma corporativa web de alta performance voltada para automação, geração em lote e gestão de contratos, procurações, petições e documentos jurídicos ou administrativos em **DOCX** e **PDF**, com **isolamento total multi-tenant (por empresa)** e motor de temas customizável **White-Label**.
+
+---
+
+## 🚀 Principais Funcionalidades
+
+### 🎨 White-Label & Design System HSL
+- **Tema Personalizável por Empresa**: Definição independente de cores **Primária** e **Secundária** no painel da empresa.
+- **Cálculo Dinâmico de Luminosidade (HSL)**: Geração matemática de variações de cor (tons 50 a 700) que se adaptam automaticamente ao **Modo Claro** e **Modo Noturno (Dark Mode)** garantindo perfeita legibilidade e contraste.
+- **Dashboard Interativo com Gráficos**: Gráficos analíticos renderizados com Chart.js que respeitam e sincronizam com a identidade visual da empresa em tempo real.
+
+### 📑 Geração de Documentos & Processamento Word
+- **Templates Word (`.docx`) com Handlebars**: Variáveis dinâmicas no estilo `{{nome}}`, `{{cpf}}`, `{{endereco}}`, etc.
+- **Pré-Processador de XML do Word**: Reparo automático de tags fragmentadas pela verificação ortográfica ou formatação do Microsoft Word.
+- **Validação de Erros em Português Claro**: Sistema que identifica erros em templates (como tags não fechadas `{{` ou arquivos incompatíveis) e explica o problema de forma visual, didática e clara direto no modal e nas notificações.
+- **Suporte a Arquivos de Até 50 MB**: Upload e conversão com buffers otimizados para suportar contratos e modelos longos sem travamentos.
+- **Conversão DOCX ➔ PDF Nativa**: Integração com **LibreOffice (soffice)** para conversões precisas de documentos preservando layout e imagens.
+
+### 🏢 Arquitetura Multi-Tenant & Segurança
+- **Isolamento Completo por Empresa (Tenant)**: Cada cliente enxerga apenas seus clientes, relatórios, templates e documentos.
+- **Acesso Hierárquico**:
+  - **Master**: Controle global de empresas, usuários, auditoria, firewall e backups.
+  - **Admin / Usuário**: Gestão isolada de clientes e documentos de sua própria organização.
+- **Auditoria de Sistema**: Registro completo de logs de acesso, geração e exclusões de documentos para fins de compliance.
+- **Firewall & Rate Limiting Integrados**: Proteção contra abusos, requisições excessivas e controle de acessos LAN/VPN.
+
+### 🧹 Rotinas de Manutenção Automática (Background Jobs)
+- **Backup Automático do Banco de Dados**: Proteção contínua dos registros e dados dos clientes (`database.db`).
+- **Garbage Collector (Limpeza Automática)**: Remoção inteligente de arquivos temporários, PDFs e DOCXs antigos sem uso, otimizando o disco do servidor.
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+- **Core & Backend**: [Node.js](https://nodejs.org/) (ES Modules) + [Express.js](https://expressjs.com/)
+- **Processamento de Word & PDF**: [Docxtemplater](https://docxtemplater.com/) + [PizZip](https://github.com/open-xml-templating/pizzip) + [LibreOffice (`soffice`)](https://www.libreoffice.org/)
+- **Frontend**: Vanilla JavaScript (ES6+), CSS3 Moderno (Variáveis CSS & Flex/Grid), HTML5 Semântico e [Chart.js](https://www.chartjs.org/)
+- **Banco de Dados**: SQLite3 (com WAL mode para alta concorrência)
+- **Containerização**: Docker & Docker Compose
+
+---
+
+## 🐳 Instalação Rápida com Docker (Recomendado para VPS)
+
+O projeto está pronto para rodar em produção (VPS Linux, Hostinger, AWS, DigitalOcean) utilizando **Docker Compose**, já contendo o LibreOffice configurado internamente:
+
+### 1. Clonar o Repositório
+```bash
+git clone https://github.com/Araujaum7/SystemDocs.git
+cd SystemDocs
+```
+
+### 2. Subir o Contêiner Docker
+```bash
+docker compose up -d --build
+```
+> O servidor iniciará automaticamente na porta **`7000`** (ou na porta mapeada no seu `docker-compose.yml`) com todos os recursos, LibreOffice e limites de upload de 50MB ativados.
+
+### 3. Atualizar o Servidor (Quando houver novos commits)
+```bash
+git pull
+docker compose restart
+```
+
+---
+
+## 💻 Execução Local sem Docker (Desenvolvimento)
+
+Caso prefira desenvolver rodando o Node.js diretamente na sua máquina:
+
+### 1. Instalar Dependências
+```bash
+cd backend
+npm install
+```
+
+### 2. Rodar Servidor de Desenvolvimento
+```bash
+npm run dev
+```
+- A aplicação local estará disponível em **`http://localhost:3000`** (ou `http://localhost:7000`).
+- O banco de dados (`database.db`) e as tabelas iniciais são gerados automaticamente na primeira execução.
+
+---
+
+## 🔑 Acesso Principal (Primeiro Uso)
+
+Ao rodar pela primeira vez, o sistema cria automaticamente as credenciais administrativas padrão:
+
+| Campo | Valor Padrão |
+| :--- | :--- |
+| **Email** | `admin@admin.com` |
+| **Senha** | `admin123` |
+
+> ⚠️ *Recomendamos alterar a senha padrão imediatamente após o primeiro login no painel de Usuários.*
+
+---
+
+## 📁 Estrutura do Repositório
+
+```text
+DocumentosPro/
+├── backend/
+│   ├── config/            # Parâmetros de ambiente, paths e limites do sistema
+│   ├── database/          # Gerenciamento de conexões, migrations e queries SQLite
+│   ├── lib/               # Wrapper de conversão DOCX ➔ PDF via LibreOffice
+│   ├── middlewares/       # Auth JWT, Tenant Isolado, Multer (50MB) e Firewall
+│   ├── routes/            # Endpoints da REST API (empresas, templates, docs, auditoria)
+│   ├── services/          # Serviços de geração em lote e limpeza em background
+│   ├── utils/             # Formatador de erros em português, helpers e loggers
+│   ├── docx-preprocessor  # Limpeza e reparo de XML do Microsoft Word
+│   └── server.js          # Ponto de entrada (Express Server)
+├── frontend/
+│   ├── css/style.css      # Design System White-Label, Modo Noturno e Variáveis HSL
+│   ├── js/                # Aplicação SPA modular (auth, templates, docs, empresas)
+│   └── *.html             # Telas do sistema (Dashboard, Clientes, Documentos, Templates)
+├── docker-compose.yml     # Orquestração do contêiner Docker para Produção
+├── Dockerfile             # Imagem de produção otimizada com Node.js + LibreOffice
+└── README.md              # Documentação oficial do projeto
+```
+
+---
+
+<div align="center">
+  <p><b>Desenvolvido para máxima automação, performance visual e segurança corporativa. 🚀</b></p>
+</div>
