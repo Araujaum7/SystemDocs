@@ -1,0 +1,32 @@
+html .btn.btn-primary {
+  min-height: 44px;
+  color: var(--on-primary);
+  background: var(--primary-500);
+  border-color: var(--primary-500);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--primary-700) 18%, transparent);
+}
+
+html .btn.btn-primary:hover {
+  color: var(--on-primary);
+  background: var(--primary-600);
+  border-color: var(--primary-600);
+  transform: none;
+}
+
+html .nav-item.active {
+  color: var(--primary-700);
+  background: var(--primary-100);
+}
+
+body.dark-theme .nav-item.active {
+  color: var(--primary-700);
+}
+
+html :where(.panel, .card, .modal-content, .actions-panel) {
+  background-color: var(--surface-panel);
+  border-color: var(--border-soft);
+}
+
+html :where(.badge, .meta-pill) {
+  border-color: var(--border-soft);
+}

@@ -1,6 +1,17 @@
 class Auth {
     constructor() {
+        this.loadEditorialStyles();
         this.init();
+    }
+
+    loadEditorialStyles() {
+        if (document.querySelector('link[data-editorial-styles]')) return;
+
+        const stylesheet = document.createElement('link');
+        stylesheet.rel = 'stylesheet';
+        stylesheet.href = '/css/editorial.css';
+        stylesheet.dataset.editorialStyles = 'true';
+        document.head.appendChild(stylesheet);
     }
 
     init() {
@@ -233,7 +244,7 @@ class Auth {
                 '50': this.hslToHex(h, s, 10),
                 '100': this.hslToHex(h, s, 15),
                 '400': this.hslToHex(h, s, Math.max(0, baseL - 10)),
-                '500': this.hslToHex(h, s, baseL),
+                '500': baseL === l ? baseHex : this.hslToHex(h, s, baseL),
                 '600': this.hslToHex(h, s, Math.min(100, baseL + 10)), // Mais claro no hover escuro
                 '700': this.hslToHex(h, s, Math.min(100, baseL + 20)),
             };
@@ -242,7 +253,7 @@ class Auth {
                 '50': this.hslToHex(h, s, 98),
                 '100': this.hslToHex(h, s, 95),
                 '400': this.hslToHex(h, s, Math.min(100, baseL + 10)),
-                '500': this.hslToHex(h, s, baseL),
+                '500': baseL === l ? baseHex : this.hslToHex(h, s, baseL),
                 '600': this.hslToHex(h, s, Math.max(0, baseL - 10)), // Mais escuro no hover claro
                 '700': this.hslToHex(h, s, Math.max(0, baseL - 20)),
             };
@@ -251,6 +262,26 @@ class Auth {
         Object.keys(shades).forEach(weight => {
             target.style.setProperty(`--${prefix}-${weight}`, shades[weight]);
         });
+
+        target.style.setProperty(`--on-${prefix}`, this.getReadableTextColor(shades['500']));
+    }
+
+    getReadableTextColor(hex) {
+        const normalized = hex.replace('#', '');
+        const expanded = normalized.length === 3
+            ? normalized.split('').map((value) => value + value).join('')
+            : normalized;
+        const channels = [0, 2, 4].map((offset) => parseInt(expanded.slice(offset, offset + 2), 16) / 255);
+        const luminance = channels
+            .map((channel) => channel <= 0.03928
+                ? channel / 12.92
+                : Math.pow((channel + 0.055) / 1.055, 2.4))
+            .reduce((total, channel, index) => total + channel * [0.2126, 0.7152, 0.0722][index], 0);
+        const contrastWithWhite = 1.05 / (luminance + 0.05);
+        const darkLuminance = 0.009;
+        const contrastWithDark = (luminance + 0.05) / (darkLuminance + 0.05);
+
+        return contrastWithWhite >= contrastWithDark ? '#ffffff' : '#111827';
     }
 
     hexToHsl(hex) {

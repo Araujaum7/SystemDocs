@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+html {
+  background: var(--surface-app);
+}
+
+html body {
+  min-height: 100%;
+  font-family: var(--font-sans);
+  background-color: var(--surface-app);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+html body::before,
+html body::after {
+  display: none;
+}
+
+html :where(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--font-display);
+  color: var(--text-primary);
+  letter-spacing: -0.025em;
+}
+
+html :where(button, input, select, textarea) {
+  font: inherit;
+}
+
+html :where(button, .btn, input:not([type='checkbox']):not([type='radio']), select, textarea) {
+  min-height: 44px;
+}
+
+html :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary-500) 35%, transparent);
+  outline-offset: 2px;
+}
+
+html ::selection {
+  background: var(--primary-100);
+  color: var(--primary-700);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html *,
+  html *::before,
+  html *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
