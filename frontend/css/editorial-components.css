@@ -63,6 +63,12 @@ html .btn-success {
   border-color: var(--success);
 }
 
+html .btn-warning {
+  color: #fff;
+  background: var(--warning);
+  border-color: var(--warning);
+}
+
 html :where(input:not([type='checkbox']):not([type='radio']), select, textarea) {
   width: 100%;
   min-height: 44px;
