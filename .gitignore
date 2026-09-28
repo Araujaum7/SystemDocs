@@ -2,3 +2,5 @@ node_modules/
 uploads/
 database.db
 .env
+test-results/
+playwright-report/

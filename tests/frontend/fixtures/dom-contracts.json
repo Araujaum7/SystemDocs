@@ -1,0 +1,50 @@
+{
+  "index.html": {
+    "ids": ["email", "loginForm", "senha"],
+    "forms": ["loginForm"],
+    "scripts": ["https://unpkg.com/@phosphor-icons/web", "https://cdn.tailwindcss.com", "js/auth.js", "js/ui-core.js"],
+    "permissionClasses": []
+  },
+  "dashboard.html": {
+    "ids": ["contextAction", "contextBanner", "contextDescription", "contextTitle", "currentTime", "dashboardShell", "heroSubtitle", "heroTitle", "kpiCapacidade", "kpiCapacidadeTrend", "kpiClientes", "kpiClientesTrend", "kpiTemplates", "kpiTemplatesTrend", "kpiUsuarios", "kpiUsuariosTrend", "logoutBtn", "mainChart", "masterInsights", "masterPanel", "metaEmpresa", "metaHealth", "metaRole", "operationalInsights", "quickLinks", "recentActivity", "userInfo", "userName", "userRole"],
+    "forms": [],
+    "scripts": ["https://unpkg.com/@phosphor-icons/web", "https://cdn.jsdelivr.net/npm/chart.js", "https://cdn.tailwindcss.com", "https://cdn.jsdelivr.net/npm/chart.js", "js/auth.js?v=2", "js/sidebar.js?v=2", "js/dashboard.js?v=2", "js/ui-core.js?v=2"],
+    "permissionClasses": ["admin-master-only", "master-only"]
+  },
+  "clientes.html": {
+    "ids": ["addClienteBtn", "clienteFields", "clienteForm", "clientesList", "cpf", "csvFile", "deleteMultipleBtn", "duplicateMultipleBtn", "email", "endereco", "importClientesBtn", "importForm", "importProgress", "logoutBtn", "modalCliente", "modalClienteTitle", "modalImport", "nome", "progressFill", "progressText", "searchClientes", "telefone", "userInfo", "userName", "userRole"],
+    "forms": ["clienteForm", "importForm"],
+    "scripts": ["https://unpkg.com/@phosphor-icons/web", "https://cdn.tailwindcss.com", "js/auth.js?v=2", "js/api.js?v=2", "js/sidebar.js?v=2", "js/clientes.js?v=2", "js/ui-core.js?v=2"],
+    "permissionClasses": ["admin-master-only"]
+  },
+  "documentos.html": {
+    "ids": ["camposEspecificos", "clienteEditandoNome", "clientesSelecionadosCount", "clientesSelection", "downloadMode", "editarCamposBtn", "formEditarCampos", "gerarDocumentosBtn", "historyContainer", "logoutBtn", "modalEditarCampos", "searchClientesDoc", "searchTemplatesDoc", "templatesSelecionadosCount", "templatesSelection", "totalDocumentosCount", "userInfo", "userName", "userRole"],
+    "forms": ["formEditarCampos"],
+    "scripts": ["https://unpkg.com/@phosphor-icons/web", "https://cdn.tailwindcss.com", "js/auth.js?v=2", "js/sidebar.js?v=2", "js/documentos.js?v=2", "js/ui-core.js?v=2"],
+    "permissionClasses": ["admin-master-only"]
+  },
+  "templates.html": {
+    "ids": ["addTemplateBtn", "editTemplateArquivo", "editTemplateCampos", "editTemplateId", "editTemplateNome", "logoutBtn", "modalEditTemplate", "modalTemplate", "templateArquivo", "templateCampos", "templateEditError", "templateEditForm", "templateForm", "templateNome", "templatesList", "templateUploadError", "userInfo", "userMessage", "userName", "userRole"],
+    "forms": ["templateEditForm", "templateForm"],
+    "scripts": ["https://unpkg.com/@phosphor-icons/web", "https://cdn.tailwindcss.com", "js/auth.js?v=2", "js/sidebar.js?v=2", "js/templates.js?v=3", "js/ui-core.js?v=2"],
+    "permissionClasses": ["admin-master-only"]
+  },
+  "auditoria.html": {
+    "ids": ["logoutBtn", "logsTableBody", "tenantBadge", "tenantName", "totalLogsCount", "userInfo", "userName", "userRole"],
+    "forms": [],
+    "scripts": ["https://unpkg.com/@phosphor-icons/web", "js/auth.js?v=3", "js/sidebar.js?v=3", "js/auditoria.js?v=2"],
+    "permissionClasses": ["admin-master-only"]
+  },
+  "empresas.html": {
+    "ids": ["addEmpresaBtn", "empresasList", "logoutBtn", "userInfo", "userName", "userRole"],
+    "forms": [],
+    "scripts": ["https://unpkg.com/@phosphor-icons/web", "https://cdn.tailwindcss.com", "js/auth.js?v=2", "js/sidebar.js?v=2", "js/empresas.js?v=2", "js/ui-core.js?v=2"],
+    "permissionClasses": ["admin-master-only"]
+  },
+  "usuarios.html": {
+    "ids": ["addUsuarioBtn", "alterarCargoForm", "alterarCargoUsuarioId", "alterarCargoUsuarioNome", "logoutBtn", "modalAlterarCargo", "modalRedefinirSenha", "modalUsuario", "novaSenha", "novoCargo", "resetSenhaForm", "resetSenhaUsuarioId", "resetSenhaUsuarioNome", "userInfo", "userName", "userRole", "usuarioCargo", "usuarioEmail", "usuarioForm", "usuarioNome", "usuarioSenha", "usuariosList"],
+    "forms": ["alterarCargoForm", "resetSenhaForm", "usuarioForm"],
+    "scripts": ["https://unpkg.com/@phosphor-icons/web", "https://cdn.tailwindcss.com", "js/auth.js?v=2", "js/sidebar.js?v=2", "js/usuarios.js?v=2", "js/ui-core.js?v=2"],
+    "permissionClasses": ["admin-master-only"]
+  }
+}
