@@ -15,6 +15,7 @@ class Auth {
     }
 
     init() {
+        document.body.classList.toggle('dark-theme', localStorage.getItem('darkTheme') === 'true');
         this.checkAuth();
         this.setupEventListeners();
         this.updateUserInfo();

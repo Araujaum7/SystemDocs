@@ -320,13 +320,10 @@ class DashboardManager {
             this.chartInstance.destroy();
         }
 
-        const isDark = document.body.classList.contains('dark-theme');
-        const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-        const textColor = isDark ? '#cbd5e1' : '#475569';
-        
         const rootStyle = getComputedStyle(document.body);
+        const gridColor = rootStyle.getPropertyValue('--border-soft').trim() || '#e2e0da';
+        const textColor = rootStyle.getPropertyValue('--text-secondary').trim() || '#60646c';
         const primaryColorHex = rootStyle.getPropertyValue('--primary-500').trim() || '#7c3aed';
-        const secondaryColorHex = rootStyle.getPropertyValue('--secondary-500').trim() || '#3b82f6';
         
         // Converte hex para rgba para o background
         const hexToRgb = (hex) => {
@@ -353,6 +350,10 @@ class DashboardManager {
                     backgroundColor: primaryBg,
                     borderColor: primaryColorHex,
                     borderWidth: 2,
+                    pointBackgroundColor: primaryColorHex,
+                    pointBorderColor: rootStyle.getPropertyValue('--surface-panel').trim() || '#ffffff',
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
                     tension: 0.3,
                     fill: true
                 }]
