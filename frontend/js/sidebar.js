@@ -1,112 +1,153 @@
-// Controle do sidebar retrátil
-document.addEventListener('DOMContentLoaded', function() {
-    const sidebar = document.querySelector('.sidebar');
-    const sidebarToggle = document.querySelector('.sidebar-toggle');
-    const mobileSidebarToggle = document.querySelector('.mobile-sidebar-toggle');
-    const sidebarOverlay = document.querySelector('.sidebar-overlay');
-    
-    // Toggle do sidebar no desktop
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('collapsed');
-            // Salvar estado no localStorage
-            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-        });
-    }
-    
-    // Toggle do sidebar no mobile
-    if (mobileSidebarToggle) {
-        mobileSidebarToggle.addEventListener('click', function() {
-            sidebar.classList.add('active');
-            if (sidebarOverlay) {
-                sidebarOverlay.classList.add('active');
-            }
-        });
-    }
-    
-    // Fechar sidebar no mobile ao clicar no overlay
-    if (sidebarOverlay) {
-        sidebarOverlay.addEventListener('click', function() {
-            sidebar.classList.remove('active');
-            sidebarOverlay.classList.remove('active');
-        });
-    }
-    
-    // Fechar sidebar no mobile ao clicar em um link
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach(item => {
-        item.addEventListener('click', function() {
-            if (window.innerWidth <= 768) {
-                sidebar.classList.remove('active');
-                if (sidebarOverlay) {
-                    sidebarOverlay.classList.remove('active');
-                }
-            }
-        });
-    });
-    
-    // Restaurar estado do sidebar
-    const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-    if (sidebarCollapsed && sidebar) {
-        sidebar.classList.add('collapsed');
-    }
-    
-    // Fechar sidebar ao redimensionar a janela para desktop
-    window.addEventListener('resize', function() {
-        if (window.innerWidth > 768) {
-            sidebar.classList.remove('active');
-            if (sidebarOverlay) {
-                sidebarOverlay.classList.remove('active');
-            }
+function setThemeToggleState(button, isDark) {
+    button.setAttribute('aria-label', isDark ? 'Ativar tema claro' : 'Ativar tema escuro');
+    button.title = isDark ? 'Ativar tema claro' : 'Ativar tema escuro';
+    button.innerHTML = isDark
+        ? '<i class="ph ph-sun" aria-hidden="true"></i>'
+        : '<i class="ph ph-moon" aria-hidden="true"></i>';
+}
+
+function createThemeToggle(isDark) {
+    const themeButton = document.createElement('button');
+    themeButton.type = 'button';
+    themeButton.className = 'theme-toggle';
+    setThemeToggleState(themeButton, isDark);
+
+    themeButton.addEventListener('click', () => {
+        const nextDark = !document.body.classList.contains('dark-theme');
+        document.body.classList.toggle('dark-theme', nextDark);
+        localStorage.setItem('darkTheme', String(nextDark));
+        setThemeToggleState(themeButton, nextDark);
+
+        if (window.auth && typeof window.auth.applyThemeColor === 'function') {
+            window.auth.applyThemeColor();
         }
     });
 
-    // Tema Escuro
-    const isDark = localStorage.getItem('darkTheme') === 'true';
-    if (isDark) {
-        document.body.classList.add('dark-theme');
+    return themeButton;
+}
+
+function createCompanyContext() {
+    const companyName = localStorage.getItem('empresaContextoNome');
+    if (!companyName) return null;
+
+    const context = document.createElement('div');
+    context.className = 'company-context';
+    context.setAttribute('aria-label', `Empresa ativa: ${companyName}`);
+    context.innerHTML = `
+        <span class="company-context__icon" aria-hidden="true"><i class="ph ph-buildings"></i></span>
+        <span class="company-context__copy">
+            <span class="company-context__eyebrow">Empresa ativa</span>
+            <strong class="company-context__name"></strong>
+        </span>`;
+    context.querySelector('.company-context__name').textContent = companyName;
+    return context;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.querySelector('.sidebar');
+    if (!sidebar) return;
+
+    const sidebarToggle = document.querySelector('.sidebar-toggle');
+    const sidebarOverlay = document.querySelector('.sidebar-overlay');
+    const headerLeft = document.querySelector('.header-left');
+    let mobileSidebarToggle = document.querySelector('.mobile-sidebar-toggle');
+
+    const storedCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    sidebar.classList.toggle('collapsed', storedCollapsed);
+
+    document.querySelectorAll('.nav-item').forEach((item) => {
+        if (item.classList.contains('active')) item.setAttribute('aria-current', 'page');
+        else item.removeAttribute('aria-current');
+    });
+
+    const companyContext = createCompanyContext();
+    const sidebarHeader = sidebar.querySelector('.sidebar-header');
+    if (companyContext && sidebarHeader && !sidebarHeader.querySelector('.company-context')) {
+        sidebarHeader.appendChild(companyContext);
     }
 
-    const headerActions = document.querySelector('.header-actions');
-    if (headerActions) {
-        const themeBtn = document.createElement('button');
-        themeBtn.className = 'btn btn-secondary';
-        themeBtn.innerHTML = isDark ? '<span class="emoji">☀️</span> Modo Claro' : '<span class="emoji">🌙</span> Modo Escuro';
-        themeBtn.title = 'Alternar Tema';
-        themeBtn.style.marginRight = '8px';
+    if (!mobileSidebarToggle && headerLeft) {
+        mobileSidebarToggle = document.createElement('button');
+        mobileSidebarToggle.className = 'mobile-sidebar-toggle';
+        mobileSidebarToggle.type = 'button';
+        headerLeft.insertBefore(mobileSidebarToggle, headerLeft.firstChild);
+    }
 
-        themeBtn.addEventListener('click', () => {
-            const isCurrentlyDark = document.body.classList.contains('dark-theme');
-            if (isCurrentlyDark) {
-                document.body.classList.remove('dark-theme');
-                localStorage.setItem('darkTheme', 'false');
-                themeBtn.innerHTML = '<span class="emoji">🌙</span> Modo Escuro';
-            } else {
-                document.body.classList.add('dark-theme');
-                localStorage.setItem('darkTheme', 'true');
-                themeBtn.innerHTML = '<span class="emoji">☀️</span> Modo Claro';
-            }
-            // Re-aplica a cor do tema customizado (pois a cor do hover muda dependendo do modo)
-            if (window.auth && typeof window.auth.applyThemeColor === 'function') {
-                window.auth.applyThemeColor();
-            }
+    const syncDesktopToggle = () => {
+        if (!sidebarToggle) return;
+        const expanded = !sidebar.classList.contains('collapsed');
+        sidebarToggle.type = 'button';
+        sidebarToggle.setAttribute('aria-label', expanded ? 'Recolher menu lateral' : 'Expandir menu lateral');
+        sidebarToggle.setAttribute('aria-expanded', String(expanded));
+        sidebarToggle.innerHTML = expanded
+            ? '<i class="ph ph-caret-left" aria-hidden="true"></i>'
+            : '<i class="ph ph-caret-right" aria-hidden="true"></i>';
+    };
+
+    const syncMobileToggle = (expanded) => {
+        if (!mobileSidebarToggle) return;
+        mobileSidebarToggle.setAttribute('aria-label', expanded ? 'Fechar menu' : 'Abrir menu');
+        mobileSidebarToggle.setAttribute('aria-expanded', String(expanded));
+        mobileSidebarToggle.innerHTML = expanded
+            ? '<i class="ph ph-x" aria-hidden="true"></i>'
+            : '<i class="ph ph-list" aria-hidden="true"></i>';
+    };
+
+    const closeDrawer = () => {
+        sidebar.classList.remove('active');
+        sidebarOverlay?.classList.remove('active');
+        syncMobileToggle(false);
+    };
+
+    const openDrawer = () => {
+        sidebar.classList.add('active');
+        sidebarOverlay?.classList.add('active');
+        syncMobileToggle(true);
+    };
+
+    sidebarToggle?.addEventListener('click', () => {
+        sidebar.classList.toggle('collapsed');
+        localStorage.setItem('sidebarCollapsed', String(sidebar.classList.contains('collapsed')));
+        syncDesktopToggle();
+    });
+
+    mobileSidebarToggle?.addEventListener('click', () => {
+        if (sidebar.classList.contains('active')) closeDrawer();
+        else openDrawer();
+    });
+
+    sidebarOverlay?.addEventListener('click', closeDrawer);
+    document.querySelectorAll('.nav-item').forEach((item) => {
+        item.addEventListener('click', () => {
+            if (window.innerWidth <= 768) closeDrawer();
         });
+    });
 
-        headerActions.insertBefore(themeBtn, headerActions.firstChild);
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && sidebar.classList.contains('active')) closeDrawer();
+    });
+
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) closeDrawer();
+    });
+
+    const isDark = localStorage.getItem('darkTheme') === 'true';
+    document.body.classList.toggle('dark-theme', isDark);
+    const headerActions = document.querySelector('.header-actions');
+    if (headerActions && !headerActions.querySelector('.theme-toggle')) {
+        headerActions.insertBefore(createThemeToggle(isDark), headerActions.firstChild);
     }
+
+    syncDesktopToggle();
+    syncMobileToggle(false);
 });
 
-// Funções auxiliares para modais
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.style.display = 'flex';
-    }
+    if (modal) modal.style.display = 'flex';
 }
 
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.style.display = 'none';
-    }
+    if (modal) modal.style.display = 'none';
 }
