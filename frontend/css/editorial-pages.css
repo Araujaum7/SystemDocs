@@ -502,9 +502,278 @@ html .progress-fill {
   background: var(--primary-500);
 }
 
+html .documentos-container {
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.85fr);
+  gap: var(--space-6);
+}
+
+html .documentos-container > *,
+html .selection-panel,
+html .selection-section,
+html .selection-list,
+html .selection-list .item-content,
+html .actions-panel {
+  min-width: 0;
+}
+
+html .selection-panel {
+  gap: var(--space-4);
+}
+
+html .selection-section {
+  padding: var(--space-4);
+  background: var(--surface-panel);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+html .selection-section h3 {
+  margin-bottom: var(--space-3);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+html .selection-section .search-box {
+  margin-bottom: var(--space-3);
+}
+
+html .selection-section .search-box .icon {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  z-index: 1;
+  color: var(--text-subtle);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+html .selection-list {
+  max-height: 340px;
+  padding: var(--space-2);
+  background: var(--surface-muted);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+}
+
+html .selection-list label {
+  gap: var(--space-3);
+  margin: 0 0 4px;
+  padding: var(--space-3);
+  overflow: hidden;
+  background: var(--surface-panel);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+}
+
+html .selection-list label:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-soft);
+  transform: none;
+}
+
+html .selection-list label:has(input:checked) {
+  background: var(--primary-100);
+  border-color: color-mix(in srgb, var(--primary-500) 45%, var(--border-soft));
+}
+
+html .selection-list .item-title,
+html .selection-list .item-subtitle {
+  overflow-wrap: anywhere;
+}
+
+html .selection-list .item-title {
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+html .selection-list .item-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+html .actions-panel {
+  top: 92px;
+  padding: var(--space-4);
+  background: var(--surface-panel);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+html .selection-stats.cards-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+html .selection-stats .stat-item {
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+}
+
+html .selection-stats .stat-item.primary {
+  grid-column: 1 / -1;
+  color: var(--on-primary);
+  background: var(--primary-500);
+  border-color: var(--primary-500);
+}
+
+html .selection-stats .stat-item::before {
+  display: none;
+}
+
+html .selection-stats .stat-item .kpi-label,
+html .selection-stats .stat-item .kpi-value {
+  display: block;
+}
+
+html .selection-stats .stat-item .kpi-value {
+  margin-top: 4px;
+  font-size: 1.5rem;
+}
+
+html .selection-stats .stat-item.primary :where(.kpi-label, .kpi-value) {
+  color: var(--on-primary);
+}
+
+html .generation-options {
+  display: grid;
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+html .option-title {
+  margin-bottom: var(--space-2);
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+  font-weight: 650;
+}
+
+html .option-row {
+  min-width: 0;
+  gap: var(--space-2);
+}
+
+html .option-chip {
+  position: relative;
+  min-width: 0;
+  flex: 1 1 0;
+}
+
+html .option-chip input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+html .option-chip span {
+  display: block;
+  padding: 9px 8px;
+  color: var(--text-secondary);
+  background: var(--surface-panel);
+  border: 1px solid var(--border-emphasis);
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 650;
+  text-align: center;
+  cursor: pointer;
+}
+
+html .option-chip input:checked + span {
+  color: var(--on-primary);
+  background: var(--primary-500);
+  border-color: var(--primary-500);
+  box-shadow: none;
+}
+
+html .option-hint {
+  display: block;
+  margin-top: var(--space-2);
+  color: var(--text-subtle);
+  font-size: 0.6875rem;
+  line-height: 1.5;
+}
+
+html #gerarDocumentosBtn {
+  display: inline-flex;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 12px 16px;
+  color: var(--on-primary);
+  background: var(--primary-500);
+  border: 1px solid var(--primary-500);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+html #gerarDocumentosBtn:hover {
+  background: var(--primary-600);
+  transform: none;
+}
+
+html #gerarDocumentosBtn:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+html #modalEditarCampos .modal-content {
+  width: min(900px, 100%);
+}
+
+html #modalEditarCampos .modal-body {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 350px) !important;
+  gap: var(--space-6) !important;
+  padding: var(--space-6) !important;
+}
+
+html .modal-history-section {
+  min-width: 0;
+  padding-left: var(--space-6);
+  overflow-y: auto;
+  border-left: 1px solid var(--border-soft);
+}
+
+html #progressModal[style*='display: block'] {
+  display: flex !important;
+}
+
+html #progressModal > div {
+  width: min(680px, 100%);
+  color: var(--text-primary);
+  background: var(--surface-panel);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+html #progressModal h2,
+html #progressModal h3,
+html #progressModal strong {
+  color: var(--text-primary);
+}
+
 @media (max-width: 1100px) {
   html .kpi-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  html .documentos-container {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html .actions-panel {
+    position: static;
   }
 }
 
@@ -613,5 +882,34 @@ html .progress-fill {
 
   html .header-actions .btn {
     flex: 1 1 auto;
+  }
+
+  html .documentos-container {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+  }
+
+  html .selection-section,
+  html .actions-panel {
+    padding: var(--space-3);
+  }
+
+  html .option-row.segmented {
+    flex-wrap: wrap;
+  }
+
+  html #modalEditarCampos .modal-body {
+    display: block !important;
+    padding: var(--space-4) !important;
+  }
+
+  html .modal-history-section {
+    max-height: none !important;
+    margin-top: var(--space-6);
+    padding-top: var(--space-6);
+    padding-left: 0;
+    border-top: 1px solid var(--border-soft);
+    border-left: 0;
   }
 }
