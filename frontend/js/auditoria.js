@@ -9,7 +9,7 @@ class AuditoriaManager {
 
     async carregarLogs() {
         const tbody = document.getElementById('logsTableBody');
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center">Carregando...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="table-state">Carregando...</td></tr>';
         
         try {
             const response = await window.auth.fetchWithAuth('/api/auditoria');
@@ -21,39 +21,39 @@ class AuditoriaManager {
             if (countEl) countEl.textContent = logs.length;
 
             if (logs.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-[var(--text-muted)]">Nenhum registro encontrado.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="table-state">Nenhum registro encontrado.</td></tr>';
                 return;
             }
 
             tbody.innerHTML = logs.map(log => {
                 const data = new Date(log.created_at).toLocaleString('pt-BR');
                 const user = log.usuario_nome || 'Sistema';
-                let tagClass = 'bg-[var(--bg-panel-hover)] text-[var(--text-main)]';
+                let tagClass = 'info';
                 
                 // Definir cores das tags de ação
-                if (log.acao.includes('CRIADO')) tagClass = 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30';
-                else if (log.acao.includes('EXCLUIDO')) tagClass = 'bg-red-500/20 text-red-500 border border-red-500/30';
-                else if (log.acao.includes('LOGIN')) tagClass = 'bg-blue-500/20 text-blue-500 border border-blue-500/30';
-                else if (log.acao.includes('GERADO')) tagClass = 'bg-[var(--primary-100)] text-[var(--primary-700)] border border-[var(--primary-300)]';
+                if (log.acao.includes('CRIADO')) tagClass = 'success';
+                else if (log.acao.includes('EXCLUIDO')) tagClass = 'danger';
+                else if (log.acao.includes('LOGIN')) tagClass = 'info';
+                else if (log.acao.includes('GERADO')) tagClass = 'brand';
                 
                 const detalheHtml = typeof log.detalhe === 'object' 
-                    ? `<pre class="text-xs p-2 bg-[var(--bg-panel-muted)] rounded border border-[var(--border-subtle)] overflow-x-auto m-0">${JSON.stringify(log.detalhe, null, 2)}</pre>`
+                    ? `<pre class="audit-detail-json">${JSON.stringify(log.detalhe, null, 2)}</pre>`
                     : `<span>${this.escapeHtml(log.detalhe || '')}</span>`;
 
                 return `
-                <tr class="hover:bg-[var(--bg-panel-hover)] transition-colors">
-                    <td class="text-xs text-[var(--text-muted)]">${data}</td>
-                    <td class="font-medium">${this.escapeHtml(user)}</td>
-                    <td><span class="px-2 py-1 rounded text-xs font-bold ${tagClass}">${this.escapeHtml(log.acao)}</span></td>
-                    <td class="text-sm max-w-xs">${detalheHtml}</td>
-                    <td class="text-xs text-[var(--text-muted)]">${this.escapeHtml(log.ip || '-')}</td>
+                <tr>
+                    <td class="audit-muted">${data}</td>
+                    <td class="audit-user">${this.escapeHtml(user)}</td>
+                    <td><span class="audit-action-badge ${tagClass}">${this.escapeHtml(log.acao)}</span></td>
+                    <td class="audit-details">${detalheHtml}</td>
+                    <td class="audit-muted">${this.escapeHtml(log.ip || '-')}</td>
                 </tr>
                 `;
             }).join('');
             
         } catch (error) {
             console.error('Erro:', error);
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-red-500">Falha ao carregar logs.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="table-state error">Falha ao carregar logs.</td></tr>';
         }
     }
 

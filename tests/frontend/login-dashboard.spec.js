@@ -4,7 +4,13 @@ import { installSession, mockApi } from './helpers/session.js';
 const dashboardResponses = {
   '/api/clientes': {
     status: 200,
-    body: [{ id: 1, dados: { nome: 'Ana Martins', cpf: '12345678901', email: 'ana@example.com' }, created_at: '2026-09-28T12:00:00Z' }],
+    body: [
+      {
+        id: 1,
+        dados: { nome: 'Ana Martins', cpf: '12345678901', email: 'ana@example.com' },
+        created_at: '2026-09-28T12:00:00Z',
+      },
+    ],
   },
   '/api/templates': { status: 200, body: [{ id: 1, nome: 'Contrato', campos: ['nome', 'cpf'] }] },
   '/api/usuarios': { status: 200, body: [{ id: 1, nome: 'Marina Costa' }] },
@@ -16,7 +22,9 @@ const dashboardResponses = {
   },
 };
 
-test('login is an editorial form with explicit labels and no Tailwind runtime', async ({ page }) => {
+test('login is an editorial form with explicit labels and no Tailwind runtime', async ({
+  page,
+}) => {
   await page.goto('/');
 
   await expect(page.locator('script[src*="tailwindcss"]')).toHaveCount(0);
@@ -27,7 +35,9 @@ test('login is an editorial form with explicit labels and no Tailwind runtime', 
   await expect(page.getByRole('button', { name: /entrar no sistema/i })).toBeVisible();
 });
 
-test('dashboard presents editorial KPIs, chart, actions and master governance', async ({ page }) => {
+test('dashboard presents editorial KPIs, chart, actions and master governance', async ({
+  page,
+}) => {
   await installSession(page, { role: 'master' });
   await mockApi(page, dashboardResponses);
   await page.goto('/dashboard.html');

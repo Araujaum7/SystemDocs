@@ -123,12 +123,12 @@
         </div>
     </div>
 
-    <!-- Modal para upload de template (apenas master) -->
+    <!-- Modal para upload de template (apenas master/admin) -->
     <div id="modalTemplate" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Upload de Template</h3>
-                <button class="modal-close">&times;</button>
+                <button class="modal-close" onclick="closeModal('modalTemplate')">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="templateForm" enctype="multipart/form-data">
@@ -145,8 +145,8 @@
 
                     <div class="form-group">
                         <label for="templateCampos">Campos do Template *</label>
-                        <input type="text" id="templateCampos" required placeholder="nãome,cpf,email,endereco">
-                        <small>Liste os campos separados por vírgula. Use estáes nãomes entre {{ }} não seu documento
+                        <input type="text" id="templateCampos" required placeholder="nome,cpf,email,endereco">
+                        <small>Liste os campos separados por vírgula. Use estes nomes entre {{ }} no seu documento
                             Word</small>
                     </div>
 
@@ -154,7 +154,7 @@
 
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">
-                            <span class="emoji"></span>
+                            <span class="emoji">📤</span>
                             Upload Template
                         </button>
                         <button type="button" class="btn btn-secondary"
@@ -165,9 +165,51 @@
         </div>
     </div>
 
+    <!-- Modal para edição de template -->
+    <div id="modalEditTemplate" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Template</h3>
+                <button class="modal-close" onclick="closeModal('modalEditTemplate')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="templateEditForm" enctype="multipart/form-data">
+                    <input type="hidden" id="editTemplateId">
+                    <div class="form-group">
+                        <label for="editTemplateNome">Nome do Template *</label>
+                        <input type="text" id="editTemplateNome" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editTemplateArquivo">Novo Arquivo .docx (Opcional)</label>
+                        <input type="file" id="editTemplateArquivo" accept=".docx">
+                        <small>Deixe em branco para manter o arquivo atual.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editTemplateCampos">Campos do Template *</label>
+                        <input type="text" id="editTemplateCampos" required>
+                        <small>Liste os campos separados por vírgula. Ex: nome,cpf</small>
+                    </div>
+
+                    <div id="templateEditError" style="display: none; margin-bottom: 16px; padding: 12px 14px; border-radius: 8px; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #ef4444; font-weight: 500; font-size: 0.95rem; line-height: 1.5;"></div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <span class="emoji">💾</span>
+                            Salvar Alterações
+                        </button>
+                        <button type="button" class="btn btn-secondary"
+                            onclick="closeModal('modalEditTemplate')">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="js/auth.js?v=2"></script>
     <script src="js/sidebar.js?v=2"></script>
-    <script src="js/templates.js?v=2"></script>
+    <script src="js/templates.js?v=3"></script>
     <script src="js/ui-core.js?v=2"></script>
 </body>
 

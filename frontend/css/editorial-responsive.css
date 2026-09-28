@@ -1,0 +1,44 @@
+/* Ajustes finais de responsividade e alvos de interacao. */
+html .sidebar-toggle {
+  right: -22px;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+}
+
+html :where(.main-content, .content, .content-wrapper, .cards-grid, .toolbar) {
+  min-width: 0;
+}
+
+html img,
+html canvas,
+html svg {
+  max-width: 100%;
+}
+
+@media (max-width: 1024px) {
+  html .dashboard-layout {
+    gap: var(--space-4);
+  }
+
+  html .content-header {
+    padding-inline: var(--space-4);
+  }
+}
+
+@media (max-width: 768px) {
+  html .main-content {
+    width: 100%;
+  }
+
+  html :where(.card, .panel, .actions-panel) {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 390px) {
+  html :where(.btn, button) {
+    max-width: 100%;
+  }
+}

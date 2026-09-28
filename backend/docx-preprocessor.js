@@ -1,4 +1,4 @@
-﻿import fs from 'fs';
+import fs from 'fs';
 import PizZip from 'pizzip';
 
 const XML_FILE_PATTERNS = [

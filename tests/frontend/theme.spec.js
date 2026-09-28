@@ -29,15 +29,16 @@ async function rootToken(page, name) {
 }
 
 function rgbChannels(cssColor) {
-  return cssColor.match(/[\d.]+/g).slice(0, 3).map(Number);
+  return cssColor
+    .match(/[\d.]+/g)
+    .slice(0, 3)
+    .map(Number);
 }
 
 function relativeLuminance(cssColor) {
   return rgbChannels(cssColor)
     .map((channel) => channel / 255)
-    .map((channel) =>
-      channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4,
-    )
+    .map((channel) => (channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4))
     .reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
 }
 

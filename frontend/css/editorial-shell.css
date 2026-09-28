@@ -19,7 +19,9 @@ html .sidebar {
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  transition: width var(--duration-base) var(--ease-standard), transform var(--duration-base) var(--ease-standard);
+  transition:
+    width var(--duration-base) var(--ease-standard),
+    transform var(--duration-base) var(--ease-standard);
 }
 
 html .sidebar.collapsed {
@@ -45,9 +47,9 @@ html .logo-section h2 {
 html .sidebar-toggle {
   top: 43px;
   right: -14px;
-  width: 28px;
-  min-height: 28px;
-  height: 28px;
+  width: 44px;
+  min-height: 44px;
+  height: 44px;
   color: var(--text-secondary);
   background: var(--surface-panel);
   border: 1px solid var(--border-soft);
@@ -133,7 +135,9 @@ html .nav-item {
   border-radius: var(--radius-sm);
   font-size: 0.875rem;
   font-weight: 600;
-  transition: color var(--duration-fast), background-color var(--duration-fast);
+  transition:
+    color var(--duration-fast),
+    background-color var(--duration-fast);
 }
 
 html .nav-item:hover {
@@ -272,7 +276,9 @@ html .sidebar.collapsed .nav-item {
     opacity: 0;
     background: rgba(9, 12, 17, 0.52);
     backdrop-filter: blur(2px);
-    transition: opacity var(--duration-base), visibility var(--duration-base);
+    transition:
+      opacity var(--duration-base),
+      visibility var(--duration-base);
   }
 
   html .sidebar-overlay.active {

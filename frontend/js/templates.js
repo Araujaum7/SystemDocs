@@ -24,6 +24,14 @@ class TemplatesManager {
                 this.uploadTemplate();
             });
         }
+
+        const formEdit = document.getElementById('templateEditForm');
+        if (formEdit) {
+            formEdit.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.editarTemplate();
+            });
+        }
     }
 
     applyPermissions() {
@@ -95,9 +103,11 @@ class TemplatesManager {
                     <p><strong>Campos:</strong> ${this.escapeHtml((template.campos || []).join(', '))}</p>
                     <small>Criado em: ${new Date(template.created_at).toLocaleDateString('pt-BR')}</small>
                 </div>
-                <div class="card-footer">
+                <div class="card-footer" style="display: flex; gap: 8px; flex-wrap: wrap;">
                     ${(this.usuario?.role === 'master' || this.usuario?.role === 'admin')
-                ? `<button class="btn btn-danger" onclick="templatesManager.deletarTemplate(${template.id})">Excluir</button>`
+                ? `<button class="btn btn-secondary" onclick="templatesManager.baixarTemplate(${template.id})">Baixar</button>
+                   <button class="btn btn-primary" onclick="templatesManager.abrirEditModal(${template.id})">Editar</button>
+                   <button class="btn btn-danger" onclick="templatesManager.deletarTemplate(${template.id})">Excluir</button>`
                 : ''
             }
                 </div>
@@ -197,6 +207,139 @@ class TemplatesManager {
             this.showUploadError(error.message || 'Falha desconhecida ao enviar template.');
         }
     }
+
+    async baixarTemplate(id) {
+        if (this.usuario?.role !== 'master' && this.usuario?.role !== 'admin') return;
+
+        try {
+            const response = await window.auth.fetchWithAuth(`/api/templates/${id}/download`);
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Erro ao baixar template');
+            }
+
+            const blob = await response.blob();
+            const contentDisposition = response.headers.get('content-disposition');
+            let filename = 'template.docx';
+            
+            if (contentDisposition && contentDisposition.indexOf('filename=') !== -1) {
+                const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                const matches = filenameRegex.exec(contentDisposition);
+                if (matches != null && matches[1]) {
+                    filename = matches[1].replace(/['"]/g, '');
+                }
+            }
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        } catch (error) {
+            window.auth.showNotification(error.message, 'error');
+        }
+    }
+
+    abrirEditModal(id) {
+        if (this.usuario?.role !== 'master' && this.usuario?.role !== 'admin') return;
+
+        const template = this.templates.find(t => t.id === id);
+        if (!template) {
+            window.auth.showNotification('Template não encontrado', 'error');
+            return;
+        }
+
+        const errDiv = document.getElementById('templateEditError');
+        if (errDiv) errDiv.style.display = 'none';
+
+        document.getElementById('editTemplateId').value = template.id;
+        document.getElementById('editTemplateNome').value = template.nome;
+        document.getElementById('editTemplateCampos').value = (template.campos || []).join(', ');
+        document.getElementById('editTemplateArquivo').value = '';
+
+        openModal('modalEditTemplate');
+    }
+
+    showEditError(msg) {
+        window.auth.showNotification(msg, 'error');
+        const errDiv = document.getElementById('templateEditError');
+        if (errDiv) {
+            errDiv.style.display = 'block';
+            errDiv.innerHTML = `<strong>❌ Erro ao editar template:</strong><br>${this.escapeHtml(msg)}`;
+        }
+    }
+
+    async editarTemplate() {
+        if (this.usuario?.role !== 'master' && this.usuario?.role !== 'admin') return;
+
+        const errDiv = document.getElementById('templateEditError');
+        if (errDiv) errDiv.style.display = 'none';
+
+        const id = document.getElementById('editTemplateId')?.value;
+        const nome = document.getElementById('editTemplateNome')?.value?.trim();
+        const arquivo = document.getElementById('editTemplateArquivo')?.files?.[0];
+        const camposTxt = document.getElementById('editTemplateCampos')?.value?.trim();
+
+        if (!id || !nome || !camposTxt) {
+            this.showEditError('Preencha os campos obrigatórios (Nome e Campos).');
+            return;
+        }
+
+        if (arquivo) {
+            if (arquivo.size > 50 * 1024 * 1024) {
+                const sizeMB = (arquivo.size / (1024 * 1024)).toFixed(1);
+                this.showEditError(`O arquivo selecionado tem ${sizeMB} MB e excede o limite máximo permitido de 50 MB.`);
+                return;
+            }
+
+            if (!arquivo.name.toLowerCase().endsWith('.docx')) {
+                this.showEditError(`O arquivo "${arquivo.name}" não é um documento Microsoft Word (.docx) compatível.`);
+                return;
+            }
+        }
+
+        const campos = camposTxt
+            .split(',')
+            .map((v) => v.trim())
+            .filter(Boolean);
+
+        if (!campos.length) {
+            this.showEditError('Informe ao menos um campo válido separado por vírgula.');
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('nome', nome);
+            formData.append('campos', JSON.stringify(campos));
+            if (arquivo) {
+                formData.append('arquivo', arquivo);
+            }
+
+            const response = await window.auth.fetchWithAuth(`/api/templates/${id}`, {
+                method: 'PUT',
+                body: formData
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Erro ao editar o template');
+            }
+
+            closeModal('modalEditTemplate');
+            document.getElementById('templateEditForm')?.reset();
+            window.auth.showNotification('Template atualizado com sucesso!');
+            await this.loadTemplates();
+        } catch (error) {
+            this.showEditError(error.message || 'Falha desconhecida ao editar template.');
+        }
+    }
+
+
 
     async deletarTemplate(id) {
         if (!confirm('Deseja excluir este template?')) return;

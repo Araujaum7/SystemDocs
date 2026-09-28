@@ -6,15 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Documentos - Sistema de Documentos</title>
     <link rel="stylesheet" href="css/style.css?v=1784057472976">
+    <link rel="stylesheet" href="css/editorial.css" data-editorial-styles>
 
-    <!-- Frameworks (Phosphor Icons & Tailwind) -->
+    <!-- Icones -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            corePlugins: { preflight: false }
-        }
-    </script>
 </head>
 
 <body>
@@ -112,97 +107,76 @@
                     <div class="selection-panel">
                         <div class="selection-section">
                             <h3>Selecionar Clientes</h3>
-                            <div class="search-box mb-4">
-                                <span
-                                    class="icon absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--text-light)]"><i
-                                        class="ph ph-magnifying-glass"></i></span>
-                                <input type="text" id="searchClientesDoc"
-                                    class="w-full pl-10 pr-4 py-2 bg-[var(--bg-panel-muted)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-main)] focus:ring-2 focus:ring-[var(--primary-500)] outline-none transition-all"
-                                    placeholder="Buscar clientes...">
+                            <div class="search-box">
+                                <span class="icon"><i class="ph ph-magnifying-glass"></i></span>
+                                <input type="text" id="searchClientesDoc" placeholder="Buscar clientes...">
                             </div>
                             <div id="clientesSelection" class="selection-list styled-list"></div>
                         </div>
 
                         <div class="selection-section">
                             <h3>Selecionar Templates</h3>
-                            <div class="search-box mb-4">
-                                <span
-                                    class="icon absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--text-light)]"><i
-                                        class="ph ph-magnifying-glass"></i></span>
-                                <input type="text" id="searchTemplatesDoc"
-                                    class="w-full pl-10 pr-4 py-2 bg-[var(--bg-panel-muted)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-main)] focus:ring-2 focus:ring-[var(--primary-500)] outline-none transition-all"
-                                    placeholder="Buscar templates...">
+                            <div class="search-box">
+                                <span class="icon"><i class="ph ph-magnifying-glass"></i></span>
+                                <input type="text" id="searchTemplatesDoc" placeholder="Buscar templates...">
                             </div>
                             <div id="templatesSelection" class="selection-list styled-list"></div>
                         </div>
                     </div>
 
                     <div class="actions-panel sticky-panel">
-                        <div class="selection-stats cards-grid mb-6">
-                            <div
-                                class="stat-item kpi-card p-4 rounded-xl bg-[var(--bg-panel)] border border-[var(--border-subtle)] shadow-sm">
-                                <span
-                                    class="kpi-label text-xs uppercase font-bold text-[var(--text-light)]">Clientes</span>
-                                <strong class="kpi-value text-2xl font-display text-[var(--primary-500)]"
-                                    id="clientesSelecionadosCount">0</strong>
+                        <div class="selection-stats cards-grid">
+                            <div class="stat-item kpi-card">
+                                <span class="kpi-label">Clientes</span>
+                                <strong class="kpi-value" id="clientesSelecionadosCount">0</strong>
                             </div>
-                            <div
-                                class="stat-item kpi-card p-4 rounded-xl bg-[var(--bg-panel)] border border-[var(--border-subtle)] shadow-sm">
-                                <span
-                                    class="kpi-label text-xs uppercase font-bold text-[var(--text-light)]">Templates</span>
-                                <strong class="kpi-value text-2xl font-display text-[var(--primary-500)]"
-                                    id="templatesSelecionadosCount">0</strong>
+                            <div class="stat-item kpi-card">
+                                <span class="kpi-label">Templates</span>
+                                <strong class="kpi-value" id="templatesSelecionadosCount">0</strong>
                             </div>
-                            <div
-                                class="stat-item kpi-card primary p-4 rounded-xl bg-gradient-to-r from-[var(--primary-600)] to-[var(--primary-500)] text-white shadow-md col-span-2">
-                                <span class="kpi-label text-xs uppercase font-bold text-white/80">A Gerar</span>
-                                <strong class="kpi-value text-3xl font-display" id="totalDocumentosCount">0</strong>
+                            <div class="stat-item kpi-card primary">
+                                <span class="kpi-label">A Gerar</span>
+                                <strong class="kpi-value" id="totalDocumentosCount">0</strong>
                             </div>
                         </div>
 
-                        <div class="generation-options space-y-6 mb-8">
+                        <div class="generation-options">
                             <div class="option-group">
-                                <p class="option-title text-sm font-semibold text-[var(--text-muted)] mb-3">Formato de
+                                <p class="option-title">Formato de
                                     saída</p>
-                                <div class="option-row segmented flex gap-2">
-                                    <label class="option-chip flex-1 text-center">
-                                        <input type="radio" name="outputFormat" value="docx" class="hidden peer">
-                                        <span
-                                            class="block py-2 px-4 rounded-lg border border-[var(--border-strong)] bg-[var(--bg-panel)] text-[var(--text-main)] peer-checked:bg-[var(--primary-600)] peer-checked:text-white peer-checked:border-[var(--primary-600)] peer-checked:shadow-[0_4px_12px_rgba(124,58,237,0.3)] transition-all cursor-pointer font-medium text-sm">Word</span>
+                                <div class="option-row segmented">
+                                    <label class="option-chip">
+                                        <input type="radio" name="outputFormat" value="docx">
+                                        <span>Word</span>
                                     </label>
-                                    <label class="option-chip flex-1 text-center">
-                                        <input type="radio" name="outputFormat" value="pdf" class="hidden peer">
-                                        <span
-                                            class="block py-2 px-4 rounded-lg border border-[var(--border-strong)] bg-[var(--bg-panel)] text-[var(--text-main)] peer-checked:bg-[var(--primary-600)] peer-checked:text-white peer-checked:border-[var(--primary-600)] peer-checked:shadow-[0_4px_12px_rgba(124,58,237,0.3)] transition-all cursor-pointer font-medium text-sm">PDF</span>
+                                    <label class="option-chip">
+                                        <input type="radio" name="outputFormat" value="pdf">
+                                        <span>PDF</span>
                                     </label>
-                                    <label class="option-chip flex-1 text-center">
-                                        <input type="radio" name="outputFormat" value="both" checked
-                                            class="hidden peer">
-                                        <span
-                                            class="block py-2 px-4 rounded-lg border border-[var(--border-strong)] bg-[var(--bg-panel)] text-[var(--text-main)] peer-checked:bg-[var(--primary-600)] peer-checked:text-white peer-checked:border-[var(--primary-600)] peer-checked:shadow-[0_4px_12px_rgba(124,58,237,0.3)] transition-all cursor-pointer font-medium text-sm">Ambos</span>
+                                    <label class="option-chip">
+                                        <input type="radio" name="outputFormat" value="both" checked>
+                                        <span>Ambos</span>
                                     </label>
                                 </div>
                             </div>
 
                             <div class="option-group">
-                                <p class="option-title text-sm font-semibold text-[var(--text-muted)] mb-3">Destino do
+                                <p class="option-title">Destino do
                                     download</p>
                                 <div class="option-row">
-                                    <select id="downloadMode"
-                                        class="form-control w-full p-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-panel-muted)] text-[var(--text-main)] focus:ring-2 focus:ring-[var(--primary-500)] outline-none transition-all">
+                                    <select id="downloadMode" class="form-control">
                                         <option value="browser">Perguntar no navegador (Manual)</option>
                                         <option value="auto">Download Automático (Pasta Downloads)</option>
                                         <option value="folder">Escolher pasta específica (Chrome/Edge)</option>
                                     </select>
                                 </div>
-                                <small class="option-hint text-xs text-[var(--text-light)] mt-2 block">No modo pasta,
+                                <small class="option-hint">No modo pasta,
                                     você seleciona a pasta e o sistema baixa automaticamente tudo para lá.</small>
                             </div>
                         </div>
 
-                        <button id="gerarDocumentosBtn"
-                            class="w-full flex justify-center items-center gap-2 py-4 px-4 rounded-xl shadow-lg text-lg font-bold text-white bg-gradient-to-r from-[var(--primary-600)] to-[var(--primary-500)] hover:from-[var(--primary-700)] hover:to-[var(--primary-600)] transition-all transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none animate-pulse-if-active">
-                            <span class="icon"><i class="ph-fill ph-lightning text-xl"></i></span>
+                        <button id="gerarDocumentosBtn">
+                            <span class="icon"><i class="ph-fill ph-lightning"></i></span>
                             Gerar Documentos
                         </button>
                     </div>
@@ -213,24 +187,24 @@
 
     <!-- Modal para edição de campos específicos -->
     <div id="modalEditarCampos" class="modal">
-        <div class="modal-content" style="max-width: 900px;">
+        <div class="modal-content document-fields-dialog">
             <div class="modal-header">
                 <h3>Editar Campos e Histórico</h3>
                 <button class="modal-close">&times;</button>
             </div>
-            <div class="modal-body" style="display: grid; grid-template-columns: 1fr 350px; gap: 24px; padding: 24px;">
+            <div class="modal-body fields-history-layout">
                 <!-- Lado Esquerdo: Formulário Normal -->
                 <div class="modal-form-section">
-                    <div class="modal-info mb-4">
+                    <div class="modal-info">
                         <p><strong>Editando campos necessários para os templates selecionados</strong></p>
-                        <p>Cliente: <strong id="clienteEditandoNome" class="text-[var(--primary-600)]">-</strong></p>
+                        <p>Cliente: <strong id="clienteEditandoNome" class="brand-text">-</strong></p>
                     </div>
 
                     <form id="formEditarCampos">
-                        <div id="camposEspecificos" class="form-grid" style="grid-template-columns: 1fr;">
+                        <div id="camposEspecificos" class="form-grid single-column">
                             <!-- Campos dinâmicos serão inseridos aqui -->
                         </div>
-                        <div class="form-actions mt-6 pt-4 border-t border-[var(--border-subtle)] flex justify-end gap-3">
+                        <div class="form-actions">
                             <button type="submit" class="btn btn-primary">Salvar Alterações</button>
                             <button type="button" class="btn btn-secondary"
                                 onclick="closeModal('modalEditarCampos')">Cancelar</button>
@@ -239,10 +213,10 @@
                 </div>
 
                 <!-- Lado Direito: Histórico -->
-                <div class="modal-history-section border-l border-[var(--border-subtle)] pl-6" style="max-height: 60vh; overflow-y: auto;">
-                    <h4 class="text-md font-bold mb-4 flex items-center gap-2"><i class="ph ph-clock-counter-clockwise"></i> Últimos Documentos</h4>
-                    <div id="historyContainer" class="flex flex-col gap-3">
-                        <div class="text-center text-[var(--text-muted)] text-sm py-4">Carregando histórico...</div>
+                <div class="modal-history-section">
+                    <h4 class="history-title"><i class="ph ph-clock-counter-clockwise"></i> Últimos Documentos</h4>
+                    <div id="historyContainer" class="history-list">
+                        <div class="history-state">Carregando histórico...</div>
                     </div>
                 </div>
             </div>

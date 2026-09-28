@@ -1,32 +1,38 @@
 import { expect, test } from '@playwright/test';
 import { installSession, mockApi } from './helpers/session.js';
 
-const companies = [{
-  id: 1,
-  nome: 'Amethyst Legal',
-  slug: 'amethyst-legal',
-  total_usuarios: 4,
-  total_clientes: 120,
-  total_templates: 8,
-  config: { temaCor: '#7C3AED', temaCorSecundaria: '#2563EB' },
-}];
+const companies = [
+  {
+    id: 1,
+    nome: 'Amethyst Legal',
+    slug: 'amethyst-legal',
+    total_usuarios: 4,
+    total_clientes: 120,
+    total_templates: 8,
+    config: { temaCor: '#7C3AED', temaCorSecundaria: '#2563EB' },
+  },
+];
 
-const users = [{
-  id: 8,
-  nome: 'Pessoa com nome extenso para validar o layout administrativo',
-  email: 'pessoa.com.email.extenso@example.com',
-  role: 'admin',
-  created_at: '2026-09-28T12:00:00Z',
-}];
+const users = [
+  {
+    id: 8,
+    nome: 'Pessoa com nome extenso para validar o layout administrativo',
+    email: 'pessoa.com.email.extenso@example.com',
+    role: 'admin',
+    created_at: '2026-09-28T12:00:00Z',
+  },
+];
 
-const logs = [{
-  id: 1,
-  usuario_nome: 'Marina Costa',
-  acao: 'DOCUMENTO_GERADO',
-  detalhe: { arquivo: 'contrato-com-nome-muito-longo.docx', cliente: 'Ana Martins' },
-  ip: '127.0.0.1',
-  created_at: '2026-09-28T12:00:00Z',
-}];
+const logs = [
+  {
+    id: 1,
+    usuario_nome: 'Marina Costa',
+    acao: 'DOCUMENTO_GERADO',
+    detalhe: { arquivo: 'contrato-com-nome-muito-longo.docx', cliente: 'Ana Martins' },
+    ip: '127.0.0.1',
+    created_at: '2026-09-28T12:00:00Z',
+  },
+];
 
 test('audit presents count and detailed log table', async ({ page }) => {
   await installSession(page, { role: 'admin' });
@@ -36,7 +42,9 @@ test('audit presents count and detailed log table', async ({ page }) => {
   await expect(page.locator('#totalLogsCount')).toHaveText('1');
   await expect(page.locator('#logsTableBody tr')).toHaveCount(1);
   await expect(page.locator('#logsTableBody')).toContainText('DOCUMENTO_GERADO');
-  await expect(page.locator('#logsTableBody pre')).toContainText('contrato-com-nome-muito-longo.docx');
+  await expect(page.locator('#logsTableBody pre')).toContainText(
+    'contrato-com-nome-muito-longo.docx'
+  );
 });
 
 test('master company cards retain context and management actions', async ({ page }) => {
@@ -88,7 +96,9 @@ for (const pageName of ['auditoria.html', 'empresas.html', 'usuarios.html']) {
     });
     await page.goto(`/${pageName}`);
 
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth
+    );
     expect(overflow).toBeLessThanOrEqual(1);
   });
 }

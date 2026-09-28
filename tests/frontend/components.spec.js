@@ -40,7 +40,9 @@ test('modal remains contained on a 390px viewport and keeps global helpers', asy
   await expect(modal).toBeHidden();
 });
 
-test('toasts announce their status, retain duration and do not inject ripples', async ({ page }) => {
+test('toasts announce their status, retain duration and do not inject ripples', async ({
+  page,
+}) => {
   await openClients(page);
 
   await page.evaluate(() => window.showToast('Dados salvos', 'success', 80));
@@ -50,7 +52,10 @@ test('toasts announce their status, retain duration and do not inject ripples', 
   await expect(successToast).toHaveCount(0, { timeout: 1_000 });
 
   await page.evaluate(() => window.showToast('Falha ao salvar', 'error', 500));
-  await expect(page.locator('.toast').filter({ hasText: 'Falha ao salvar' })).toHaveAttribute('role', 'alert');
+  await expect(page.locator('.toast').filter({ hasText: 'Falha ao salvar' })).toHaveAttribute(
+    'role',
+    'alert'
+  );
 
   const button = page.locator('#addClienteBtn');
   await button.dispatchEvent('mousedown', { clientX: 10, clientY: 10 });

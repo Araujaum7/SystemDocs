@@ -61,13 +61,23 @@ router.delete('/:id', authenticateToken, requireMasterOrAdmin, tenantRequired(),
     return res.status(400).json({ error: 'Usuário inválido' });
   }
 
-  const result = await dbRun(
-    "DELETE FROM usuarios WHERE id = ? AND empresa_id = ? AND role != 'master'",
-    [id, req.tenantId],
-  );
-
-  if (result.changes === 0) {
+  const user = await dbGet("SELECT id FROM usuarios WHERE id = ? AND empresa_id = ? AND role != 'master'", [id, req.tenantId]);
+  if (!user) {
     return res.status(404).json({ error: 'Usuário não encontrado' });
+  }
+
+  await dbRun('BEGIN IMMEDIATE TRANSACTION');
+  try {
+    // Remove as referências do usuário antes de deletar para não violar foreign keys
+    await dbRun('UPDATE documentos_gerados SET created_by = NULL WHERE created_by = ?', [id]);
+    await dbRun('UPDATE auditoria SET usuario_id = NULL WHERE usuario_id = ?', [id]);
+
+    await dbRun("DELETE FROM usuarios WHERE id = ?", [id]);
+
+    await dbRun('COMMIT');
+  } catch (error) {
+    await dbRun('ROLLBACK').catch(() => null);
+    throw error;
   }
 
   return res.json({ message: 'Usuário excluído com sucesso' });
@@ -88,13 +98,13 @@ router.put('/:id/senha', authenticateToken, requireMasterOrAdmin, tenantRequired
 
   // Verifica se o usuário pertence à empresa atual
   const exists = await dbGet('SELECT id FROM usuarios WHERE id = ? AND empresa_id = ? AND role != \'master\'', [id, req.tenantId]);
-  
+
   if (!exists) {
     return res.status(404).json({ error: 'Usuário não encontrado ou sem permissão' });
   }
 
   const hash = bcrypt.hashSync(novaSenha, 10);
-  
+
   await dbRun(
     "UPDATE usuarios SET senha = ? WHERE id = ?",
     [hash, id]
@@ -114,7 +124,7 @@ router.put('/:id/role', authenticateToken, requireMasterOrAdmin, tenantRequired(
   }
 
   const exists = await dbGet('SELECT id FROM usuarios WHERE id = ? AND empresa_id = ? AND role != \'master\'', [id, req.tenantId]);
-  
+
   if (!exists) {
     return res.status(404).json({ error: 'Usuário não encontrado ou sem permissão' });
   }
@@ -128,3 +138,4 @@ router.put('/:id/role', authenticateToken, requireMasterOrAdmin, tenantRequired(
 }));
 
 export default router;
+

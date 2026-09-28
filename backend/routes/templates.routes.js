@@ -128,4 +128,82 @@ router.delete('/:id', authenticateToken, requireMasterOrAdmin, tenantRequired(),
   });
 }));
 
+router.get('/:id/download', authenticateToken, requireMasterOrAdmin, tenantRequired(), asyncHandler(async (req, res) => {
+  const id = parseTenantId(req.params.id);
+  if (!id) {
+    return res.status(400).json({ error: 'Template invalido' });
+  }
+
+  const template = await dbGet('SELECT * FROM templates WHERE id = ? AND empresa_id = ?', [id, req.tenantId]);
+  if (!template) {
+    return res.status(404).json({ error: 'Template nao encontrado' });
+  }
+
+  const filePath = resolveTemplateFilePath(template.arquivo);
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: 'Arquivo fisico do template nao encontrado' });
+  }
+
+  res.download(filePath, template.arquivo);
+}));
+
+router.put('/:id', authenticateToken, requireMasterOrAdmin, tenantRequired({ allowBodyOrQueryForMaster: true }), templateUpload.single('arquivo'), asyncHandler(async (req, res) => {
+  const id = parseTenantId(req.params.id);
+  if (!id) {
+    return res.status(400).json({ error: 'Template invalido' });
+  }
+
+  const template = await dbGet('SELECT * FROM templates WHERE id = ? AND empresa_id = ?', [id, req.tenantId]);
+  if (!template) {
+    return res.status(404).json({ error: 'Template nao encontrado' });
+  }
+
+  const nome = String(req.body?.nome || template.nome).trim();
+  const camposRaw = req.body?.campos;
+  
+  let sanitizedCampos = safeJsonParse(template.campos, []);
+  if (camposRaw) {
+    const campos = safeJsonParse(camposRaw, null);
+    if (Array.isArray(campos) && campos.length > 0) {
+      sanitizedCampos = campos.map((campo) => String(campo || '').trim()).filter(Boolean);
+    }
+  }
+
+  let novoArquivo = template.arquivo;
+  if (req.file) {
+    const uploadedTemplatePath = resolveTemplateFilePath(req.file.filename);
+    try {
+      await validateTemplateStructure(uploadedTemplatePath);
+      novoArquivo = req.file.filename;
+      
+      // Optionally remove old file if it's not used by other templates
+      const stillUsedTemplateFile = await dbGet('SELECT id FROM templates WHERE arquivo = ? AND id != ? LIMIT 1', [template.arquivo, id]);
+      if (!stillUsedTemplateFile) {
+        const oldFilePath = resolveTemplateFilePath(template.arquivo);
+        if (fs.existsSync(oldFilePath)) {
+          fs.unlinkSync(oldFilePath);
+        }
+      }
+    } catch (templateError) {
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      return res.status(400).json({ error: formatDocxTemplateError(templateError) });
+    }
+  }
+
+  await dbRun(
+    'UPDATE templates SET nome = ?, arquivo = ?, campos = ? WHERE id = ? AND empresa_id = ?',
+    [nome, novoArquivo, JSON.stringify(sanitizedCampos), id, req.tenantId],
+  );
+
+  return res.json({
+    id,
+    empresa_id: req.tenantId,
+    nome,
+    arquivo: novoArquivo,
+    campos: sanitizedCampos,
+  });
+}));
+
 export default router;

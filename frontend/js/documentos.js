@@ -328,7 +328,7 @@ class DocumentosManager {
         const historyContainer = document.getElementById('historyContainer');
         if (!historyContainer) return;
         
-        historyContainer.innerHTML = '<div class="text-center text-[var(--text-muted)] text-sm py-4">Carregando histórico...</div>';
+        historyContainer.innerHTML = '<div class="history-state">Carregando histórico...</div>';
 
         try {
             const response = await window.auth.fetchWithAuth(`/api/clientes/${clienteId}/historico`);
@@ -336,38 +336,37 @@ class DocumentosManager {
             const historico = await response.json();
 
             if (!historico || historico.length === 0) {
-                historyContainer.innerHTML = '<div class="text-center text-[var(--text-muted)] text-sm py-4 italic">Nenhum documento gerado recentemente.</div>';
+                historyContainer.innerHTML = '<div class="history-state">Nenhum documento gerado recentemente.</div>';
                 return;
             }
 
             historyContainer.innerHTML = historico.map(doc => {
                 const date = new Date(doc.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
                 const camposHtml = doc.campos_usados && Object.keys(doc.campos_usados).length > 0
-                    ? `<div class="mt-3 text-sm text-[var(--text-muted)] bg-[var(--bg-panel-muted)] p-3 rounded-lg border border-[var(--border-strong)]" id="campos-hist-${doc.id}" style="display: none;">
-                        <strong class="block mb-2 text-[var(--text-main)]">Campos Preenchidos:</strong>
-                        <ul class="list-disc pl-4 space-y-1">
-                            ${Object.entries(doc.campos_usados).map(([k, v]) => `<li><span class="font-bold text-[var(--primary-500)]">${this.escapeHtml(String(k).toUpperCase())}:</span> ${this.escapeHtml(String(v))}</li>`).join('')}
+                    ? `<div class="history-entry__fields" id="campos-hist-${doc.id}" style="display: none;">
+                        <strong>Campos Preenchidos:</strong>
+                        <ul>
+                            ${Object.entries(doc.campos_usados).map(([k, v]) => `<li><span class="brand-text">${this.escapeHtml(String(k).toUpperCase())}:</span> ${this.escapeHtml(String(v))}</li>`).join('')}
                         </ul>
                        </div>`
-                    : `<div class="mt-2 text-xs text-[var(--text-muted)] italic" id="campos-hist-${doc.id}" style="display: none;">Nenhum campo registrado.</div>`;
+                    : `<div class="history-entry__fields" id="campos-hist-${doc.id}" style="display: none;">Nenhum campo registrado.</div>`;
 
                 return `
-                <div class="border border-[var(--border-subtle)] rounded-xl p-4 hover:border-[var(--primary-500)] transition-all bg-[var(--bg-panel)] mb-3 shadow-sm">
-                    <div class="flex justify-between items-start mb-2">
-                        <strong class="text-sm text-[var(--text-main)] truncate block w-48" title="${this.escapeHtml(doc.nome_arquivo)}">${this.escapeHtml(doc.nome_arquivo)}</strong>
-                        <span class="text-xs text-[var(--text-muted)] whitespace-nowrap">${date}</span>
+                <div class="history-entry">
+                    <div class="history-entry__header">
+                        <strong class="history-entry__filename" title="${this.escapeHtml(doc.nome_arquivo)}">${this.escapeHtml(doc.nome_arquivo)}</strong>
+                        <span class="history-entry__date">${date}</span>
                     </div>
                     
-                    <div class="mb-3">
-                        <span class="text-xs bg-[var(--primary-600)] text-white px-2.5 py-1 rounded-md font-medium inline-flex items-center gap-1 shadow-sm">
+                    <div class="history-entry__meta">
+                        <span class="history-entry__actor">
                             <i class="ph ph-user"></i> ${this.escapeHtml(doc.usuario_nome || 'Usuário')}
                         </span>
                     </div>
                     
                     <button type="button" 
-                        style="background: none; border: none; padding: 0; margin: 0; outline: none; box-shadow: none;"
                         onclick="const el = document.getElementById('campos-hist-${doc.id}'); el.style.display = el.style.display === 'none' ? 'block' : 'none';" 
-                        class="text-xs font-bold text-[var(--primary-500)] hover:text-[var(--primary-400)] inline-flex items-center gap-1 cursor-pointer transition-colors">
+                        class="history-entry__toggle">
                         <i class="ph ph-caret-down"></i> Ver campos preenchidos
                     </button>
                     ${camposHtml}
@@ -376,7 +375,7 @@ class DocumentosManager {
             }).join('');
         } catch (error) {
             console.error('History fetch error:', error);
-            historyContainer.innerHTML = '<div class="text-center text-red-500 text-sm py-4">Erro ao carregar histórico.</div>';
+            historyContainer.innerHTML = '<div class="history-state error">Erro ao carregar histórico.</div>';
         }
     }
 
@@ -458,35 +457,35 @@ class DocumentosManager {
         if (!document.getElementById('progressModal')) {
             const modal = document.createElement('div');
             modal.id = 'progressModal';
-            modal.className = 'modal fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all';
+            modal.className = 'modal progress-modal';
             modal.innerHTML = `
-                <div class="bg-[var(--bg-panel)] rounded-2xl border border-[var(--border-subtle)] shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col transform transition-all">
-                    <div class="px-6 py-4 border-b border-[var(--border-subtle)] flex items-center gap-3">
-                        <span class="icon text-[var(--primary-500)] text-2xl"><i class="ph-fill ph-gear-six animate-spin"></i></span>
-                        <h2 class="text-xl font-display font-bold text-white m-0">Gerando Documentos</h2>
+                <div class="progress-dialog">
+                    <div class="progress-dialog__header">
+                        <span class="progress-dialog__icon"><i class="ph-fill ph-gear-six"></i></span>
+                        <h2>Gerando Documentos</h2>
                     </div>
-                    <div class="p-6">
-                        <div class="progress-container bg-[var(--bg-panel-muted)] rounded-xl p-6 border border-[var(--border-subtle)]">
-                            <div class="flex justify-between items-end mb-2">
-                                <p id="progressStatus" class="text-sm font-semibold text-[var(--text-main)] m-0">Iniciando...</p>
-                                <p id="progressDetails" class="text-xs text-[var(--text-light)] m-0">0 de 0</p>
+                    <div class="progress-dialog__body">
+                        <div class="progress-container">
+                            <div class="progress-meta">
+                                <p id="progressStatus">Iniciando...</p>
+                                <p id="progressDetails">0 de 0</p>
                             </div>
-                            <div class="h-2 w-full bg-[var(--border-strong)] rounded-full overflow-hidden">
-                                <div class="h-full bg-gradient-to-r from-[var(--primary-600)] to-[var(--primary-500)] transition-all duration-300" id="progressFill" style="width: 0%"></div>
+                            <div class="progress-track">
+                                <div id="progressFill" class="progress-fill" style="width: 0%"></div>
                             </div>
                         </div>
-                        <div id="progressResults" class="mt-6" style="display:none;">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-lg font-bold text-white m-0 flex items-center gap-2">
-                                    <i class="ph-fill ph-check-circle text-green-500"></i> Concluído
+                        <div id="progressResults" class="progress-results" style="display:none;">
+                            <div class="progress-results__header">
+                                <h3>
+                                    <i class="ph-fill ph-check-circle"></i> Concluído
                                 </h3>
                                 <div class="result-actions" id="resultActions"></div>
                             </div>
-                            <div id="generatedDocuments" class="space-y-3 max-h-64 overflow-y-auto pr-2 custom-scrollbar"></div>
+                            <div id="generatedDocuments" class="generated-documents"></div>
                         </div>
                     </div>
-                    <div class="px-6 py-4 border-t border-[var(--border-subtle)] bg-[var(--bg-panel-muted)] flex justify-end">
-                        <button id="closeProgressBtn" class="btn btn-secondary px-6" style="display:none;">Concluir e Fechar</button>
+                    <div class="progress-dialog__footer">
+                        <button id="closeProgressBtn" class="btn btn-secondary" style="display:none;">Concluir e Fechar</button>
                     </div>
                 </div>
             `;
@@ -548,25 +547,25 @@ class DocumentosManager {
             return;
         }
 
-        resultActions.innerHTML = `<button class="btn btn-primary text-sm flex items-center gap-2 py-1.5" id="downloadAllBtn"><i class="ph-fill ph-download-simple"></i> Baixar todos</button>`;
+        resultActions.innerHTML = `<button class="btn btn-primary" id="downloadAllBtn"><i class="ph-fill ph-download-simple"></i> Baixar todos</button>`;
         document.getElementById('downloadAllBtn').addEventListener('click', async () => {
             await this.downloadAllDocuments(documentos);
         });
 
         list.innerHTML = documentos.map((doc, index) => `
-            <div class="p-3 bg-[var(--bg-panel)] rounded-lg border border-[var(--border-subtle)] hover:border-[var(--primary-500)] transition-colors group">
-                <div class="flex justify-between items-start gap-4">
-                    <div class="flex flex-col gap-1 min-w-0 flex-1">
-                        <strong class="text-sm text-white truncate break-words whitespace-normal" title="${this.escapeHtml(doc.nomeArquivo || doc.nome)}">
+            <div class="generated-document">
+                <div class="generated-document__row">
+                    <div class="generated-document__copy">
+                        <strong title="${this.escapeHtml(doc.nomeArquivo || doc.nome)}">
                             ${this.escapeHtml(doc.nomeArquivo || doc.nome)}
                         </strong>
-                        <small class="text-xs text-[var(--text-light)]">
-                            <i class="ph-fill ph-user mr-1"></i>${this.escapeHtml(doc.nomeCliente || doc.cliente || '-')}
+                        <small>
+                            <i class="ph-fill ph-user"></i>${this.escapeHtml(doc.nomeCliente || doc.cliente || '-')}
                         </small>
                     </div>
-                    <div class="flex gap-2 shrink-0">
-                        ${doc.docxDownloadUrl ? `<button class="px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors flex items-center gap-1" data-type="docx" data-index="${index}"><i class="ph-fill ph-file-doc"></i> Word</button>` : ''}
-                        ${doc.pdfDownloadUrl ? `<button class="px-3 py-1.5 rounded bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-colors flex items-center gap-1" data-type="pdf" data-index="${index}"><i class="ph-fill ph-file-pdf"></i> PDF</button>` : ''}
+                    <div class="generated-document__actions">
+                        ${doc.docxDownloadUrl ? `<button class="btn btn-secondary" data-type="docx" data-index="${index}"><i class="ph-fill ph-file-doc"></i> Word</button>` : ''}
+                        ${doc.pdfDownloadUrl ? `<button class="btn btn-danger" data-type="pdf" data-index="${index}"><i class="ph-fill ph-file-pdf"></i> PDF</button>` : ''}
                     </div>
                 </div>
             </div>

@@ -40,7 +40,9 @@
   --danger: #c43d4b;
   --info: #3567b7;
 
-  --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-sans:
+    'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
   --font-display: var(--font-sans);
 
   --space-1: 4px;

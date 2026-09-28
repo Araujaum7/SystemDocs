@@ -7,7 +7,9 @@ async function openDashboard(page, options = {}) {
   await page.goto('/dashboard.html');
 }
 
-test('desktop shell exposes company, active navigation and accessible controls', async ({ page }) => {
+test('desktop shell exposes company, active navigation and accessible controls', async ({
+  page,
+}) => {
   await openDashboard(page, { role: 'admin' });
 
   await expect(page.locator('.sidebar')).toHaveCSS('width', '248px');
@@ -19,7 +21,9 @@ test('desktop shell exposes company, active navigation and accessible controls',
   await expect(desktopToggle).toHaveAttribute('aria-expanded', 'true');
   await desktopToggle.click();
   await expect(page.locator('.sidebar')).toHaveClass(/collapsed/);
-  await expect.poll(() => page.evaluate(() => localStorage.getItem('sidebarCollapsed'))).toBe('true');
+  await expect
+    .poll(() => page.evaluate(() => localStorage.getItem('sidebarCollapsed')))
+    .toBe('true');
 });
 
 test('mobile shell opens and closes as a drawer', async ({ page }) => {
@@ -40,7 +44,11 @@ test('mobile shell opens and closes as a drawer', async ({ page }) => {
   await expect(mobileToggle).toHaveAttribute('aria-expanded', 'false');
 });
 
-for (const [role, expected] of [['master', true], ['admin', true], ['user', false]]) {
+for (const [role, expected] of [
+  ['master', true],
+  ['admin', true],
+  ['user', false],
+]) {
   test(`${role} keeps the existing administrative navigation visibility`, async ({ page }) => {
     await openDashboard(page, { role });
     const administration = page.locator('.nav-section.admin-master-only');

@@ -13,18 +13,26 @@ const clients = [
     },
     created_at: '2026-09-28T12:00:00Z',
   },
-  { id: 2, dados: { nome: 'Beatriz Lima', cpf: '98765432100' }, created_at: '2026-09-27T12:00:00Z' },
+  {
+    id: 2,
+    dados: { nome: 'Beatriz Lima', cpf: '98765432100' },
+    created_at: '2026-09-27T12:00:00Z',
+  },
 ];
 
-const templates = [{
-  id: 7,
-  nome: 'Contrato de prestação de serviços corporativos',
-  arquivo: 'contrato-corporativo.docx',
-  campos: ['nome', 'cpf', 'endereco_completo'],
-  created_at: '2026-09-28T12:00:00Z',
-}];
+const templates = [
+  {
+    id: 7,
+    nome: 'Contrato de prestação de serviços corporativos',
+    arquivo: 'contrato-corporativo.docx',
+    campos: ['nome', 'cpf', 'endereco_completo'],
+    created_at: '2026-09-28T12:00:00Z',
+  },
+];
 
-test('clients keep search, create, import and bulk actions in the redesigned cards', async ({ page }) => {
+test('clients keep search, create, import and bulk actions in the redesigned cards', async ({
+  page,
+}) => {
   await installSession(page, { role: 'admin' });
   await mockApi(page, { '/api/clientes': { status: 200, body: clients } });
   await page.goto('/clientes.html');
@@ -55,7 +63,11 @@ test('template admin keeps download, optional-file edit and delete actions', asy
   await mockApi(page, {
     '/api/templates': { status: 200, body: templates },
     '/api/templates/7': async (route) => {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: true }),
+      });
     },
   });
   await page.goto('/templates.html');
@@ -70,8 +82,13 @@ test('template admin keeps download, optional-file edit and delete actions', asy
   await expect(page.locator('#modalEditTemplate')).toBeVisible();
   await page.locator('#editTemplateNome').fill('Contrato atualizado');
   await page.locator('#editTemplateCampos').fill('nome, cpf');
-  const updateRequest = page.waitForRequest((request) => request.method() === 'PUT' && request.url().endsWith('/api/templates/7'));
-  await page.locator('#templateEditForm').getByRole('button', { name: /salvar/i }).click();
+  const updateRequest = page.waitForRequest(
+    (request) => request.method() === 'PUT' && request.url().endsWith('/api/templates/7')
+  );
+  await page
+    .locator('#templateEditForm')
+    .getByRole('button', { name: /salvar/i })
+    .click();
   await updateRequest;
 });
 
@@ -94,7 +111,9 @@ for (const pageName of ['clientes.html', 'templates.html']) {
       '/api/templates': { status: 200, body: templates },
     });
     await page.goto(`/${pageName}`);
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth
+    );
     expect(overflow).toBeLessThanOrEqual(1);
   });
 }

@@ -1,10 +1,12 @@
 import { expect, test } from '@playwright/test';
 import { installSession, mockApi } from './helpers/session.js';
 
-const clients = [{
-  id: 1,
-  dados: { nome: 'Ana Martins', cpf: '12345678901', banco: 'Banco Exemplo', contrato: '99881' },
-}];
+const clients = [
+  {
+    id: 1,
+    dados: { nome: 'Ana Martins', cpf: '12345678901', banco: 'Banco Exemplo', contrato: '99881' },
+  },
+];
 const templates = [{ id: 2, nome: 'Contrato padrão', campos: ['nome', 'cpf'] }];
 
 async function openDocuments(page, viewport) {
@@ -23,7 +25,9 @@ async function openDocuments(page, viewport) {
   await page.goto('/documentos.html');
 }
 
-test('selection, counters and generation request preserve the production flow', async ({ page }) => {
+test('selection, counters and generation request preserve the production flow', async ({
+  page,
+}) => {
   await openDocuments(page);
 
   await expect(page.locator('#clientesSelection label')).toHaveCount(1);
@@ -38,10 +42,16 @@ test('selection, counters and generation request preserve the production flow', 
   await expect(page.locator('#gerarDocumentosBtn')).toBeEnabled();
   await expect(page.locator('#editarCamposBtn')).toBeEnabled();
 
-  const generationRequest = page.waitForRequest((request) => request.method() === 'POST' && request.url().endsWith('/api/gerar-documentos'));
+  const generationRequest = page.waitForRequest(
+    (request) => request.method() === 'POST' && request.url().endsWith('/api/gerar-documentos')
+  );
   await page.locator('#gerarDocumentosBtn').click();
   const request = await generationRequest;
-  expect(request.postDataJSON()).toMatchObject({ clienteIds: [1], templateIds: [2], outputFormat: 'both' });
+  expect(request.postDataJSON()).toMatchObject({
+    clienteIds: [1],
+    templateIds: [2],
+    outputFormat: 'both',
+  });
 });
 
 test('specific-field editor keeps fields and history in a contained modal', async ({ page }) => {

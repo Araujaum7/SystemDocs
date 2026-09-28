@@ -17,12 +17,7 @@ const DEFAULT_RESPONSES = {
 
 export async function installSession(
   page,
-  {
-    role = 'master',
-    company = DEFAULT_COMPANY,
-    darkTheme = false,
-    sidebarCollapsed = false,
-  } = {},
+  { role = 'master', company = DEFAULT_COMPANY, darkTheme = false, sidebarCollapsed = false } = {}
 ) {
   const companyConfig = company
     ? {
@@ -36,14 +31,12 @@ export async function installSession(
     nome: 'Marina Costa',
     email: 'marina@documentospro.test',
     role,
-    empresa_id: role === 'master' ? null : company?.id ?? null,
-    empresa_nome: role === 'master' ? null : company?.nome ?? null,
+    empresa_id: role === 'master' ? null : (company?.id ?? null),
+    empresa_nome: role === 'master' ? null : (company?.nome ?? null),
     empresa_config: role === 'master' ? null : companyConfig,
   };
 
-  const empresas = company
-    ? [{ id: company.id, nome: company.nome, config: companyConfig }]
-    : [];
+  const empresas = company ? [{ id: company.id, nome: company.nome, config: companyConfig }] : [];
 
   await page.addInitScript(
     ({ storedUser, storedCompanies, activeCompany, isDark, isCollapsed }) => {
@@ -64,7 +57,7 @@ export async function installSession(
       activeCompany: company,
       isDark: darkTheme,
       isCollapsed: sidebarCollapsed,
-    },
+    }
   );
 }
 

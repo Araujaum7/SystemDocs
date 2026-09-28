@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/editorial.css" data-editorial-styles>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>
@@ -99,7 +100,7 @@
             </header>
 
             <div class="content-wrapper">
-                <div class="stats-grid mb-6">
+                <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon" style="background: rgba(124, 58, 237, 0.1); color: var(--primary-600);">
                             <i class="ph ph-shield-check"></i>
@@ -111,9 +112,9 @@
                     </div>
                 </div>
 
-                <div class="card p-6">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-xl font-bold">Histórico de Atividades</h2>
+                <div class="card audit-log-panel">
+                    <div class="panel-header audit-log-header">
+                        <h2>Histórico de Atividades</h2>
                         <button class="btn btn-secondary" onclick="window.auditoria.carregarLogs()"><i class="ph ph-arrows-clockwise"></i> Atualizar</button>
                     </div>
 
@@ -130,7 +131,7 @@
                             </thead>
                             <tbody id="logsTableBody">
                                 <tr>
-                                    <td colspan="5" class="text-center text-[var(--text-muted)] py-8">Carregando logs de auditoria...</td>
+                                    <td colspan="5" class="table-state">Carregando logs de auditoria...</td>
                                 </tr>
                             </tbody>
                         </table>

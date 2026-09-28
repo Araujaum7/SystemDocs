@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const contracts = JSON.parse(
-  await readFile(resolve('tests/frontend/fixtures/dom-contracts.json'), 'utf8'),
+  await readFile(resolve('tests/frontend/fixtures/dom-contracts.json'), 'utf8')
 );
 
 function valuesFrom(html, pattern) {
@@ -21,7 +21,7 @@ for (const [pageName, contract] of Object.entries(contracts)) {
     const forms = valuesFrom(html, /<form\b[^>]*\bid="([^"]+)"/g);
     const scripts = valuesFrom(html, /<script\b[^>]*src="([^"]+)"/g);
     const classTokens = valuesFrom(html, /\bclass="([^"]+)"/g).flatMap((value) =>
-      value.split(/\s+/),
+      value.split(/\s+/)
     );
 
     expect(ids, `${pageName} must not contain duplicate IDs`).toHaveLength(new Set(ids).size);

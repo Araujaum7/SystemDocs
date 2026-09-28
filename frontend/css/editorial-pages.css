@@ -216,8 +216,12 @@ html .context-banner {
   border-radius: var(--radius-md);
 }
 
-html .context-banner.success { border-left-color: var(--success); }
-html .context-banner.warning { border-left-color: var(--warning); }
+html .context-banner.success {
+  border-left-color: var(--success);
+}
+html .context-banner.warning {
+  border-left-color: var(--warning);
+}
 
 html .context-title {
   color: var(--text-primary);
@@ -297,9 +301,15 @@ html .kpi-card::before {
   border-radius: 999px;
 }
 
-html .kpi-card.info::before { background: var(--info); }
-html .kpi-card.success::before { background: var(--success); }
-html .kpi-card.warning::before { background: var(--warning); }
+html .kpi-card.info::before {
+  background: var(--info);
+}
+html .kpi-card.success::before {
+  background: var(--success);
+}
+html .kpi-card.warning::before {
+  background: var(--warning);
+}
 
 html .kpi-label {
   margin-bottom: var(--space-2);
@@ -733,6 +743,7 @@ html #modalEditarCampos .modal-content {
 }
 
 html #modalEditarCampos .modal-body {
+  display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 350px) !important;
   gap: var(--space-6) !important;
   padding: var(--space-6) !important;
@@ -743,6 +754,117 @@ html .modal-history-section {
   padding-left: var(--space-6);
   overflow-y: auto;
   border-left: 1px solid var(--border-soft);
+}
+
+html .form-grid.single-column {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+html .brand-text {
+  color: var(--primary-700);
+  font-weight: 700;
+}
+
+html .history-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+html .history-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+html .history-state {
+  padding: var(--space-4);
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+html .history-state.error {
+  color: var(--danger);
+}
+
+html .history-entry {
+  min-width: 0;
+  padding: var(--space-4);
+  background: var(--surface-panel);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+}
+
+html .history-entry__header,
+html .history-entry__meta {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+html .history-entry__filename {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html .history-entry__date {
+  flex: 0 0 auto;
+  color: var(--text-subtle);
+  font-size: 0.6875rem;
+}
+
+html .history-entry__meta {
+  margin-block: var(--space-3);
+}
+
+html .history-entry__actor {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  color: var(--primary-700);
+  background: var(--primary-100);
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 650;
+}
+
+html .history-entry__toggle {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  color: var(--primary-700);
+  background: none;
+  border: 0;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+html .history-entry__fields {
+  margin-top: var(--space-2);
+  padding: var(--space-3);
+  color: var(--text-secondary);
+  background: var(--surface-muted);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+}
+
+html .history-entry__fields ul {
+  margin: var(--space-2) 0 0;
+  padding-left: 18px;
 }
 
 html #progressModal[style*='display: block'] {
@@ -756,6 +878,148 @@ html #progressModal > div {
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
+}
+
+html .progress-dialog {
+  display: flex;
+  max-height: calc(100dvh - 48px);
+  flex-direction: column;
+  overflow: hidden;
+}
+
+html .progress-dialog__header,
+html .progress-dialog__footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-6);
+  border-color: var(--border-soft);
+}
+
+html .progress-dialog__header {
+  border-bottom: 1px solid var(--border-soft);
+}
+
+html .progress-dialog__header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+html .progress-dialog__icon {
+  color: var(--primary-700);
+  font-size: 1.4rem;
+}
+
+html .progress-dialog__body {
+  padding: var(--space-6);
+  overflow-y: auto;
+}
+
+html .progress-container {
+  padding: var(--space-4);
+  background: var(--surface-muted);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+}
+
+html .progress-meta,
+html .progress-results__header,
+html .generated-document__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+html .progress-meta {
+  margin-bottom: var(--space-2);
+}
+
+html #progressStatus {
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+  font-weight: 650;
+}
+
+html #progressDetails {
+  color: var(--text-subtle);
+  font-size: 0.75rem;
+}
+
+html .progress-track {
+  width: 100%;
+  height: 8px;
+  overflow: hidden;
+  background: var(--border-emphasis);
+  border-radius: 999px;
+}
+
+html .progress-track .progress-fill {
+  height: 100%;
+  transition: width 300ms var(--ease-standard);
+}
+
+html .progress-results {
+  margin-top: var(--space-6);
+}
+
+html .progress-results__header {
+  margin-bottom: var(--space-4);
+}
+
+html .progress-results__header h3 {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: 1rem;
+}
+
+html .progress-results__header h3 i {
+  color: var(--success);
+}
+
+html .generated-documents {
+  display: grid;
+  max-height: 280px;
+  gap: var(--space-2);
+  overflow-y: auto;
+}
+
+html .generated-document {
+  min-width: 0;
+  padding: var(--space-3);
+  background: var(--surface-panel);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+}
+
+html .generated-document__copy {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+html .generated-document__copy strong {
+  overflow-wrap: anywhere;
+  font-size: 0.8125rem;
+}
+
+html .generated-document__copy small {
+  color: var(--text-subtle);
+  font-size: 0.6875rem;
+}
+
+html .generated-document__actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--space-2);
+}
+
+html .progress-dialog__footer {
+  justify-content: flex-end;
+  background: var(--surface-muted);
+  border-top: 1px solid var(--border-soft);
 }
 
 html #progressModal h2,
@@ -898,6 +1162,47 @@ html .data-table td:nth-child(3) span {
   font-weight: 700;
 }
 
+html .audit-action-badge.success {
+  color: var(--success);
+}
+html .audit-action-badge.danger {
+  color: var(--danger);
+}
+html .audit-action-badge.info {
+  color: var(--info);
+}
+
+html :where(.audit-muted, .audit-details) {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+html .audit-user {
+  color: var(--text-primary);
+  font-weight: 650;
+}
+
+html .audit-log-panel {
+  min-width: 0;
+}
+
+html .audit-log-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+html .table-state {
+  padding: var(--space-8);
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+html .table-state.error {
+  color: var(--danger);
+}
+
 html .data-table pre {
   max-width: 100%;
   margin: 0;
@@ -907,7 +1212,11 @@ html .data-table pre {
   background: var(--surface-muted);
   border: 1px solid var(--border-soft);
   border-radius: 6px;
-  font: 0.75rem/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
+  font:
+    0.75rem/1.5 ui-monospace,
+    SFMono-Regular,
+    Consolas,
+    monospace;
 }
 
 html .modal-info {
@@ -1071,6 +1380,15 @@ html .text-warning {
     padding-left: 0;
     border-top: 1px solid var(--border-soft);
     border-left: 0;
+  }
+
+  html .generated-document__row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  html .generated-document__actions .btn {
+    flex: 1;
   }
 
   html .content-wrapper {
