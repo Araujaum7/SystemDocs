@@ -31,7 +31,7 @@ function createCompanyContext() {
     if (!companyName) return null;
 
     const context = document.createElement('div');
-    context.className = 'company-context';
+    context.className = 'company-context topbar-company-context';
     context.setAttribute('aria-label', `Empresa ativa: ${companyName}`);
     context.innerHTML = `
         <span class="company-context__icon" aria-hidden="true"><i class="ph ph-buildings"></i></span>
@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const sidebarToggle = document.querySelector('.sidebar-toggle');
     const sidebarOverlay = document.querySelector('.sidebar-overlay');
     const headerLeft = document.querySelector('.header-left');
+    const topbarActions = document.querySelector('.topbar-actions');
     let mobileSidebarToggle = document.querySelector('.mobile-sidebar-toggle');
 
     const storedCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
@@ -61,9 +62,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     const companyContext = createCompanyContext();
-    const sidebarHeader = sidebar.querySelector('.sidebar-header');
-    if (companyContext && sidebarHeader && !sidebarHeader.querySelector('.company-context')) {
-        sidebarHeader.appendChild(companyContext);
+    if (companyContext && topbarActions && !topbarActions.querySelector('.topbar-company-context')) {
+        topbarActions.appendChild(companyContext);
+    }
+
+    const userInfo = document.getElementById('userInfo');
+    if (userInfo && topbarActions) {
+        userInfo.classList.add('topbar-user');
+        topbarActions.appendChild(userInfo);
     }
 
     if (!mobileSidebarToggle && headerLeft) {
@@ -96,12 +102,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeDrawer = () => {
         sidebar.classList.remove('active');
         sidebarOverlay?.classList.remove('active');
+        document.body.classList.remove('sidebar-open');
         syncMobileToggle(false);
     };
 
     const openDrawer = () => {
         sidebar.classList.add('active');
         sidebarOverlay?.classList.add('active');
+        document.body.classList.add('sidebar-open');
         syncMobileToggle(true);
     };
 
@@ -134,9 +142,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const storedDark = localStorage.getItem('darkTheme');
     const isDark = storedDark === null ? true : storedDark === 'true';
     document.body.classList.toggle('dark-theme', isDark);
-    const headerActions = document.querySelector('.header-actions');
-    if (headerActions && !headerActions.querySelector('.theme-toggle')) {
-        headerActions.insertBefore(createThemeToggle(isDark), headerActions.firstChild);
+    if (topbarActions && !topbarActions.querySelector('.theme-toggle')) {
+        const themeToggle = createThemeToggle(isDark);
+        const userProfile = topbarActions.querySelector('.topbar-user');
+        topbarActions.insertBefore(themeToggle, userProfile);
     }
 
     syncDesktopToggle();
