@@ -60,6 +60,53 @@ test('login is an editorial form with explicit labels and no Tailwind runtime', 
   await expect(page.getByRole('button', { name: /entrar no sistema/i })).toBeVisible();
 });
 
+test('login keeps the premium split on desktop and a clean single flow on mobile', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+
+  const desktop = await page.evaluate(() => {
+    const shell = document.querySelector('.login-shell').getBoundingClientRect();
+    const intro = document.querySelector('.login-intro').getBoundingClientRect();
+    const panel = document.querySelector('.login-panel').getBoundingClientRect();
+    return {
+      shell: { x: shell.x, width: shell.width },
+      intro: { x: intro.x, y: intro.y, width: intro.width },
+      panel: { x: panel.x, y: panel.y, width: panel.width },
+    };
+  });
+
+  expect(desktop.shell.width).toBeLessThanOrEqual(1120);
+  expect(desktop.intro.y).toBeCloseTo(desktop.panel.y, 0);
+  expect(desktop.intro.x + desktop.intro.width).toBeCloseTo(desktop.panel.x, 0);
+  expect(desktop.intro.width / desktop.shell.width).toBeGreaterThanOrEqual(0.515);
+  expect(desktop.intro.width / desktop.shell.width).toBeLessThanOrEqual(0.525);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+
+  const mobile = await page.evaluate(() => {
+    const root = document.documentElement;
+    const intro = document.querySelector('.login-intro').getBoundingClientRect();
+    const panel = document.querySelector('.login-panel').getBoundingClientRect();
+    const benefits = getComputedStyle(document.querySelector('.login-benefits'));
+    return {
+      overflow: root.scrollWidth - root.clientWidth,
+      intro: { x: intro.x, y: intro.y, width: intro.width, bottom: intro.bottom },
+      panel: { x: panel.x, y: panel.y, width: panel.width },
+      benefitsDisplay: benefits.display,
+    };
+  });
+
+  expect(mobile.overflow).toBeLessThanOrEqual(1);
+  expect(mobile.panel.y).toBeGreaterThanOrEqual(mobile.intro.bottom - 1);
+  expect(mobile.intro.x).toBeGreaterThanOrEqual(0);
+  expect(mobile.panel.x).toBeGreaterThanOrEqual(0);
+  expect(mobile.intro.width).toBeLessThanOrEqual(390);
+  expect(mobile.panel.width).toBeLessThanOrEqual(390);
+  expect(mobile.benefitsDisplay).toBe('none');
+});
+
 test('login preserves its action while showing loading and an accessible error', async ({ page }) => {
   await page.route('**/api/login', async (route) => {
     await new Promise((resolve) => setTimeout(resolve, 250));
@@ -74,10 +121,13 @@ test('login preserves its action while showing loading and an accessible error',
   await page.getByLabel('Senha').fill('senha-incorreta');
 
   const submit = page.getByRole('button', { name: /entrar no sistema/i });
+  const initialWidth = (await submit.boundingBox()).width;
   await submit.click();
   await expect(page.locator('.login-submit')).toBeDisabled();
   await expect(page.locator('.login-submit')).toHaveAttribute('aria-busy', 'true');
   await expect(page.locator('.login-submit')).toContainText('Entrando');
+  const loadingWidth = (await page.locator('.login-submit').boundingBox()).width;
+  expect(Math.abs(loadingWidth - initialWidth)).toBeLessThanOrEqual(1);
 
   await expect(page.getByRole('alert')).toContainText('Credenciais inválidas');
   await expect(page.getByRole('button', { name: /entrar no sistema/i })).toBeEnabled();

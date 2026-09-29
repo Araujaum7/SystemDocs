@@ -559,8 +559,8 @@ html .login-shell {
   position: relative;
   z-index: 1;
   display: grid;
-  width: min(1080px, 100%);
-  grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
+  width: min(1120px, 100%);
+  grid-template-columns: minmax(0, 52fr) minmax(360px, 48fr);
   overflow: hidden;
   background: var(--surface-panel-strong);
   background: var(--surface-panel);
@@ -573,7 +573,8 @@ html .login-shell {
 
 html .login-intro {
   display: flex;
-  min-height: 610px;
+  min-width: 0;
+  min-height: 620px;
   flex-direction: column;
   justify-content: space-between;
   padding: clamp(32px, 6vw, 72px);
@@ -670,6 +671,7 @@ html .login-benefits li {
 
 html .login-panel {
   display: flex;
+  min-width: 0;
   flex-direction: column;
   justify-content: center;
   padding: clamp(32px, 6vw, 72px);
