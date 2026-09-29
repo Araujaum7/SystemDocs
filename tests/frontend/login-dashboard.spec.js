@@ -48,9 +48,39 @@ test('login is an editorial form with explicit labels and no Tailwind runtime', 
   await expect(page.locator('script[src*="tailwindcss"]')).toHaveCount(0);
   await expect(page.locator('.animate-blob')).toHaveCount(0);
   await expect(page.locator('.login-shell')).toBeVisible();
+  await expect(page.locator('body')).toHaveClass(/dark-theme/);
+  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(6, 19, 38)');
+  await expect(page.locator('.login-shell')).toHaveCSS('backdrop-filter', 'blur(18px)');
+  await expect(page.locator('.login-aurora')).toHaveCount(2);
+  await expect(page.locator('.login-aurora').first()).toHaveCSS('animation-name', 'none');
   await expect(page.getByLabel('E-mail')).toHaveAttribute('id', 'email');
+  await expect(page.getByLabel('E-mail')).toHaveAttribute('autocomplete', 'email');
   await expect(page.getByLabel('Senha')).toHaveAttribute('id', 'senha');
+  await expect(page.getByLabel('Senha')).toHaveAttribute('autocomplete', 'current-password');
   await expect(page.getByRole('button', { name: /entrar no sistema/i })).toBeVisible();
+});
+
+test('login preserves its action while showing loading and an accessible error', async ({ page }) => {
+  await page.route('**/api/login', async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    await route.fulfill({
+      status: 401,
+      contentType: 'application/json',
+      body: JSON.stringify({ error: 'Credenciais inválidas' }),
+    });
+  });
+  await page.goto('/');
+  await page.getByLabel('E-mail').fill('erro@example.com');
+  await page.getByLabel('Senha').fill('senha-incorreta');
+
+  const submit = page.getByRole('button', { name: /entrar no sistema/i });
+  await submit.click();
+  await expect(page.locator('.login-submit')).toBeDisabled();
+  await expect(page.locator('.login-submit')).toHaveAttribute('aria-busy', 'true');
+  await expect(page.locator('.login-submit')).toContainText('Entrando');
+
+  await expect(page.getByRole('alert')).toContainText('Credenciais inválidas');
+  await expect(page.getByRole('button', { name: /entrar no sistema/i })).toBeEnabled();
 });
 
 test('dashboard reproduces the approved Aurora bento with truthful data', async ({

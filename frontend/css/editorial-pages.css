@@ -1,10 +1,54 @@
 html .login-page {
+  position: relative;
+  isolation: isolate;
   display: grid;
   min-height: 100dvh;
   grid-template-rows: 1fr auto;
   place-items: center;
   padding: clamp(20px, 5vw, 64px);
   background: var(--surface-app);
+}
+
+html .login-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+html .login-backdrop::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--border-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-soft) 1px, transparent 1px);
+  background-size: 64px 64px;
+  opacity: 0.16;
+  mask-image: linear-gradient(to bottom, black, transparent 80%);
+}
+
+html .login-aurora {
+  position: absolute;
+  width: min(52vw, 720px);
+  aspect-ratio: 1;
+  background: var(--primary-500);
+  border-radius: 50%;
+  opacity: 0.14;
+  filter: blur(120px);
+  animation: none;
+}
+
+html .login-aurora--primary {
+  top: -28%;
+  left: -12%;
+}
+
+html .login-aurora--secondary {
+  right: -18%;
+  bottom: -42%;
+  background: var(--secondary-500);
 }
 
 /* Dashboard Aurora Glass — composição aprovada */
@@ -512,14 +556,19 @@ html .insight-marker {
 }
 
 html .login-shell {
+  position: relative;
+  z-index: 1;
   display: grid;
   width: min(1080px, 100%);
   grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
   overflow: hidden;
+  background: var(--surface-panel-strong);
   background: var(--surface-panel);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
 }
 
 html .login-intro {
@@ -529,7 +578,8 @@ html .login-intro {
   justify-content: space-between;
   padding: clamp(32px, 6vw, 72px);
   color: var(--on-primary);
-  background: var(--primary-700);
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--primary-700) 90%, #061326), color-mix(in srgb, var(--primary-600) 72%, #061326));
   position: relative;
   isolation: isolate;
 }
@@ -623,7 +673,7 @@ html .login-panel {
   flex-direction: column;
   justify-content: center;
   padding: clamp(32px, 6vw, 72px);
-  background: var(--surface-panel);
+  background: color-mix(in srgb, var(--surface-panel) 92%, transparent);
 }
 
 html .login-panel__header {
@@ -687,6 +737,16 @@ html .login-submit {
   min-height: 50px;
   margin-top: var(--space-2);
   justify-content: space-between;
+}
+
+html .login-submit.is-loading {
+  justify-content: center;
+  cursor: wait;
+}
+
+html .login-footer {
+  position: relative;
+  z-index: 1;
 }
 
 html .login-support {

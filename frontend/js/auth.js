@@ -80,7 +80,9 @@ class Auth {
         const submitBtn = e.target.querySelector('button[type="submit"]');
         const oldText = submitBtn ? submitBtn.innerHTML : '';
         if (submitBtn) {
-            submitBtn.innerHTML = 'Entrando...';
+            submitBtn.classList.add('is-loading');
+            submitBtn.setAttribute('aria-busy', 'true');
+            submitBtn.innerHTML = '<span>Entrando...</span><i class="ph ph-hourglass-medium" aria-hidden="true"></i>';
             submitBtn.disabled = true;
         }
 
@@ -121,6 +123,8 @@ class Auth {
             if (submitBtn) {
                 submitBtn.innerHTML = oldText;
                 submitBtn.disabled = false;
+                submitBtn.classList.remove('is-loading');
+                submitBtn.removeAttribute('aria-busy');
             }
         }
     }
@@ -448,6 +452,9 @@ class Auth {
 
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
+        notification.setAttribute('role', type === 'error' ? 'alert' : 'status');
+        notification.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
+        notification.setAttribute('aria-atomic', 'true');
         const icon = type === 'error' ? '❌' : (type === 'warning' ? '⚠️' : '✅');
         const borderColor = type === 'error' ? '#ef4444' : (type === 'warning' ? '#f59e0b' : '#22c55e');
         
@@ -471,7 +478,13 @@ class Auth {
             max-width: 420px;
             line-height: 1.4;
         `;
-        notification.innerHTML = `<span style="font-size: 1.25rem;">${icon}</span><span>${message}</span>`;
+        const iconElement = document.createElement('span');
+        iconElement.className = 'notification__icon';
+        iconElement.setAttribute('aria-hidden', 'true');
+        iconElement.textContent = icon;
+        const messageElement = document.createElement('span');
+        messageElement.textContent = String(message);
+        notification.append(iconElement, messageElement);
         notification.title = 'Clique para fechar';
         notification.onclick = () => notification.remove();
 
