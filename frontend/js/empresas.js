@@ -33,11 +33,31 @@ class EmpresasManager {
             }
 
             this.empresas = data;
-            localStorage.setItem('empresas', JSON.stringify(data.map((e) => ({ id: e.id, nome: e.nome, slug: e.slug }))));
+            localStorage.setItem('empresas', JSON.stringify(data.map((e) => ({
+                id: e.id,
+                nome: e.nome,
+                slug: e.slug,
+                config: this.parseConfig(e.config),
+            }))));
             this.renderEmpresas();
         } catch (error) {
             window.auth.showNotification(error.message, 'error');
         }
+    }
+
+    parseConfig(config) {
+        if (config && typeof config === 'object') return config;
+        if (typeof config !== 'string') return {};
+        try {
+            return JSON.parse(config || '{}');
+        } catch {
+            return {};
+        }
+    }
+
+    safeColor(value, fallback) {
+        const color = String(value || '').trim();
+        return /^#[0-9a-f]{6}$/i.test(color) ? color.toUpperCase() : fallback;
     }
 
     renderEmpresas() {
@@ -56,32 +76,42 @@ class EmpresasManager {
 
         const contextoId = window.auth.getEmpresaContextoId();
 
-        container.innerHTML = this.empresas.map((empresa) => `
-            <div class="card empresa-card">
+        container.innerHTML = this.empresas.map((empresa) => {
+            const config = this.parseConfig(empresa.config);
+            const primary = this.safeColor(config.temaCor, '#7C3AED');
+            const secondary = this.safeColor(config.temaCorSecundaria, '#2563EB');
+            const isActive = Number(contextoId) === Number(empresa.id);
+            const monogram = this.escapeHtml(String(empresa.nome || 'E').trim().charAt(0).toUpperCase() || 'E');
+            return `
+            <article class="card empresa-card aurora-data-card${isActive ? ' is-active' : ''}">
                 <div class="card-header">
-                    <h3>${this.escapeHtml(empresa.nome)}</h3>
-                    <span class="badge">ID ${empresa.id}</span>
+                    <div class="company-card-identity">
+                        <span class="company-monogram">${monogram}</span>
+                        <div><span class="data-card-eyebrow">Empresa</span><h3>${this.escapeHtml(empresa.nome)}</h3><small>${this.escapeHtml(empresa.slug || '-')}</small></div>
+                    </div>
+                    <span class="badge${isActive ? ' active' : ''}">${isActive ? 'Ativa' : `ID ${empresa.id}`}</span>
                 </div>
                 <div class="card-body">
-                    <p><strong>Usuários:</strong> ${empresa.total_usuarios || 0}</p>
-                    <p><strong>Clientes:</strong> ${empresa.total_clientes || 0}</p>
-                    <p><strong>Templates:</strong> ${empresa.total_templates || 0}</p>
-                    <p>
-                        <strong>Cores:</strong> 
-                        <span style="display:inline-block; width:15px; height:15px; background-color:${(typeof empresa.config === 'string' ? JSON.parse(empresa.config || '{}') : (empresa.config || {})).temaCor || '#7c3aed'}; border-radius:50%; vertical-align:middle; margin-right:4px;" title="Primária"></span>
-                        <span style="display:inline-block; width:15px; height:15px; background-color:${(typeof empresa.config === 'string' ? JSON.parse(empresa.config || '{}') : (empresa.config || {})).temaCorSecundaria || '#3b82f6'}; border-radius:50%; vertical-align:middle;" title="Secundária"></span>
-                    </p>
-                    <small>Slug: ${this.escapeHtml(empresa.slug || '-')}</small>
+                    <div class="company-metrics">
+                        <div><strong>${empresa.total_usuarios || 0}</strong><span>Usuários</span></div>
+                        <div><strong>${empresa.total_clientes || 0}</strong><span>Clientes</span></div>
+                        <div><strong>${empresa.total_templates || 0}</strong><span>Templates</span></div>
+                    </div>
+                    <div class="company-palette" aria-label="Paleta da empresa">
+                        <div><span class="company-palette-swatch" style="--swatch-color: ${primary}" title="Cor primária"></span><code class="company-palette-code">${primary}</code></div>
+                        <div><span class="company-palette-swatch" style="--swatch-color: ${secondary}" title="Cor secundária"></span><code class="company-palette-code">${secondary}</code></div>
+                    </div>
                 </div>
                 <div class="card-footer">
                     <button class="btn btn-primary" onclick="empresasManager.entrarEmpresa(${empresa.id})">
-                        ${contextoId === empresa.id ? 'Empresa Ativa' : 'Entrar na Empresa'}
+                        <i class="ph ph-sign-in"></i>${isActive ? 'Empresa Ativa' : 'Entrar na Empresa'}
                     </button>
-                    <button class="btn btn-secondary" onclick="empresasManager.editarEmpresa(${empresa.id})">Editar</button>
-                    <button class="btn btn-danger" onclick="empresasManager.excluirEmpresa(${empresa.id})">Excluir</button>
+                    <button class="btn btn-secondary" onclick="empresasManager.editarEmpresa(${empresa.id})"><i class="ph ph-pencil-simple"></i>Editar</button>
+                    <button class="btn btn-danger" onclick="empresasManager.excluirEmpresa(${empresa.id})"><i class="ph ph-trash"></i>Excluir</button>
                 </div>
-            </div>
-        `).join('');
+            </article>
+        `;
+        }).join('');
     }
 
     escapeHtml(value) {

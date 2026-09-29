@@ -93,24 +93,30 @@ class UsuariosManager {
             return;
         }
 
-        container.innerHTML = this.usuarios.map((usuario) => `
-            <div class="card usuario-card">
+        container.innerHTML = this.usuarios.map((usuario) => {
+            const role = usuario.role === 'admin' ? 'admin' : 'user';
+            const roleLabel = role === 'admin' ? 'Administrador' : 'Usuário';
+            const initial = this.escapeHtml(String(usuario.nome || 'U').trim().charAt(0).toUpperCase() || 'U');
+            return `
+            <article class="card usuario-card aurora-data-card">
                 <div class="card-header">
-                    <h3>${this.escapeHtml(usuario.nome)}</h3>
-                    <span class="badge">${this.escapeHtml(usuario.role)}</span>
+                    <div class="user-card-identity">
+                        <span class="user-avatar-card">${initial}</span>
+                        <div><span class="data-card-eyebrow">Conta</span><h3>${this.escapeHtml(usuario.nome)}</h3><span class="user-card-email">${this.escapeHtml(usuario.email)}</span></div>
+                    </div>
+                    <span class="role-badge ${role}">${roleLabel}</span>
                 </div>
                 <div class="card-body">
-                    <p><strong>Email:</strong> ${this.escapeHtml(usuario.email)}</p>
-                    <p><strong>ID:</strong> ${usuario.id}</p>
-                    <small>Criado em: ${new Date(usuario.created_at).toLocaleDateString('pt-BR')}</small>
+                    <div class="user-account-meta"><span><i class="ph ph-identification-badge"></i>ID ${usuario.id}</span><span><i class="ph ph-calendar-blank"></i>Criado em ${new Date(usuario.created_at).toLocaleDateString('pt-BR')}</span></div>
                 </div>
                 <div class="card-footer">
-                    <button class="btn btn-primary" onclick="usuariosManager.abrirModalAlterarCargo(${usuario.id}, '${this.escapeHtml(usuario.nome)}', '${this.escapeHtml(usuario.role)}')">Alterar Cargo</button>
-                    <button class="btn btn-warning" onclick="usuariosManager.abrirModalResetSenha(${usuario.id}, '${this.escapeHtml(usuario.nome)}')">Alterar Senha</button>
-                    <button class="btn btn-danger" onclick="usuariosManager.deletarUsuario(${usuario.id})">Excluir</button>
+                    <button class="btn btn-primary" onclick="usuariosManager.abrirModalAlterarCargo(${usuario.id}, '${this.escapeHtml(usuario.nome)}', '${this.escapeHtml(usuario.role)}')"><i class="ph ph-user-switch"></i>Alterar Cargo</button>
+                    <button class="btn btn-warning" onclick="usuariosManager.abrirModalResetSenha(${usuario.id}, '${this.escapeHtml(usuario.nome)}')"><i class="ph ph-key"></i>Alterar Senha</button>
+                    <button class="btn btn-danger" onclick="usuariosManager.deletarUsuario(${usuario.id})"><i class="ph ph-trash"></i>Excluir</button>
                 </div>
-            </div>
-        `).join('');
+            </article>
+        `;
+        }).join('');
     }
 
     escapeHtml(value) {

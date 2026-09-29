@@ -40,8 +40,10 @@ test('audit presents count and detailed log table', async ({ page }) => {
   await page.goto('/auditoria.html');
 
   await expect(page.locator('#totalLogsCount')).toHaveText('1');
+  await expect(page.locator('.audit-summary')).toBeVisible();
   await expect(page.locator('#logsTableBody tr')).toHaveCount(1);
   await expect(page.locator('#logsTableBody')).toContainText('DOCUMENTO_GERADO');
+  await expect(page.locator('.audit-action-badge.brand')).toBeVisible();
   await expect(page.locator('#logsTableBody pre')).toContainText(
     'contrato-com-nome-muito-longo.docx'
   );
@@ -55,6 +57,11 @@ test('master company cards retain context and management actions', async ({ page
   const card = page.locator('.empresa-card');
   await expect(card).toBeVisible();
   await expect(card).toHaveCSS('padding', '0px');
+  await expect(card).toHaveClass(/aurora-data-card/);
+  await expect(card).toHaveClass(/is-active/);
+  await expect(card.locator('.company-monogram')).toHaveText('A');
+  await expect(card.locator('.company-palette-swatch')).toHaveCount(2);
+  await expect(card.locator('.company-palette-code')).toHaveText(['#7C3AED', '#2563EB']);
   await expect(card).toContainText('120');
   await expect(card.getByRole('button', { name: /empresa ativa/i })).toBeVisible();
   await expect(card.getByRole('button', { name: 'Editar' })).toBeVisible();
@@ -76,6 +83,9 @@ test('administrators retain user role and password controls', async ({ page }) =
   const card = page.locator('.usuario-card');
   await expect(card).toBeVisible();
   await expect(card).toHaveCSS('padding', '0px');
+  await expect(card).toHaveClass(/aurora-data-card/);
+  await expect(card.locator('.user-avatar-card')).toHaveText('P');
+  await expect(card.locator('.role-badge.admin')).toContainText(/administrador/i);
 
   await card.getByRole('button', { name: /alterar cargo/i }).click();
   await expect(page.locator('#modalAlterarCargo')).toBeVisible();

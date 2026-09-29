@@ -37,7 +37,7 @@ class AuditoriaManager {
                 else if (log.acao.includes('GERADO')) tagClass = 'brand';
                 
                 const detalheHtml = typeof log.detalhe === 'object' 
-                    ? `<pre class="audit-detail-json">${JSON.stringify(log.detalhe, null, 2)}</pre>`
+                    ? `<pre class="audit-detail-json">${this.escapeHtml(JSON.stringify(log.detalhe, null, 2))}</pre>`
                     : `<span>${this.escapeHtml(log.detalhe || '')}</span>`;
 
                 return `
@@ -60,11 +60,11 @@ class AuditoriaManager {
     escapeHtml(unsafe) {
         if (!unsafe) return '';
         return String(unsafe)
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
     }
 }
 
