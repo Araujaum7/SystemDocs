@@ -32,7 +32,15 @@ test('selection, counters and generation request preserve the production flow', 
 
   await expect(page.locator('#clientesSelection label')).toHaveCount(1);
   await expect(page.locator('#templatesSelection label')).toHaveCount(1);
+  await expect(page.locator('.workflow-step')).toHaveCount(4);
+  await expect(page.locator('.workflow-step-number')).toHaveText(['1', '2', '3', '4']);
+  await expect(page.locator('.workflow-progress-item')).toHaveCount(4);
   await expect(page.locator('.documentos-container')).toHaveCSS('gap', '24px');
+
+  await page.locator('#searchClientesDoc').fill('Ana');
+  await expect(page.locator('#clientesSelection label')).toHaveCount(1);
+  await page.locator('#searchTemplatesDoc').fill('Contrato');
+  await expect(page.locator('#templatesSelection label')).toHaveCount(1);
 
   await page.locator('#cliente_doc_1').check();
   await page.locator('#template_doc_2').check();
@@ -46,12 +54,14 @@ test('selection, counters and generation request preserve the production flow', 
     (request) => request.method() === 'POST' && request.url().endsWith('/api/gerar-documentos')
   );
   await page.locator('#gerarDocumentosBtn').click();
+  await expect(page.locator('#progressModal')).toBeVisible();
   const request = await generationRequest;
   expect(request.postDataJSON()).toMatchObject({
     clienteIds: [1],
     templateIds: [2],
     outputFormat: 'both',
   });
+  await expect(page.locator('#progressResults')).toBeVisible({ timeout: 3_000 });
 });
 
 test('specific-field editor keeps fields and history in a contained modal', async ({ page }) => {

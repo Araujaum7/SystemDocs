@@ -119,10 +119,19 @@
             </header>
 
             <div class="content">
+                <nav class="document-workflow-progress" aria-label="Etapas da geração de documentos">
+                    <span class="workflow-progress-item active"><b>1</b> Clientes</span>
+                    <span class="workflow-progress-item"><b>2</b> Templates</span>
+                    <span class="workflow-progress-item"><b>3</b> Opções</span>
+                    <span class="workflow-progress-item"><b>4</b> Revisar e gerar</span>
+                </nav>
                 <div class="documentos-container">
                     <div class="selection-panel">
-                        <div class="selection-section">
-                            <h3>Selecionar Clientes</h3>
+                        <div class="selection-section workflow-step">
+                            <div class="workflow-step-heading">
+                                <span class="workflow-step-number">1</span>
+                                <div><h3>Selecionar clientes</h3><p>Escolha quem receberá os documentos.</p></div>
+                            </div>
                             <div class="search-box">
                                 <span class="icon"><i class="ph ph-magnifying-glass"></i></span>
                                 <input type="text" id="searchClientesDoc" placeholder="Buscar clientes...">
@@ -130,8 +139,11 @@
                             <div id="clientesSelection" class="selection-list styled-list"></div>
                         </div>
 
-                        <div class="selection-section">
-                            <h3>Selecionar Templates</h3>
+                        <div class="selection-section workflow-step">
+                            <div class="workflow-step-heading">
+                                <span class="workflow-step-number">2</span>
+                                <div><h3>Selecionar templates</h3><p>Defina os modelos que serão gerados.</p></div>
+                            </div>
                             <div class="search-box">
                                 <span class="icon"><i class="ph ph-magnifying-glass"></i></span>
                                 <input type="text" id="searchTemplatesDoc" placeholder="Buscar templates...">
@@ -156,7 +168,11 @@
                             </div>
                         </div>
 
-                        <div class="generation-options">
+                        <div class="generation-options workflow-step workflow-step-options">
+                            <div class="workflow-step-heading">
+                                <span class="workflow-step-number">3</span>
+                                <div><h3>Configurar saída</h3><p>Escolha o formato e o destino dos arquivos.</p></div>
+                            </div>
                             <div class="option-group">
                                 <p class="option-title">Formato de
                                     saída</p>
@@ -191,10 +207,16 @@
                             </div>
                         </div>
 
-                        <button id="gerarDocumentosBtn">
-                            <span class="icon"><i class="ph-fill ph-lightning"></i></span>
-                            Gerar Documentos
-                        </button>
+                        <div class="workflow-step workflow-step-action">
+                            <div class="workflow-step-heading">
+                                <span class="workflow-step-number">4</span>
+                                <div><h3>Revisar e gerar</h3><p>Confira os totais antes de iniciar.</p></div>
+                            </div>
+                            <button id="gerarDocumentosBtn">
+                                <span class="icon"><i class="ph-fill ph-lightning"></i></span>
+                                Gerar Documentos
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
