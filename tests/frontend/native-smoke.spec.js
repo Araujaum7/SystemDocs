@@ -23,6 +23,7 @@ test('isolated native flow creates context, navigates, toggles theme and logs ou
   await companyCard.getByRole('button', { name: /entrar na empresa/i }).click();
   await expect(page).toHaveURL(/\/dashboard(?:\.html)?$/);
   await expect(page.locator('.company-context__name')).toHaveText('Empresa Smoke UI');
+  await expect(page.locator('#dashboardShell')).toHaveAttribute('data-state', /ready|empty/);
 
   const themeToggle = page.locator('.theme-toggle');
   await themeToggle.click();
@@ -38,8 +39,20 @@ test('isolated native flow creates context, navigates, toggles theme and logs ou
     'empresas.html',
   ]) {
     await page.locator(`.nav-item[href="${destination}"]`).click();
+    await expect(page.locator('h1')).toBeVisible();
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth
+    );
+    expect(overflow, `${destination} must not overflow`).toBeLessThanOrEqual(1);
     await expect(page).toHaveURL(new RegExp(`/${destination.replace('.', '\\.')}$`));
   }
+
+  await expect(
+    page
+      .locator('.empresa-card.is-active')
+      .filter({ hasText: 'Empresa Smoke UI' })
+      .locator('.active-company-label')
+  ).toContainText('Empresa ativa');
 
   await page.locator('#logoutBtn').click();
   await expect(page).toHaveURL(/\/$/);

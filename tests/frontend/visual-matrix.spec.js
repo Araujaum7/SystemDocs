@@ -24,6 +24,7 @@ const viewports = [
   { slug: 'desktop', width: 1440, height: 900 },
   { slug: 'tablet', width: 1024, height: 768 },
   { slug: 'mobile', width: 390, height: 844 },
+  { slug: 'compact', width: 320, height: 720 },
 ];
 
 const authenticatedPages = [
@@ -38,8 +39,10 @@ const authenticatedPages = [
 
 const criticalPages = new Set([
   'dashboard.html',
+  'clientes.html',
   'documentos.html',
   'empresas.html',
+  'usuarios.html',
 ]);
 
 const responses = {
@@ -250,6 +253,74 @@ test('forced no-backdrop mode keeps glass surfaces opaque', async ({ page }) => 
   });
   expect(surface.backdrop).toBe('none');
   expect(surface.background).toBe('rgb(13, 27, 46)');
+});
+
+test('critical pages remain usable at 320px and 200 percent zoom', async ({ page }) => {
+  await page.setViewportSize({ width: 640, height: 900 });
+  await installSession(page, { role: 'master', company: companies[0], darkTheme: true });
+  await mockApi(page, {
+    ...responses,
+    '/api/empresas': {
+      status: 200,
+      body: [
+        {
+          id: companies[0].id,
+          nome: companies[0].nome,
+          slug: companies[0].slug,
+          total_usuarios: 1,
+          total_clientes: 1,
+          total_templates: 1,
+          config: {
+            temaCor: companies[0].temaCor,
+            temaCorSecundaria: companies[0].temaCorSecundaria,
+          },
+        },
+      ],
+    },
+  });
+
+  for (const pageName of criticalPages) {
+    await page.goto(`/${pageName}`);
+    await page.evaluate(() => {
+      document.documentElement.style.zoom = '2';
+    });
+    await expectLayoutHealth(page, `${pageName} at 200%`);
+  }
+});
+
+test('Aurora Executive light and dark themes remain structurally equivalent', async ({ browser }) => {
+  const snapshots = [];
+
+  for (const darkTheme of [false, true]) {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const page = await context.newPage();
+    await installSession(page, { role: 'master', company: companies[0], darkTheme });
+    await mockApi(page, responses);
+    await page.goto('http://127.0.0.1:7101/dashboard.html');
+
+    snapshots.push(await page.evaluate(() => {
+      const style = getComputedStyle(document.body);
+      const panelStyle = getComputedStyle(document.querySelector('.kpi-card'));
+      return {
+        sections: [...document.querySelectorAll('[data-dashboard-section]')].map(
+          (section) => section.getAttribute('data-dashboard-section')
+        ),
+        headings: [...document.querySelectorAll('main h2, main h3')].map((heading) =>
+          heading.textContent.trim()
+        ),
+        kpis: [...document.querySelectorAll('.kpi-label')].map((label) => label.textContent.trim()),
+        appSurface: style.backgroundColor,
+        panelSurface: panelStyle.backgroundColor,
+      };
+    }));
+    await context.close();
+  }
+
+  expect(snapshots[0].sections).toEqual(snapshots[1].sections);
+  expect(snapshots[0].headings).toEqual(snapshots[1].headings);
+  expect(snapshots[0].kpis).toEqual(snapshots[1].kpis);
+  expect(snapshots[0].appSurface).not.toBe(snapshots[1].appSurface);
+  expect(snapshots[0].panelSurface).not.toBe(snapshots[1].panelSurface);
 });
 
 for (const viewport of viewports) {
