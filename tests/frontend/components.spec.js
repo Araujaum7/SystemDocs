@@ -103,6 +103,57 @@ test('Aurora panels use progressive glass with a solid fallback', async ({ page 
   expect(stylesheet).toContain('@supports not ((backdrop-filter: blur(1px))');
 });
 
+test('specialized cards own layout while base card owns only surface', async ({ page }) => {
+  await openClients(page);
+  await page.evaluate(() => {
+    const baseCard = document.createElement('article');
+    baseCard.id = 'baseCardProbe';
+    baseCard.className = 'card';
+    baseCard.textContent = 'Conteúdo controlado pelo componente';
+    document.body.appendChild(baseCard);
+  });
+
+  const baseCard = page.locator('#baseCardProbe');
+  await expect(baseCard).toHaveCSS('padding', '0px');
+  await expect(baseCard).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+  await expect(baseCard).not.toHaveCSS('border-top-color', 'rgba(0, 0, 0, 0)');
+});
+
+test('glass fallback resolves directly to the solid surface token', async ({ page }) => {
+  await openClients(page);
+  await page.evaluate(() => {
+    document.body.classList.add('force-solid-glass');
+    document.body.style.setProperty('--surface-panel-strong', 'transparent');
+  });
+
+  const style = await page.locator('.toolbar').first().evaluate((element) => {
+    const computed = getComputedStyle(element);
+    return {
+      background: computed.backgroundColor,
+      backdrop: computed.backdropFilter,
+      solid: getComputedStyle(document.body).getPropertyValue('--surface-panel-solid').trim(),
+    };
+  });
+  expect(style.backdrop).toBe('none');
+  expect(style.background).toBe('rgb(13, 27, 46)');
+  expect(style.solid.toLowerCase()).toBe('#0d1b2e');
+});
+
+test('modal traps focus and returns it to the opener', async ({ page }) => {
+  await openClients(page, { width: 390, height: 844 });
+  const opener = page.locator('#addClienteBtn');
+  await opener.focus();
+  await page.evaluate(() => window.openModal('modalCliente'));
+
+  const modal = page.locator('#modalCliente');
+  await expect(modal).toBeVisible();
+  await expect(modal.locator(':focus')).toHaveCount(1);
+
+  await page.keyboard.press('Escape');
+  await expect(modal).toBeHidden();
+  await expect(opener).toBeFocused();
+});
+
 test('brand glow belongs to primary actions while destructive actions stay semantic', async ({
   page,
 }) => {

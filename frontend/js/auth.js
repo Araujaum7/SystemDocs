@@ -523,14 +523,3 @@ class Auth {
 document.addEventListener('DOMContentLoaded', () => {
     window.auth = new Auth();
 });
-
-window.openModal = function (modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) modal.style.display = 'flex';
-};
-
-window.closeModal = function (modalId) {
-    if (!modalId) return;
-    const modal = document.getElementById(modalId);
-    if (modal) modal.style.display = 'none';
-};
