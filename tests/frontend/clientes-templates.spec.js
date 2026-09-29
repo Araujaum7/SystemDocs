@@ -25,7 +25,11 @@ const templates = [
     id: 7,
     nome: 'Contrato de prestação de serviços corporativos',
     arquivo: 'contrato-corporativo.docx',
-    campos: ['nome', 'cpf', 'endereco_completo'],
+    campos: [
+      'nome',
+      'cpf',
+      'endereco_completo_com_identificador_deliberadamente_extenso_sem_espacos_para_validar_quebra',
+    ],
     created_at: '2026-09-28T12:00:00Z',
   },
 ];
@@ -62,6 +66,34 @@ test('clients keep search, create, import and bulk actions in the redesigned car
   await expect(page.locator('#deleteMultipleBtn')).toBeEnabled();
   await expect(page.locator('#duplicateMultipleBtn')).toBeEnabled();
   await expect(page.locator('.selection-count')).toContainText('1 selecionado');
+});
+
+test('bulk actions and client card emphasis follow the current selection', async ({ page }) => {
+  await installSession(page, { role: 'admin' });
+  await mockApi(page, { '/api/clientes': { status: 200, body: clients } });
+  await page.goto('/clientes.html');
+
+  const selectionBar = page.locator('.aurora-selection-bar');
+  const firstCard = page.locator('.cliente-card').first();
+  const firstCheckbox = firstCard.locator('input[type="checkbox"]');
+
+  await expect(selectionBar).not.toHaveClass(/is-active/);
+  await expect(selectionBar).toHaveAttribute('data-selection-count', '0');
+  await expect(firstCard).not.toHaveClass(/is-selected/);
+
+  await firstCard.locator('.checkbox').click();
+  await expect(selectionBar).toHaveClass(/is-active/);
+  await expect(selectionBar).toHaveAttribute('data-selection-count', '1');
+  await expect(firstCard).toHaveClass(/is-selected/);
+
+  await page.locator('#searchClientes').fill('Beatriz');
+  await page.locator('#searchClientes').fill('');
+  await expect(firstCheckbox).toBeChecked();
+  await expect(firstCard).toHaveClass(/is-selected/);
+
+  await firstCard.locator('.checkbox').click();
+  await expect(selectionBar).not.toHaveClass(/is-active/);
+  await expect(selectionBar).toHaveAttribute('data-selection-count', '0');
 });
 
 test('template admin keeps download, optional-file edit and delete actions', async ({ page }) => {
@@ -121,9 +153,33 @@ for (const pageName of ['clientes.html', 'templates.html']) {
       '/api/templates': { status: 200, body: templates },
     });
     await page.goto(`/${pageName}`);
-    const overflow = await page.evaluate(
-      () => document.documentElement.scrollWidth - document.documentElement.clientWidth
-    );
-    expect(overflow).toBeLessThanOrEqual(1);
+    const layout = await page.evaluate(() => {
+      const root = document.documentElement;
+      const card = document.querySelector('.cliente-card, .template-card');
+      const cardRect = card.getBoundingClientRect();
+      const controls = [...card.querySelectorAll('.checkbox, .card-footer .btn')].map((control) => {
+        const rect = control.getBoundingClientRect();
+        return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom };
+      });
+      return {
+        overflow: root.scrollWidth - root.clientWidth,
+        cardOverflow: card.scrollWidth - card.clientWidth,
+        card: { left: cardRect.left, right: cardRect.right, top: cardRect.top, bottom: cardRect.bottom },
+        controls,
+      };
+    });
+    expect(layout.overflow).toBeLessThanOrEqual(1);
+    expect(layout.cardOverflow).toBeLessThanOrEqual(1);
+    for (const control of layout.controls) {
+      expect(control.left).toBeGreaterThanOrEqual(layout.card.left - 1);
+      expect(control.right).toBeLessThanOrEqual(layout.card.right + 1);
+      expect(control.top).toBeGreaterThanOrEqual(layout.card.top - 1);
+      expect(control.bottom).toBeLessThanOrEqual(layout.card.bottom + 1);
+    }
+
+    const actionLabels = await page.locator('.card-footer .btn').allTextContents();
+    if (actionLabels.length) {
+      expect(actionLabels.at(-1)).toContain('Excluir');
+    }
   });
 }

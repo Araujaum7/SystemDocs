@@ -107,8 +107,9 @@ class ClientesManager {
             const dados = cliente.dados || {};
             const nome = this.escapeHtml(dados.nome || 'Sem nome');
             const inicial = nome.charAt(0).toUpperCase();
+            const isSelected = this.selectedClientes.has(Number(cliente.id));
             return `
-                <article class="card cliente-card aurora-data-card" data-id="${cliente.id}">
+                <article class="card cliente-card aurora-data-card${isSelected ? ' is-selected' : ''}" data-id="${cliente.id}">
                     <div class="card-header">
                         <div class="client-primary-data">
                             <span class="data-card-icon" aria-hidden="true">${inicial}</span>
@@ -118,7 +119,7 @@ class ClientesManager {
                             </div>
                         </div>
                         <label class="checkbox">
-                            <input type="checkbox" value="${cliente.id}" onchange="clientesManager.toggleClienteSelection(${cliente.id}, this.checked)">
+                            <input type="checkbox" value="${cliente.id}" ${isSelected ? 'checked' : ''} onchange="clientesManager.toggleClienteSelection(${cliente.id}, this.checked)">
                             <span class="checkmark"></span>
                         </label>
                     </div>
@@ -139,6 +140,7 @@ class ClientesManager {
                 </article>
             `;
         }).join('');
+        this.updateActionsState();
     }
 
     filterClientes(termo) {
@@ -159,6 +161,18 @@ class ClientesManager {
         const duplicateBtn = document.getElementById('duplicateMultipleBtn');
         if (deleteBtn) deleteBtn.disabled = !hasSelection;
         if (duplicateBtn) duplicateBtn.disabled = !hasSelection;
+        const selectionBar = document.querySelector('.aurora-selection-bar');
+        if (selectionBar) {
+            selectionBar.classList.toggle('is-active', hasSelection);
+            selectionBar.dataset.selectionCount = String(this.selectedClientes.size);
+        }
+        document.querySelectorAll('.cliente-card').forEach((card) => {
+            const id = Number(card.dataset.id);
+            const isSelected = this.selectedClientes.has(id);
+            card.classList.toggle('is-selected', isSelected);
+            const checkbox = card.querySelector('input[type="checkbox"]');
+            if (checkbox) checkbox.checked = isSelected;
+        });
         const countLabel = document.querySelector('.selection-count');
         if (countLabel) {
             const total = this.selectedClientes.size;

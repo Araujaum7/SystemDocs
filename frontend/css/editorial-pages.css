@@ -1032,6 +1032,18 @@ html .aurora-toolbar {
 
 html .aurora-selection-bar {
   align-items: center;
+  padding: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+html .aurora-selection-bar.is-active {
+  background: color-mix(in srgb, var(--primary-500) 9%, transparent);
+  border-color: color-mix(in srgb, var(--primary-500) 34%, var(--border-soft));
 }
 
 html .selection-count {
@@ -1085,9 +1097,16 @@ html .cards-grid > .não-data {
 html .cliente-card,
 html .template-card {
   position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   min-width: 0;
   padding: 0;
   overflow: hidden;
+}
+
+html .cliente-card.is-selected {
+  border-color: color-mix(in srgb, var(--primary-500) 62%, var(--border-soft));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary-500) 28%, transparent), var(--shadow-sm);
 }
 
 html .aurora-data-card::before {
@@ -1216,24 +1235,27 @@ html :where(.client-meta p, .template-file) strong {
 
 html .template-fields {
   display: flex;
+  min-width: 0;
   flex-wrap: wrap;
   gap: 6px;
 }
 
 html .field-chip {
   display: inline-flex;
+  min-width: 0;
   max-width: 100%;
   min-height: 24px;
   align-items: center;
   padding: 3px 8px;
-  overflow: hidden;
+  overflow-wrap: anywhere;
   color: var(--text-secondary);
   background: var(--surface-muted);
   border: 1px solid var(--border-soft);
   border-radius: 999px;
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   font-size: 0.6875rem;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
 }
 
 html .data-card-date {
@@ -1260,8 +1282,8 @@ html :is(.cliente-card, .template-card) .card-footer .btn {
 
 html .checkbox {
   display: inline-grid;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   flex: 0 0 auto;
   place-items: center;
   cursor: pointer;
@@ -1291,6 +1313,20 @@ html .checkbox {
   html :is(.cliente-card, .template-card) .card-footer {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  html .aurora-selection-bar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html .selection-count {
+    grid-column: auto;
+  }
+
+  html .aurora-selection-bar .btn {
+    width: 100%;
   }
 }
 
