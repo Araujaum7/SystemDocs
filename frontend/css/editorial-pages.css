@@ -1416,6 +1416,16 @@ html .workflow-progress-item.active b {
   box-shadow: var(--brand-glow);
 }
 
+html .workflow-progress-item.complete {
+  color: var(--text-secondary);
+}
+
+html .workflow-progress-item.complete b {
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 12%, var(--surface-panel));
+  border-color: color-mix(in srgb, var(--success) 42%, var(--border-soft));
+}
+
 @media (max-width: 640px) {
   html .document-workflow-progress {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1924,6 +1934,21 @@ html .progress-track .progress-fill {
   transition: width 300ms var(--ease-standard);
 }
 
+html .progress-container.is-error {
+  border-color: color-mix(in srgb, var(--danger) 48%, var(--border-soft));
+}
+
+html .progress-feedback {
+  margin: var(--space-3) 0 0;
+  color: var(--danger);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+html .progress-feedback[hidden] {
+  display: none;
+}
+
 html .progress-results {
   margin-top: var(--space-6);
 }
@@ -1979,6 +2004,30 @@ html .generated-document__actions {
   display: flex;
   flex: 0 0 auto;
   gap: var(--space-2);
+}
+
+html .generated-document__unavailable {
+  display: inline-flex;
+  max-width: 210px;
+  align-items: center;
+  gap: 6px;
+  color: var(--warning);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+html .generation-result-state {
+  padding: var(--space-4);
+  color: var(--text-secondary);
+  background: var(--surface-muted);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+}
+
+html .generation-result-state.error {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 42%, var(--border-soft));
 }
 
 html .progress-dialog__footer {
@@ -2377,7 +2426,9 @@ html .text-warning {
   html .kpi-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
 
+@media (max-width: 1023px) {
   html .documentos-container {
     grid-template-columns: minmax(0, 1fr);
   }

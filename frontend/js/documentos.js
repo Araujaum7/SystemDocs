@@ -30,6 +30,7 @@ class DocumentosManager {
 
     init() {
         this.setupEventListeners();
+        this.updateSelectionCounts();
         Promise.all([this.loadClientes(), this.loadTemplates()]).catch(() => {
             window.auth.showNotification('Erro ao carregar dados para geracao', 'error');
         });
@@ -44,6 +45,9 @@ class DocumentosManager {
             if (document.getElementById('downloadMode').value !== 'folder') {
                 this.folderHandle = null;
             }
+        });
+        document.querySelectorAll('input[name="outputFormat"]').forEach((input) => {
+            input.addEventListener('change', () => this.updateWorkflowProgress());
         });
     }
 
@@ -173,6 +177,23 @@ class DocumentosManager {
         const hasSelection = clientesCount > 0 && templatesCount > 0;
         document.getElementById('gerarDocumentosBtn').disabled = !hasSelection;
         document.getElementById('editarCamposBtn').disabled = !hasSelection;
+        this.updateWorkflowProgress();
+    }
+
+    updateWorkflowProgress() {
+        const clientesReady = this.selectedClientes.size > 0;
+        const templatesReady = this.selectedTemplates.size > 0;
+        const currentStep = !clientesReady ? 1 : !templatesReady ? 2 : 4;
+
+        document.querySelectorAll('.workflow-progress-item').forEach((item) => {
+            const step = Number(item.dataset.step);
+            const isComplete = step < currentStep;
+            const isActive = step === currentStep;
+            item.classList.toggle('complete', isComplete);
+            item.classList.toggle('active', isActive);
+            if (isActive) item.setAttribute('aria-current', 'step');
+            else item.removeAttribute('aria-current');
+        });
     }
 
     updateCamposNecessarios() {
@@ -439,7 +460,7 @@ class DocumentosManager {
 
             this.monitorProgress(data.generationId);
         } catch (error) {
-            this.hideProgressModal();
+            this.showGenerationError(error.message);
             window.auth.showNotification(error.message, 'error');
         }
     }
@@ -473,6 +494,7 @@ class DocumentosManager {
                             <div class="progress-track">
                                 <div id="progressFill" class="progress-fill" style="width: 0%"></div>
                             </div>
+                            <p id="progressFeedback" class="progress-feedback" role="status" hidden></p>
                         </div>
                         <div id="progressResults" class="progress-results" style="display:none;">
                             <div class="progress-results__header">
@@ -497,8 +519,31 @@ class DocumentosManager {
         document.getElementById('progressFill').style.width = '0%';
         document.getElementById('progressStatus').textContent = 'Iniciando...';
         document.getElementById('progressDetails').textContent = '0 de 0';
+        document.querySelector('.progress-container')?.classList.remove('is-error');
+        const feedback = document.getElementById('progressFeedback');
+        if (feedback) {
+            feedback.hidden = true;
+            feedback.textContent = '';
+            feedback.setAttribute('role', 'status');
+        }
+        const resultActions = document.getElementById('resultActions');
+        const generatedDocuments = document.getElementById('generatedDocuments');
+        if (resultActions) resultActions.innerHTML = '';
+        if (generatedDocuments) generatedDocuments.innerHTML = '';
         document.getElementById('progressResults').style.display = 'none';
         document.getElementById('closeProgressBtn').style.display = 'none';
+    }
+
+    showGenerationError(message) {
+        const feedback = document.getElementById('progressFeedback');
+        document.querySelector('.progress-container')?.classList.add('is-error');
+        document.getElementById('progressStatus').textContent = 'Falha na gera\u00e7\u00e3o';
+        if (feedback) {
+            feedback.hidden = false;
+            feedback.setAttribute('role', 'alert');
+            feedback.textContent = message || 'N\u00e3o foi poss\u00edvel gerar os documentos.';
+        }
+        document.getElementById('closeProgressBtn').style.display = 'inline-flex';
     }
 
     hideProgressModal() {
@@ -529,7 +574,7 @@ class DocumentosManager {
                 }
             } catch (error) {
                 clearInterval(poll);
-                this.hideProgressModal();
+                this.showGenerationError(error.message);
                 window.auth.showNotification(error.message, 'error');
             }
         }, 1000);
@@ -542,22 +587,39 @@ class DocumentosManager {
         results.style.display = 'block';
 
         const documentos = Array.isArray(progress.documentos) ? progress.documentos : [];
+        const downloadableDocuments = documentos.filter((doc) => doc.docxDownloadUrl || doc.pdfDownloadUrl);
+        const resultTitle = results.querySelector('.progress-results__header h3');
+        if (resultTitle) {
+            resultTitle.innerHTML = progress.status === 'failed'
+                ? '<i class="ph-fill ph-warning-circle"></i> Gera&ccedil;&atilde;o interrompida'
+                : '<i class="ph-fill ph-check-circle"></i> Conclu&iacute;do';
+        }
+        resultActions.innerHTML = '';
+
         if (!documentos.length) {
-            list.innerHTML = '<p>Nenhum documento gerado.</p>';
+            const errorDetails = progress.erros?.length
+                ? `<ul>${progress.erros.map((error) => `<li>${this.escapeHtml(error.error || String(error))}</li>`).join('')}</ul>`
+                : '';
+            list.innerHTML = `<div class="generation-result-state${progress.status === 'failed' ? ' error' : ''}"><strong>${progress.status === 'failed' ? 'A gera&ccedil;&atilde;o n&atilde;o foi conclu&iacute;da.' : 'Nenhum documento foi gerado.'}</strong>${errorDetails}</div>`;
             return;
         }
 
-        resultActions.innerHTML = `<button class="btn btn-primary" id="downloadAllBtn"><i class="ph-fill ph-download-simple"></i> Baixar todos</button>`;
-        document.getElementById('downloadAllBtn').addEventListener('click', async () => {
-            await this.downloadAllDocuments(documentos);
-        });
+        if (downloadableDocuments.length) {
+            resultActions.innerHTML = `<button class="btn btn-primary" id="downloadAllBtn"><i class="ph-fill ph-download-simple"></i> Baixar todos</button>`;
+            document.getElementById('downloadAllBtn').addEventListener('click', async () => {
+                await this.downloadAllDocuments(downloadableDocuments);
+            });
+        }
 
-        list.innerHTML = documentos.map((doc, index) => `
+        list.innerHTML = documentos.map((doc, index) => {
+            const displayName = doc.nomeArquivo || doc.nome || 'Documento gerado';
+            const hasDownload = doc.docxDownloadUrl || doc.pdfDownloadUrl;
+            return `
             <div class="generated-document">
                 <div class="generated-document__row">
                     <div class="generated-document__copy">
-                        <strong title="${this.escapeHtml(doc.nomeArquivo || doc.nome)}">
-                            ${this.escapeHtml(doc.nomeArquivo || doc.nome)}
+                        <strong title="${this.escapeHtml(displayName)}">
+                            ${this.escapeHtml(displayName)}
                         </strong>
                         <small>
                             <i class="ph-fill ph-user"></i>${this.escapeHtml(doc.nomeCliente || doc.cliente || '-')}
@@ -566,10 +628,12 @@ class DocumentosManager {
                     <div class="generated-document__actions">
                         ${doc.docxDownloadUrl ? `<button class="btn btn-secondary" data-type="docx" data-index="${index}"><i class="ph-fill ph-file-doc"></i> Word</button>` : ''}
                         ${doc.pdfDownloadUrl ? `<button class="btn btn-danger" data-type="pdf" data-index="${index}"><i class="ph-fill ph-file-pdf"></i> PDF</button>` : ''}
+                        ${!hasDownload ? '<span class="generated-document__unavailable"><i class="ph ph-warning-circle"></i> Arquivo indispon&iacute;vel para download</span>' : ''}
                     </div>
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
 
         list.querySelectorAll('button[data-type]').forEach((button) => {
             button.addEventListener('click', async () => {
@@ -600,7 +664,7 @@ class DocumentosManager {
         const currentMode = this.getDownloadMode();
         if (currentMode === 'folder' || currentMode === 'auto') {
             try {
-                await this.downloadAllDocuments(documentos);
+                await this.downloadAllDocuments(downloadableDocuments);
             } catch {
                 // Usuario pode cancelar a selecao de pasta ou download falhar.
             }

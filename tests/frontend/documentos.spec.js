@@ -35,6 +35,9 @@ test('selection, counters and generation request preserve the production flow', 
   await expect(page.locator('.workflow-step')).toHaveCount(4);
   await expect(page.locator('.workflow-step-number')).toHaveText(['1', '2', '3', '4']);
   await expect(page.locator('.workflow-progress-item')).toHaveCount(4);
+  expect(await page.locator('.workflow-progress-item').evaluateAll((items) =>
+    items.map((item) => item.getAttribute('data-step'))
+  )).toEqual(['1', '2', '3', '4']);
   await expect(page.locator('.documentos-container')).toHaveCSS('gap', '24px');
 
   await page.locator('#searchClientesDoc').fill('Ana');
@@ -43,12 +46,17 @@ test('selection, counters and generation request preserve the production flow', 
   await expect(page.locator('#templatesSelection label')).toHaveCount(1);
 
   await page.locator('#cliente_doc_1').check();
+  await expect(page.locator('.workflow-progress-item').nth(0)).toHaveClass(/complete/);
+  await expect(page.locator('.workflow-progress-item').nth(1)).toHaveClass(/active/);
   await page.locator('#template_doc_2').check();
   await expect(page.locator('#clientesSelecionadosCount')).toHaveText('1');
   await expect(page.locator('#templatesSelecionadosCount')).toHaveText('1');
   await expect(page.locator('#totalDocumentosCount')).toHaveText('1');
   await expect(page.locator('#gerarDocumentosBtn')).toBeEnabled();
   await expect(page.locator('#editarCamposBtn')).toBeEnabled();
+  await expect(page.locator('.workflow-progress-item').nth(1)).toHaveClass(/complete/);
+  await expect(page.locator('.workflow-progress-item').nth(2)).toHaveClass(/complete/);
+  await expect(page.locator('.workflow-progress-item').nth(3)).toHaveClass(/active/);
 
   const generationRequest = page.waitForRequest(
     (request) => request.method() === 'POST' && request.url().endsWith('/api/gerar-documentos')
@@ -56,12 +64,56 @@ test('selection, counters and generation request preserve the production flow', 
   await page.locator('#gerarDocumentosBtn').click();
   await expect(page.locator('#progressModal')).toBeVisible();
   const request = await generationRequest;
-  expect(request.postDataJSON()).toMatchObject({
+  expect(request.postDataJSON()).toEqual({
     clienteIds: [1],
     templateIds: [2],
     outputFormat: 'both',
   });
   await expect(page.locator('#progressResults')).toBeVisible({ timeout: 3_000 });
+});
+
+test('generation request failure remains actionable inside the progress dialog', async ({ page }) => {
+  await openDocuments(page);
+  await page.route('**/api/gerar-documentos', async (route) => {
+    await route.fulfill({
+      status: 500,
+      contentType: 'application/json',
+      body: JSON.stringify({ error: 'Falha controlada na geração' }),
+    });
+  });
+  await page.locator('#cliente_doc_1').check();
+  await page.locator('#template_doc_2').check();
+  await page.locator('#gerarDocumentosBtn').click();
+
+  await expect(page.locator('#progressModal')).toBeVisible();
+  await expect(page.locator('#progressFeedback[role="alert"]')).toContainText('Falha controlada');
+  await expect(page.locator('#closeProgressBtn')).toBeVisible();
+  await expect(page.locator('#downloadAllBtn')).toHaveCount(0);
+});
+
+test('a completed item without a download url is not presented as downloadable', async ({ page }) => {
+  await openDocuments(page);
+  await page.route('**/api/gerar-documentos/progresso/ui-generation', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        status: 'completed',
+        completed: 1,
+        total: 1,
+        documentos: [{ nomeArquivo: 'Contrato final.docx', nomeCliente: 'Ana Martins' }],
+      }),
+    });
+  });
+  await page.locator('#cliente_doc_1').check();
+  await page.locator('#template_doc_2').check();
+  await page.locator('#gerarDocumentosBtn').click();
+
+  await expect(page.locator('.generated-document__unavailable')).toContainText(/arquivo indisponível/i, {
+    timeout: 3_000,
+  });
+  await expect(page.locator('#downloadAllBtn')).toHaveCount(0);
+  await expect(page.locator('.generated-document__actions button')).toHaveCount(0);
 });
 
 test('specific-field editor keeps fields and history in a contained modal', async ({ page }) => {
@@ -75,17 +127,29 @@ test('specific-field editor keeps fields and history in a contained modal', asyn
   await expect(page.locator('#historyContainer')).toContainText(/nenhum documento/i);
 });
 
-test('document generation workspace remains usable at 390px', async ({ page }) => {
-  await openDocuments(page, { width: 390, height: 844 });
-  await expect(page.locator('.documentos-container')).toHaveCSS('grid-template-columns', '358px');
+for (const viewport of [
+  { width: 320, height: 720 },
+  { width: 390, height: 844 },
+]) {
+  test(`document generation workspace remains usable at ${viewport.width}px`, async ({ page }) => {
+    await openDocuments(page, viewport);
+    await expect(page.locator('.actions-panel')).toHaveCSS('position', 'static');
 
-  await page.locator('#cliente_doc_1').check();
-  await page.locator('#template_doc_2').check();
-  await expect(page.locator('#gerarDocumentosBtn')).toBeVisible();
+    await page.locator('#cliente_doc_1').check();
+    await page.locator('#template_doc_2').check();
+    await expect(page.locator('#gerarDocumentosBtn')).toBeVisible();
 
-  const dimensions = await page.evaluate(() => ({
-    scrollWidth: document.documentElement.scrollWidth,
-    clientWidth: document.documentElement.clientWidth,
-  }));
-  expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth + 1);
+    const dimensions = await page.evaluate(() => ({
+      scrollWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+      contentLeft: document.querySelector('.document-workflow-progress').getBoundingClientRect().left,
+    }));
+    expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth + 1);
+    expect(dimensions.contentLeft).toBeGreaterThanOrEqual(15);
+  });
+}
+
+test('document review remains sticky from 1024px upward', async ({ page }) => {
+  await openDocuments(page, { width: 1024, height: 768 });
+  await expect(page.locator('.actions-panel')).toHaveCSS('position', 'sticky');
 });
