@@ -1,4 +1,6 @@
 import { expect, test } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import { installSession, mockApi } from './helpers/session.js';
 
 async function openClients(page, viewport) {
@@ -76,4 +78,71 @@ test('disabled actions remain visibly unavailable without blocking semantics', a
   await expect(disabled).toHaveCSS('cursor', 'not-allowed');
   const opacity = Number(await disabled.evaluate((element) => getComputedStyle(element).opacity));
   expect(opacity).toBeLessThan(1);
+});
+
+test('Aurora panels use progressive glass with a solid fallback', async ({ page }) => {
+  await openClients(page);
+
+  const panel = page.locator('.toolbar').first();
+  const panelStyle = await panel.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      background: style.backgroundColor,
+      border: style.borderTopColor,
+      backdrop: style.backdropFilter,
+    };
+  });
+  expect(panelStyle.background).toContain('rgba');
+  expect(panelStyle.border).not.toBe('rgba(0, 0, 0, 0)');
+  expect(panelStyle.backdrop).toContain('blur');
+
+  const stylesheet = await readFile(
+    resolve('frontend/css/editorial-components.css'),
+    'utf8'
+  );
+  expect(stylesheet).toContain('@supports not ((backdrop-filter: blur(1px))');
+});
+
+test('brand glow belongs to primary actions while destructive actions stay semantic', async ({
+  page,
+}) => {
+  await openClients(page);
+
+  const primary = page.locator('#addClienteBtn');
+  await expect(primary).not.toHaveCSS('box-shadow', 'none');
+
+  await page.evaluate(() => {
+    const danger = document.createElement('button');
+    danger.id = 'dangerProbe';
+    danger.className = 'btn btn-danger';
+    danger.textContent = 'Excluir';
+    document.body.appendChild(danger);
+  });
+  const colors = await page.locator('#dangerProbe').evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { background: style.backgroundColor, brand: getComputedStyle(document.body).getPropertyValue('--primary-500') };
+  });
+  expect(colors.background).not.toBe(colors.brand.trim());
+});
+
+test('disabled fields are explicit and reduced motion removes component animation', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await openClients(page);
+
+  await page.evaluate(() => {
+    const input = document.createElement('input');
+    input.id = 'disabledProbe';
+    input.disabled = true;
+    document.body.appendChild(input);
+    window.showToast('Sem animação', 'info', 500);
+  });
+
+  await expect(page.locator('#disabledProbe')).toBeDisabled();
+  await expect(page.locator('#disabledProbe')).toHaveCSS('cursor', 'not-allowed');
+  const animationDuration = await page
+    .locator('.toast')
+    .evaluate((element) => Number.parseFloat(getComputedStyle(element).animationDuration));
+  expect(animationDuration).toBeLessThanOrEqual(0.00001);
 });

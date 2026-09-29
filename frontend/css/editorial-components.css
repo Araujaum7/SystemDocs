@@ -40,6 +40,7 @@ html .btn.btn-primary {
   color: var(--on-primary);
   background: var(--primary-500);
   border-color: var(--primary-500);
+  box-shadow: var(--brand-glow);
 }
 
 html .btn-primary:hover,
@@ -47,6 +48,7 @@ html .btn.btn-primary:hover {
   color: var(--on-primary);
   background: var(--primary-600);
   border-color: var(--primary-600);
+  box-shadow: var(--brand-glow);
 }
 
 html .btn-secondary {
@@ -59,6 +61,7 @@ html .btn-danger {
   color: #fff;
   background: var(--danger);
   border-color: var(--danger);
+  box-shadow: none;
 }
 
 html .btn-success {
@@ -161,6 +164,7 @@ html .form-actions {
 
 html :where(.panel, .card, .kpi-card, .stat-card, .actions-panel) {
   color: var(--text-primary);
+  background: var(--surface-panel-strong);
   background: var(--surface-panel);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
@@ -190,6 +194,7 @@ html .toolbar {
   justify-content: space-between;
   gap: var(--space-3);
   padding: var(--space-3);
+  background: var(--surface-panel-strong);
   background: var(--surface-panel);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
@@ -213,6 +218,7 @@ html .search-box input {
 
 html :where(.table-container, .table-responsive, .data-table-wrapper) {
   overflow-x: auto;
+  background: var(--surface-panel-strong);
   background: var(--surface-panel);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
@@ -234,6 +240,9 @@ html :where(th, td) {
 }
 
 html th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   color: var(--text-secondary);
   background: var(--surface-muted);
   font-size: 0.75rem;
@@ -268,7 +277,7 @@ html .modal {
 
 html .modal-content {
   width: min(650px, 100%);
-  max-height: calc(100dvh - 48px);
+  max-height: calc(100dvh - 32px);
   color: var(--text-primary);
   background: var(--surface-panel);
   border: 1px solid var(--border-soft);
@@ -286,6 +295,7 @@ html .modal-header {
 
 html .modal-body {
   padding: var(--space-6);
+  overflow-y: auto;
 }
 
 html :where(.modal-close, .close-btn) {
@@ -381,6 +391,36 @@ html .toast--leaving {
   transition:
     opacity var(--duration-fast),
     transform var(--duration-fast);
+}
+
+html :where(.loading-state, .error-state) {
+  display: grid;
+  min-height: 180px;
+  place-items: center;
+  gap: var(--space-3);
+  padding: var(--space-8);
+  color: var(--text-secondary);
+  text-align: center;
+  background: var(--surface-panel-strong);
+  border: 1px dashed var(--border-emphasis);
+  border-radius: var(--radius-md);
+}
+
+html .error-state {
+  color: var(--danger);
+}
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html :where(.panel, .card, .kpi-card, .stat-card, .actions-panel, .toolbar, .table-container, .table-responsive, .data-table-wrapper, .modal-content) {
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html :where(.panel, .card, .kpi-card, .stat-card, .actions-panel, .toolbar, .table-container, .table-responsive, .data-table-wrapper, .modal-content) {
+    background: var(--surface-panel-strong);
+  }
 }
 
 @keyframes modal-enter {
