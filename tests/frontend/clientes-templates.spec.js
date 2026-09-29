@@ -39,6 +39,11 @@ test('clients keep search, create, import and bulk actions in the redesigned car
 
   const cards = page.locator('.cliente-card');
   await expect(cards).toHaveCount(2);
+  await expect(page.locator('.aurora-toolbar')).toBeVisible();
+  await expect(page.locator('.aurora-selection-bar')).toBeVisible();
+  await expect(cards.first()).toHaveClass(/aurora-data-card/);
+  await expect(cards.first().locator('.client-primary-data')).toContainText('Ana Martins');
+  await expect(cards.first().locator('.client-meta')).toContainText('123.456.789-01');
   await expect(page.locator('#clientesList')).toHaveCSS('gap', '16px');
 
   await page.locator('#searchClientes').fill('Beatriz');
@@ -56,6 +61,7 @@ test('clients keep search, create, import and bulk actions in the redesigned car
   await expect(cards.first().locator('input[type="checkbox"]')).toBeChecked();
   await expect(page.locator('#deleteMultipleBtn')).toBeEnabled();
   await expect(page.locator('#duplicateMultipleBtn')).toBeEnabled();
+  await expect(page.locator('.selection-count')).toContainText('1 selecionado');
 });
 
 test('template admin keeps download, optional-file edit and delete actions', async ({ page }) => {
@@ -74,6 +80,10 @@ test('template admin keeps download, optional-file edit and delete actions', asy
 
   const card = page.locator('.template-card');
   await expect(card).toBeVisible();
+  await expect(page.locator('.aurora-toolbar')).toBeVisible();
+  await expect(card).toHaveClass(/aurora-data-card/);
+  await expect(card.locator('.template-file')).toContainText('contrato-corporativo.docx');
+  await expect(card.locator('.field-chip')).toHaveCount(3);
   await expect(card.getByRole('button', { name: 'Baixar' })).toBeVisible();
   await expect(card.getByRole('button', { name: 'Editar' })).toBeVisible();
   await expect(card.getByRole('button', { name: 'Excluir' })).toBeVisible();

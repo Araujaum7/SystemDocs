@@ -122,13 +122,14 @@
             </header>
 
             <div class="content">
-                <div class="toolbar">
+                <div class="toolbar aurora-toolbar">
                     <div class="search-box">
                         <span class="icon"><i class="ph ph-magnifying-glass"></i></span>
-                        <input type="text" id="searchClientes" placeholder="Buscar cliente...">
+                        <input type="text" id="searchClientes" placeholder="Buscar por nome, CPF ou contato...">
                     </div>
 
-                    <div class="toolbar-actions">
+                    <div class="toolbar-actions aurora-selection-bar">
+                        <span class="selection-count" aria-live="polite">Nenhum selecionado</span>
                         <button id="deleteMultipleBtn" class="btn btn-danger" disabled>
                             <span class="emoji">️</span>
                             Excluir Selecionados
@@ -158,7 +159,7 @@
                 <form id="clienteForm">
                     <div class="form-grid" id="clienteFields">
                         <div class="form-group">
-                            <label for="nãome">Nome *</label>
+                            <label for="nome">Nome *</label>
                             <input type="text" id="nome" name="nome" required>
                         </div>
                         <div class="form-group">

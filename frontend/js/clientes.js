@@ -87,6 +87,12 @@ class ClientesManager {
         const container = document.getElementById('clientesList');
         if (!container) return;
 
+        const countLabel = document.querySelector('.selection-count');
+        if (countLabel && this.selectedClientes.size === 0) {
+            const total = clientesArray.length;
+            countLabel.textContent = `${total} ${total === 1 ? 'cliente' : 'clientes'}`;
+        }
+
         if (!clientesArray.length) {
             container.innerHTML = `
                 <div class="no-data">
@@ -99,30 +105,38 @@ class ClientesManager {
 
         container.innerHTML = clientesArray.map((cliente) => {
             const dados = cliente.dados || {};
+            const nome = this.escapeHtml(dados.nome || 'Sem nome');
+            const inicial = nome.charAt(0).toUpperCase();
             return `
-                <div class="card cliente-card" data-id="${cliente.id}">
+                <article class="card cliente-card aurora-data-card" data-id="${cliente.id}">
                     <div class="card-header">
-                        <h3>${this.escapeHtml(dados.nome || 'Sem nome')}</h3>
+                        <div class="client-primary-data">
+                            <span class="data-card-icon" aria-hidden="true">${inicial}</span>
+                            <div>
+                                <span class="data-card-eyebrow">Cliente</span>
+                                <h3>${nome}</h3>
+                            </div>
+                        </div>
                         <label class="checkbox">
                             <input type="checkbox" value="${cliente.id}" onchange="clientesManager.toggleClienteSelection(${cliente.id}, this.checked)">
                             <span class="checkmark"></span>
                         </label>
                     </div>
                     <div class="card-body">
-                        <div class="cliente-info">
-                            ${dados.cpf ? `<p><strong>CPF:</strong> ${this.escapeHtml(this.formatCpf(dados.cpf))}</p>` : ''}
-                            ${dados.email ? `<p><strong>Email:</strong> ${this.escapeHtml(dados.email)}</p>` : ''}
-                            ${dados.telefone ? `<p><strong>Telefone:</strong> ${this.escapeHtml(dados.telefone)}</p>` : ''}
-                            ${dados.endereco ? `<p><strong>Endereço:</strong> ${this.escapeHtml(dados.endereco)}</p>` : ''}
+                        <div class="cliente-info client-meta">
+                            ${dados.cpf ? `<p><i class="ph ph-identification-card" aria-hidden="true"></i><span><strong>CPF</strong>${this.escapeHtml(this.formatCpf(dados.cpf))}</span></p>` : ''}
+                            ${dados.email ? `<p><i class="ph ph-envelope-simple" aria-hidden="true"></i><span><strong>E-mail</strong>${this.escapeHtml(dados.email)}</span></p>` : ''}
+                            ${dados.telefone ? `<p><i class="ph ph-phone" aria-hidden="true"></i><span><strong>Telefone</strong>${this.escapeHtml(dados.telefone)}</span></p>` : ''}
+                            ${dados.endereco ? `<p><i class="ph ph-map-pin" aria-hidden="true"></i><span><strong>Endereço</strong>${this.escapeHtml(dados.endereco)}</span></p>` : ''}
                         </div>
-                        <small>Cadastrado em: ${new Date(cliente.created_at).toLocaleDateString('pt-BR')}</small>
+                        <small class="data-card-date"><i class="ph ph-calendar-blank"></i> Cadastrado em ${new Date(cliente.created_at).toLocaleDateString('pt-BR')}</small>
                     </div>
                     <div class="card-footer">
-                        <button class="btn btn-secondary" onclick="clientesManager.editarCliente(${cliente.id})">Editar</button>
-                        <button class="btn btn-success" onclick="clientesManager.duplicarCliente(${cliente.id})">Duplicar</button>
-                        <button class="btn btn-danger" onclick="clientesManager.deletarCliente(${cliente.id})">Excluir</button>
+                        <button class="btn btn-secondary" onclick="clientesManager.editarCliente(${cliente.id})"><i class="ph ph-pencil-simple"></i>Editar</button>
+                        <button class="btn btn-success" onclick="clientesManager.duplicarCliente(${cliente.id})"><i class="ph ph-copy"></i>Duplicar</button>
+                        <button class="btn btn-danger" onclick="clientesManager.deletarCliente(${cliente.id})"><i class="ph ph-trash"></i>Excluir</button>
                     </div>
-                </div>
+                </article>
             `;
         }).join('');
     }
@@ -145,6 +159,13 @@ class ClientesManager {
         const duplicateBtn = document.getElementById('duplicateMultipleBtn');
         if (deleteBtn) deleteBtn.disabled = !hasSelection;
         if (duplicateBtn) duplicateBtn.disabled = !hasSelection;
+        const countLabel = document.querySelector('.selection-count');
+        if (countLabel) {
+            const total = this.selectedClientes.size;
+            countLabel.textContent = total
+                ? `${total} ${total === 1 ? 'selecionado' : 'selecionados'}`
+                : `${this.clientes.length} ${this.clientes.length === 1 ? 'cliente' : 'clientes'}`;
+        }
     }
 
     openClienteModal(cliente = null) {

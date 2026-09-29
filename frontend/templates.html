@@ -106,7 +106,7 @@
                 <div class="header-left">
                     <div>
                         <h1>Gerenciar Templates</h1>
-                        <div class="breadcrumb">Upload e gestáão de templates de documentos</div>
+                        <div class="breadcrumb">Upload e gestão de templates de documentos</div>
                     </div>
                 </div>
                 <div class="header-actions">
@@ -119,14 +119,24 @@
             </header>
 
             <div class="content">
+                <div class="toolbar aurora-toolbar template-toolbar">
+                    <div class="template-toolbar-copy">
+                        <span class="toolbar-icon"><i class="ph ph-stack"></i></span>
+                        <div>
+                            <strong>Biblioteca de templates</strong>
+                            <span>Modelos disponíveis para a empresa ativa</span>
+                        </div>
+                    </div>
+                    <span class="meta-pill template-count" aria-live="polite">0 templates</span>
+                </div>
                 <div id="templatesList" class="cards-grid">
                     <!-- Templates serão carregados aqui -->
                 </div>
 
                 <!-- Mensagem para usuários não master -->
-                <div id="userMessage" class="não-data" style="display: nãone;">
+                <div id="userMessage" class="no-data" style="display: none;">
                     <span class="emoji">ℹ️</span>
-                    <h3>Acesso Restárito</h3>
+                    <h3>Acesso restrito</h3>
                     <p>Esta funcionalidade está disponível apenas para usuários master.</p>
                     <p>Entre em contato com o administrador do sistema.</p>
                 </div>

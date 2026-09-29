@@ -82,6 +82,11 @@ class TemplatesManager {
         const container = document.getElementById('templatesList');
         if (!container) return;
 
+        const countLabel = document.querySelector('.template-count');
+        if (countLabel) {
+            countLabel.textContent = `${list.length} ${list.length === 1 ? 'template' : 'templates'}`;
+        }
+
         if (!list.length) {
             container.innerHTML = `
                 <div class="no-data">
@@ -93,25 +98,30 @@ class TemplatesManager {
         }
 
         container.innerHTML = list.map((template) => `
-            <div class="card template-card">
+            <article class="card template-card aurora-data-card">
                 <div class="card-header">
-                    <h3>${this.escapeHtml(template.nome)}</h3>
+                    <div class="template-primary-data">
+                        <span class="data-card-icon"><i class="ph ph-file-doc"></i></span>
+                        <div><span class="data-card-eyebrow">Template DOCX</span><h3>${this.escapeHtml(template.nome)}</h3></div>
+                    </div>
                     <span class="badge">${Array.isArray(template.campos) ? template.campos.length : 0} campos</span>
                 </div>
                 <div class="card-body">
-                    <p><strong>Arquivo:</strong> ${this.escapeHtml(template.arquivo)}</p>
-                    <p><strong>Campos:</strong> ${this.escapeHtml((template.campos || []).join(', '))}</p>
-                    <small>Criado em: ${new Date(template.created_at).toLocaleDateString('pt-BR')}</small>
+                    <p class="template-file"><i class="ph ph-paperclip"></i><span><strong>Arquivo</strong>${this.escapeHtml(template.arquivo)}</span></p>
+                    <div class="template-fields" aria-label="Campos do template">
+                        ${(template.campos || []).map((campo) => `<span class="field-chip">${this.escapeHtml(campo)}</span>`).join('')}
+                    </div>
+                    <small class="data-card-date"><i class="ph ph-calendar-blank"></i> Criado em ${new Date(template.created_at).toLocaleDateString('pt-BR')}</small>
                 </div>
-                <div class="card-footer" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <div class="card-footer">
                     ${(this.usuario?.role === 'master' || this.usuario?.role === 'admin')
-                ? `<button class="btn btn-secondary" onclick="templatesManager.baixarTemplate(${template.id})">Baixar</button>
-                   <button class="btn btn-primary" onclick="templatesManager.abrirEditModal(${template.id})">Editar</button>
-                   <button class="btn btn-danger" onclick="templatesManager.deletarTemplate(${template.id})">Excluir</button>`
+                ? `<button class="btn btn-secondary" onclick="templatesManager.baixarTemplate(${template.id})"><i class="ph ph-download-simple"></i>Baixar</button>
+                   <button class="btn btn-primary" onclick="templatesManager.abrirEditModal(${template.id})"><i class="ph ph-pencil-simple"></i>Editar</button>
+                   <button class="btn btn-danger" onclick="templatesManager.deletarTemplate(${template.id})"><i class="ph ph-trash"></i>Excluir</button>`
                 : ''
             }
                 </div>
-            </div>
+            </article>
         `).join('');
     }
 
