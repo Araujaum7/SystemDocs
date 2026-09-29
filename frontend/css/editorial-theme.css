@@ -3,7 +3,7 @@ html .btn.btn-primary {
   color: var(--on-primary);
   background: var(--primary-500);
   border-color: var(--primary-500);
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--primary-700) 18%, transparent);
+  box-shadow: var(--brand-glow);
 }
 
 html .btn.btn-primary:hover {

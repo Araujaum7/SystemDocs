@@ -102,8 +102,9 @@ html :where(input:not([type='checkbox']):not([type='radio']), select, textarea):
   color: var(--text-primary);
   background: var(--surface-panel);
   border-color: var(--primary-500);
-  outline: none;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-500) 20%, transparent);
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary-500) 12%, transparent);
 }
 
 html :where(input, select, textarea):disabled {

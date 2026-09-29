@@ -19,9 +19,16 @@ test('buttons and fields share accessible dimensions and focus treatment', async
   await field.focus();
   const focusStyle = await field.evaluate((element) => {
     const style = getComputedStyle(element);
-    return { outline: style.outlineStyle, shadow: style.boxShadow };
+    return {
+      outline: style.outlineStyle,
+      outlineColor: style.outlineColor,
+      outlineWidth: style.outlineWidth,
+      shadow: style.boxShadow,
+    };
   });
   expect(focusStyle.outline !== 'none' || focusStyle.shadow !== 'none').toBeTruthy();
+  expect(focusStyle.outlineWidth).toBe('2px');
+  expect(focusStyle.outlineColor).not.toBe('rgba(0, 0, 0, 0)');
 });
 
 test('modal remains contained on a 390px viewport and keeps global helpers', async ({ page }) => {

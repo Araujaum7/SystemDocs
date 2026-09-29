@@ -12,6 +12,9 @@ html body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  transition:
+    background-color var(--duration-base) var(--ease-standard),
+    color var(--duration-base) var(--ease-standard);
 }
 
 html body::before,
@@ -34,13 +37,32 @@ html :where(button, .btn, input:not([type='checkbox']):not([type='radio']), sele
 }
 
 html :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--primary-500) 35%, transparent);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
 html ::selection {
   background: var(--primary-100);
   color: var(--primary-700);
+}
+
+html {
+  scrollbar-color: var(--border-emphasis) transparent;
+  scrollbar-width: thin;
+}
+
+html ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html ::-webkit-scrollbar-thumb {
+  background: var(--border-emphasis);
+  border-radius: 999px;
 }
 
 @media (prefers-reduced-motion: reduce) {

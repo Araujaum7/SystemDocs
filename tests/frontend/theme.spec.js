@@ -48,18 +48,24 @@ function contrastRatio(first, second) {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-test('light theme uses the approved neutral foundations', async ({ page }) => {
+test('light theme uses the Aurora ice foundations', async ({ page }) => {
   await openDashboard(page, { company: companies.amethyst, darkTheme: false });
 
-  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(246, 245, 242)');
-  await expect(page.locator('.panel').first()).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+  expect(await rootToken(page, '--surface-app')).toBe('#eef5fb');
+  expect(await rootToken(page, '--text-primary')).toBe('#10233f');
+  expect(await rootToken(page, '--surface-panel')).toBe('rgba(255, 255, 255, 0.78)');
+  expect(await rootToken(page, '--glass-blur')).toBe('18px');
+  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(238, 245, 251)');
 });
 
-test('dark theme uses charcoal foundations instead of violet-black', async ({ page }) => {
+test('dark theme uses the approved midnight Aurora foundations', async ({ page }) => {
   await openDashboard(page, { company: companies.amethyst, darkTheme: true });
 
-  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(16, 19, 24)');
-  await expect(page.locator('.panel').first()).toHaveCSS('background-color', 'rgb(24, 28, 34)');
+  expect(await rootToken(page, '--surface-app')).toBe('#061326');
+  expect(await rootToken(page, '--text-primary')).toBe('#f4f8ff');
+  expect(await rootToken(page, '--surface-panel')).toBe('rgba(12, 34, 64, 0.76)');
+  expect(await rootToken(page, '--glass-blur')).toBe('18px');
+  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(6, 19, 38)');
 });
 
 test('ausência de darkTheme inicia body.dark-theme', async ({ page }) => {
