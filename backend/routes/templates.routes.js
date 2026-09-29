@@ -2,7 +2,7 @@ import { Router } from 'express';
 import fs from 'fs';
 import { resolve } from 'path';
 import { dbGet, dbAll, dbRun } from '../database/db.js';
-import { authenticateToken, requireMaster, requireMasterOrAdmin } from '../middlewares/auth.middleware.js';
+import { authenticateToken, requireMasterOrAdmin } from '../middlewares/auth.middleware.js';
 import { tenantRequired } from '../middlewares/tenant.middleware.js';
 import { templateUpload } from '../middlewares/upload.middleware.js';
 import { asyncHandler, parseTenantId, safeJsonParse, formatDocxTemplateError } from '../utils/helpers.js';

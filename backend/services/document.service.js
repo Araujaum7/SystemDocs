@@ -1,11 +1,11 @@
 import fs from 'fs';
-import { join, resolve } from 'path';
+import { join } from 'path';
 import Docxtemplater from 'docxtemplater';
 import PizZip from 'pizzip';
-import crypto from 'crypto';
+
 import { TEMPLATES_DIR, GENERATED_DIR, ROOT_DIR } from '../config/paths.js';
 import { DOCXTEMPLATER_OPTIONS, ENABLE_PDF } from '../config/env.js';
-import { dbGet, dbAll, dbRun } from '../database/db.js';
+import { dbAll, dbRun } from '../database/db.js';
 import { auditLog, AcoesAuditoria } from '../utils/logger.js';
 import { fixDocxTemplate } from '../docx-preprocessor.js';
 import { convertToPDF } from '../lib/convert-wrapper.js';

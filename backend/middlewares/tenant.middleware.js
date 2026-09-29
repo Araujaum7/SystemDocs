@@ -21,7 +21,7 @@ export function resolveTenant(req, { required = false, allowBodyOrQueryForMaster
 
 export async function ensureTenantExists(tenantId) {
   if (!tenantId) return null;
-  return dbGet('SELECT id, nome, slug FROM empresas WHERE id = ? AND ativo = 1', [tenantId]);
+  return dbGet('SELECT id, nome, slug, config FROM empresas WHERE id = ? AND ativo = 1', [tenantId]);
 }
 
 export function tenantRequired(options = {}) {

@@ -1,7 +1,7 @@
 import cron from 'node-cron';
 import fs from 'fs';
 import { join, dirname } from 'path';
-import { dbRun, dbGet } from '../database/db.js';
+
 import { DB_PATH, GENERATED_DIR, TEMP_DIR } from '../config/paths.js';
 
 // Tempo máximo de retenção de arquivos gerados: 30 dias

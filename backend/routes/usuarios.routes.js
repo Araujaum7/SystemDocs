@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { dbGet, dbAll, dbRun } from '../database/db.js';
-import { authenticateToken, requireMaster, requireMasterOrAdmin } from '../middlewares/auth.middleware.js';
+import { authenticateToken, requireMasterOrAdmin } from '../middlewares/auth.middleware.js';
 import { tenantRequired } from '../middlewares/tenant.middleware.js';
 import { asyncHandler, parseTenantId } from '../utils/helpers.js';
 
