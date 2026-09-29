@@ -22,7 +22,7 @@ test('isolated native flow creates context, navigates, toggles theme and logs ou
   await expect(companyCard).toBeVisible();
   await companyCard.getByRole('button', { name: /entrar na empresa/i }).click();
   await expect(page).toHaveURL(/\/dashboard(?:\.html)?$/);
-  await expect(page.getByText('Empresa Smoke UI', { exact: true })).toBeVisible();
+  await expect(page.locator('.company-context__name')).toHaveText('Empresa Smoke UI');
 
   const themeToggle = page.locator('.theme-toggle');
   await themeToggle.click();

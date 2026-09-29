@@ -48,24 +48,24 @@ function contrastRatio(first, second) {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-test('light theme uses the Aurora ice foundations', async ({ page }) => {
+test('Aurora Executive exposes exact light neutral foundations', async ({ page }) => {
   await openDashboard(page, { company: companies.amethyst, darkTheme: false });
 
-  expect(await rootToken(page, '--surface-app')).toBe('#eef5fb');
-  expect(await rootToken(page, '--text-primary')).toBe('#10233f');
-  expect(await rootToken(page, '--surface-panel')).toBe('rgba(255, 255, 255, 0.78)');
-  expect(await rootToken(page, '--glass-blur')).toBe('18px');
-  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(238, 245, 251)');
+  expect(await rootToken(page, '--surface-app')).toBe('#f4f7fb');
+  expect(await rootToken(page, '--surface-panel-solid')).toBe('#ffffff');
+  expect(await rootToken(page, '--text-primary')).toBe('#172033');
+  expect(await rootToken(page, '--text-secondary')).toBe('#58677a');
+  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(244, 247, 251)');
 });
 
-test('dark theme uses the approved midnight Aurora foundations', async ({ page }) => {
+test('Aurora Executive exposes exact dark neutral foundations', async ({ page }) => {
   await openDashboard(page, { company: companies.amethyst, darkTheme: true });
 
-  expect(await rootToken(page, '--surface-app')).toBe('#061326');
-  expect(await rootToken(page, '--text-primary')).toBe('#f4f8ff');
-  expect(await rootToken(page, '--surface-panel')).toBe('rgba(12, 34, 64, 0.76)');
-  expect(await rootToken(page, '--glass-blur')).toBe('18px');
-  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(6, 19, 38)');
+  expect(await rootToken(page, '--surface-app')).toBe('#07111f');
+  expect(await rootToken(page, '--surface-panel-solid')).toBe('#0d1b2e');
+  expect(await rootToken(page, '--text-primary')).toBe('#f8fafc');
+  expect(await rootToken(page, '--text-secondary')).toBe('#a5b4c7');
+  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(7, 17, 31)');
 });
 
 test('ausência de darkTheme inicia body.dark-theme', async ({ page }) => {
@@ -176,7 +176,7 @@ for (const company of [
   { ...companies.amethyst, temaCor: '#F5F5F5' },
   { ...companies.amethyst, temaCor: '#101010' },
 ]) {
-  test(`primary action remains readable for extreme brand color ${company.temaCor}`, async ({
+  test(`action and focus remain readable for extreme brand color ${company.temaCor}`, async ({
     page,
   }) => {
     await openDashboard(page, { company });
@@ -186,6 +186,11 @@ for (const company of [
       button.textContent = 'Gerar documentos';
       button.id = 'contrastProbe';
       document.body.appendChild(button);
+
+      const input = document.createElement('input');
+      input.id = 'focusContrastProbe';
+      input.setAttribute('aria-label', 'Busca de contraste');
+      document.body.appendChild(input);
     });
 
     const colors = await page.locator('#contrastProbe').evaluate((button) => {
@@ -195,5 +200,16 @@ for (const company of [
 
     expect(contrastRatio(colors.background, colors.foreground)).toBeGreaterThanOrEqual(4.5);
     await expect(page.locator('#contrastProbe')).toHaveCSS('min-height', '44px');
+
+    await page.locator('#focusContrastProbe').focus();
+    const focusColors = await page.locator('#focusContrastProbe').evaluate((input) => {
+      const inputStyle = getComputedStyle(input);
+      const bodyStyle = getComputedStyle(document.body);
+      return {
+        outline: inputStyle.outlineColor,
+        surface: bodyStyle.backgroundColor,
+      };
+    });
+    expect(contrastRatio(focusColors.outline, focusColors.surface)).toBeGreaterThanOrEqual(3);
   });
 }

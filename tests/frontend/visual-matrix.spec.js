@@ -249,7 +249,7 @@ test('forced no-backdrop mode keeps glass surfaces opaque', async ({ page }) => 
     return { backdrop: style.backdropFilter, background: style.backgroundColor };
   });
   expect(surface.backdrop).toBe('none');
-  expect(surface.background).toBe('rgb(14, 41, 74)');
+  expect(surface.background).toBe('rgb(13, 27, 46)');
 });
 
 for (const viewport of viewports) {

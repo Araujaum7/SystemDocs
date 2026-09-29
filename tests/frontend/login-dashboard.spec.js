@@ -49,7 +49,7 @@ test('login is an editorial form with explicit labels and no Tailwind runtime', 
   await expect(page.locator('.animate-blob')).toHaveCount(0);
   await expect(page.locator('.login-shell')).toBeVisible();
   await expect(page.locator('body')).toHaveClass(/dark-theme/);
-  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(6, 19, 38)');
+  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(7, 17, 31)');
   await expect(page.locator('.login-shell')).toHaveCSS('backdrop-filter', 'blur(18px)');
   await expect(page.locator('.login-aurora')).toHaveCount(2);
   await expect(page.locator('.login-aurora').first()).toHaveCSS('animation-name', 'none');

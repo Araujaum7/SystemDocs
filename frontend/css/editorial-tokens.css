@@ -1,20 +1,23 @@
 :root:root {
   color-scheme: light;
 
-  --surface-app: #eef5fb;
-  --surface-sidebar: rgba(248, 252, 255, 0.92);
-  --surface-topbar: rgba(255, 255, 255, 0.84);
-  --surface-panel: rgba(255, 255, 255, 0.78);
-  --surface-panel-strong: #ffffff;
-  --surface-muted: rgba(223, 235, 246, 0.74);
-  --surface-elevated: #ffffff;
-  --surface-hover: rgba(214, 231, 246, 0.78);
+  --surface-app: #f4f7fb;
+  --surface-sidebar: rgba(255, 255, 255, 0.96);
+  --surface-topbar: rgba(255, 255, 255, 0.92);
+  --surface-panel: rgba(255, 255, 255, 0.94);
+  --surface-panel-solid: #ffffff;
+  --surface-panel-strong: var(--surface-panel-solid);
+  --surface-muted: rgba(238, 243, 249, 0.86);
+  --surface-raised: #eef3f9;
+  --surface-elevated: var(--surface-raised);
+  --surface-hover: rgba(203, 213, 225, 0.32);
+  --surface-active: rgba(3, 105, 161, 0.1);
 
-  --text-primary: #10233f;
-  --text-secondary: #52657d;
-  --text-subtle: #71839a;
-  --border-soft: rgba(40, 86, 135, 0.14);
-  --border-emphasis: rgba(40, 86, 135, 0.24);
+  --text-primary: #172033;
+  --text-secondary: #58677a;
+  --text-subtle: #6b7a8e;
+  --border-soft: #cbd5e1;
+  --border-emphasis: #94a3b8;
 
   --bg-app: var(--surface-app);
   --bg-panel: var(--surface-panel);
@@ -40,8 +43,8 @@
   --secondary-700: #1e40af;
   --on-primary: #ffffff;
   --on-secondary: #ffffff;
-  --focus-ring: #7c3aed;
-  --focus-ring: color-mix(in srgb, var(--primary-500) 72%, #ffffff 28%);
+  --focus-fallback: #0369a1;
+  --focus-ring: var(--focus-fallback);
   --brand-glow: 0 0 28px rgba(124, 58, 237, 0.2);
   --brand-glow: 0 0 28px color-mix(in srgb, var(--primary-500) 22%, transparent);
 
@@ -80,20 +83,23 @@
 body.dark-theme.dark-theme {
   color-scheme: dark;
 
-  --surface-app: #061326;
-  --surface-sidebar: rgba(7, 23, 45, 0.94);
-  --surface-topbar: rgba(9, 28, 53, 0.82);
-  --surface-panel: rgba(12, 34, 64, 0.76);
-  --surface-panel-strong: #0e294a;
-  --surface-muted: rgba(21, 52, 91, 0.64);
-  --surface-elevated: #123154;
-  --surface-hover: rgba(32, 76, 127, 0.46);
+  --surface-app: #07111f;
+  --surface-sidebar: rgba(9, 22, 37, 0.94);
+  --surface-topbar: rgba(7, 17, 31, 0.88);
+  --surface-panel: rgba(13, 27, 46, 0.88);
+  --surface-panel-solid: #0d1b2e;
+  --surface-panel-strong: var(--surface-panel-solid);
+  --surface-muted: rgba(18, 36, 60, 0.72);
+  --surface-raised: #12243c;
+  --surface-elevated: var(--surface-raised);
+  --surface-hover: rgba(125, 211, 252, 0.08);
+  --surface-active: rgba(125, 211, 252, 0.12);
 
-  --text-primary: #f4f8ff;
-  --text-secondary: #b6c5d9;
-  --text-subtle: #7f94ad;
-  --border-soft: rgba(132, 180, 232, 0.16);
-  --border-emphasis: rgba(132, 180, 232, 0.28);
+  --text-primary: #f8fafc;
+  --text-secondary: #a5b4c7;
+  --text-subtle: #7f90a6;
+  --border-soft: rgba(165, 180, 199, 0.16);
+  --border-emphasis: rgba(165, 180, 199, 0.32);
 
   --bg-app: var(--surface-app);
   --bg-panel: var(--surface-panel);
@@ -112,8 +118,8 @@ body.dark-theme.dark-theme {
   --danger: #f07a85;
   --info: #72a2ed;
 
-  --focus-ring: #a789ff;
-  --focus-ring: color-mix(in srgb, var(--primary-500) 66%, #ffffff 34%);
+  --focus-fallback: #7dd3fc;
+  --focus-ring: var(--focus-fallback);
   --brand-glow: 0 0 32px rgba(124, 58, 237, 0.3);
   --brand-glow: 0 0 32px color-mix(in srgb, var(--primary-500) 30%, transparent);
 

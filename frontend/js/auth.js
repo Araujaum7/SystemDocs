@@ -280,6 +280,7 @@ class Auth {
         });
         target.style.removeProperty('--on-primary');
         target.style.removeProperty('--on-secondary');
+        target.style.removeProperty('--focus-ring');
     }
 
     emitThemeChange() {
@@ -329,9 +330,33 @@ class Auth {
         });
 
         target.style.setProperty(`--on-${prefix}`, this.getReadableTextColor(shades['500']));
+
+        if (prefix === 'primary') {
+            const surface = isDark ? '#07111F' : '#F4F7FB';
+            const fallback = isDark ? '#7DD3FC' : '#0369A1';
+            const focusCandidates = [shades['500'], shades['600'], shades['700'], shades['400']];
+            const focusColor = focusCandidates.find(color => this.getContrastRatio(color, surface) >= 3)
+                || fallback;
+            target.style.setProperty('--focus-ring', focusColor);
+        }
     }
 
     getReadableTextColor(hex) {
+        const luminance = this.getRelativeLuminance(hex);
+        const contrastWithWhite = 1.05 / (luminance + 0.05);
+        const darkLuminance = 0.009;
+        const contrastWithDark = (luminance + 0.05) / (darkLuminance + 0.05);
+
+        return contrastWithWhite >= contrastWithDark ? '#ffffff' : '#111827';
+    }
+
+    getContrastRatio(firstHex, secondHex) {
+        const first = this.getRelativeLuminance(firstHex);
+        const second = this.getRelativeLuminance(secondHex);
+        return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
+    }
+
+    getRelativeLuminance(hex) {
         const normalized = hex.replace('#', '');
         const expanded = normalized.length === 3
             ? normalized.split('').map((value) => value + value).join('')
@@ -342,11 +367,7 @@ class Auth {
                 ? channel / 12.92
                 : Math.pow((channel + 0.055) / 1.055, 2.4))
             .reduce((total, channel, index) => total + channel * [0.2126, 0.7152, 0.0722][index], 0);
-        const contrastWithWhite = 1.05 / (luminance + 0.05);
-        const darkLuminance = 0.009;
-        const contrastWithDark = (luminance + 0.05) / (darkLuminance + 0.05);
-
-        return contrastWithWhite >= contrastWithDark ? '#ffffff' : '#111827';
+        return luminance;
     }
 
     hexToHsl(hex) {
