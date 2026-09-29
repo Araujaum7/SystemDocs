@@ -58,6 +58,51 @@ test('mobile shell opens and closes as a drawer', async ({ page }) => {
   await expect(page.locator('body')).not.toHaveClass(/sidebar-open/);
 });
 
+test('mobile drawer owns secondary controls and restores trigger focus', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openDashboard(page, { role: 'user' });
+
+  const toggle = page.locator('.mobile-sidebar-toggle');
+  const drawer = page.locator('.sidebar');
+
+  await expect(page.locator('.app-topbar')).toHaveCSS('height', '64px');
+  await expect(page.locator('.app-topbar .global-search')).toBeHidden();
+  await expect(page.locator('.app-topbar .theme-toggle')).toHaveCount(0);
+  await expect(page.locator('.app-topbar .topbar-company-context')).toHaveCount(0);
+  await expect(drawer.locator('.sidebar-mobile-tools .theme-toggle')).toBeVisible();
+  await expect(drawer.locator('.sidebar-mobile-tools .topbar-company-context')).toContainText(
+    DEFAULT_COMPANY.nome
+  );
+
+  await toggle.click();
+  await expect(drawer).toHaveClass(/active/);
+  await expect(page.locator('body')).toHaveCSS('overflow', 'hidden');
+  await expect(drawer.locator(':focus')).toHaveCount(1);
+
+  await page.keyboard.press('Escape');
+  await expect(drawer).not.toHaveClass(/active/);
+  await expect(page.locator('body')).not.toHaveClass(/sidebar-open/);
+  await expect(toggle).toBeFocused();
+});
+
+test('shell remains usable at 320px and 200 percent zoom', async ({ page }) => {
+  await page.setViewportSize({ width: 640, height: 900 });
+  await openDashboard(page, { role: 'user' });
+  await page.evaluate(() => {
+    document.documentElement.style.zoom = '2';
+  });
+
+  const layout = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+  }));
+  expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth + 1);
+  await expect(page.locator('.mobile-sidebar-toggle')).toBeVisible();
+  await expect(page.locator('.app-topbar #userInfo')).toBeVisible();
+  await expect(page.locator('.app-topbar .theme-toggle')).toHaveCount(0);
+  await expect(page.locator('.sidebar-mobile-tools .theme-toggle')).toBeVisible();
+});
+
 for (const [role, expected] of [
   ['master', true],
   ['admin', true],

@@ -27,7 +27,7 @@ html svg {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 959px) {
   html .main-content {
     width: 100%;
   }

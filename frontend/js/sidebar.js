@@ -51,7 +51,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const sidebarOverlay = document.querySelector('.sidebar-overlay');
     const headerLeft = document.querySelector('.header-left');
     const topbarActions = document.querySelector('.topbar-actions');
+    const sidebarFooter = sidebar.querySelector('.sidebar-footer');
     let mobileSidebarToggle = document.querySelector('.mobile-sidebar-toggle');
+    const mobileTools = document.createElement('div');
+    mobileTools.className = 'sidebar-mobile-tools';
+    mobileTools.setAttribute('aria-label', 'Preferências e empresa ativa');
+    sidebar.insertBefore(mobileTools, sidebarFooter);
 
     const storedCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
     sidebar.classList.toggle('collapsed', storedCollapsed);
@@ -62,9 +67,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     const companyContext = createCompanyContext();
-    if (companyContext && topbarActions && !topbarActions.querySelector('.topbar-company-context')) {
-        topbarActions.appendChild(companyContext);
-    }
 
     const userInfo = document.getElementById('userInfo');
     if (userInfo && topbarActions) {
@@ -99,11 +101,16 @@ document.addEventListener('DOMContentLoaded', function() {
             : '<i class="ph ph-list" aria-hidden="true"></i>';
     };
 
-    const closeDrawer = () => {
+    const getDrawerFocusableElements = () => Array.from(sidebar.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )).filter(element => element.offsetParent !== null);
+
+    const closeDrawer = ({ restoreFocus = false } = {}) => {
         sidebar.classList.remove('active');
         sidebarOverlay?.classList.remove('active');
         document.body.classList.remove('sidebar-open');
         syncMobileToggle(false);
+        if (restoreFocus) mobileSidebarToggle?.focus();
     };
 
     const openDrawer = () => {
@@ -111,6 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
         sidebarOverlay?.classList.add('active');
         document.body.classList.add('sidebar-open');
         syncMobileToggle(true);
+        getDrawerFocusableElements()[0]?.focus();
     };
 
     sidebarToggle?.addEventListener('click', () => {
@@ -120,36 +128,74 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     mobileSidebarToggle?.addEventListener('click', () => {
-        if (sidebar.classList.contains('active')) closeDrawer();
+        if (sidebar.classList.contains('active')) closeDrawer({ restoreFocus: true });
         else openDrawer();
     });
 
-    sidebarOverlay?.addEventListener('click', closeDrawer);
+    sidebarOverlay?.addEventListener('click', () => closeDrawer({ restoreFocus: true }));
     document.querySelectorAll('.nav-item').forEach((item) => {
         item.addEventListener('click', () => {
-            if (window.innerWidth <= 768) closeDrawer();
+            if (window.innerWidth < 960) closeDrawer();
         });
     });
 
     document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && sidebar.classList.contains('active')) closeDrawer();
-    });
+        if (!sidebar.classList.contains('active')) return;
 
-    window.addEventListener('resize', () => {
-        if (window.innerWidth > 768) closeDrawer();
+        if (event.key === 'Escape') {
+            closeDrawer({ restoreFocus: true });
+            return;
+        }
+
+        if (event.key !== 'Tab') return;
+        const focusable = getDrawerFocusableElements();
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
     });
 
     const storedDark = localStorage.getItem('darkTheme');
     const isDark = storedDark === null ? true : storedDark === 'true';
     document.body.classList.toggle('dark-theme', isDark);
+    let themeToggle = topbarActions?.querySelector('.theme-toggle');
     if (topbarActions && !topbarActions.querySelector('.theme-toggle')) {
-        const themeToggle = createThemeToggle(isDark);
+        themeToggle = createThemeToggle(isDark);
         const userProfile = topbarActions.querySelector('.topbar-user');
         topbarActions.insertBefore(themeToggle, userProfile);
     }
 
+    const syncResponsiveControls = () => {
+        const isMobileShell = window.innerWidth < 960;
+        if (isMobileShell) {
+            if (companyContext) mobileTools.appendChild(companyContext);
+            if (themeToggle) mobileTools.appendChild(themeToggle);
+            return;
+        }
+
+        if (companyContext && topbarActions) {
+            topbarActions.insertBefore(companyContext, themeToggle || topbarActions.firstChild);
+        }
+        if (themeToggle && topbarActions) {
+            const userProfile = topbarActions.querySelector('.topbar-user');
+            topbarActions.insertBefore(themeToggle, userProfile);
+        }
+    };
+
+    window.addEventListener('resize', () => {
+        if (window.innerWidth >= 960) closeDrawer();
+        syncResponsiveControls();
+    });
+
     syncDesktopToggle();
     syncMobileToggle(false);
+    syncResponsiveControls();
 });
 
 window.openModal = function(modalId) {
