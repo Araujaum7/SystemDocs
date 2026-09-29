@@ -25,4 +25,5 @@ test('theme and collapsed sidebar preferences are restored', async ({ page }) =>
 
   await expect(page.locator('body')).toHaveClass(/dark-theme/);
   await expect(page.locator('.sidebar')).toHaveClass(/collapsed/);
+  await expect(page.locator('#userRole')).toHaveText('Master • Amethyst Legal');
 });

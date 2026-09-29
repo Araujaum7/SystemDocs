@@ -131,7 +131,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (window.innerWidth > 768) closeDrawer();
     });
 
-    const isDark = localStorage.getItem('darkTheme') === 'true';
+    const storedDark = localStorage.getItem('darkTheme');
+    const isDark = storedDark === null ? true : storedDark === 'true';
     document.body.classList.toggle('dark-theme', isDark);
     const headerActions = document.querySelector('.header-actions');
     if (headerActions && !headerActions.querySelector('.theme-toggle')) {

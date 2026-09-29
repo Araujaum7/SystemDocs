@@ -15,7 +15,9 @@ class Auth {
     }
 
     init() {
-        document.body.classList.toggle('dark-theme', localStorage.getItem('darkTheme') === 'true');
+        const storedDark = localStorage.getItem('darkTheme');
+        const isDark = storedDark === null ? true : storedDark === 'true';
+        document.body.classList.toggle('dark-theme', isDark);
         this.checkAuth();
         this.setupEventListeners();
         this.updateUserInfo();
@@ -163,16 +165,61 @@ class Auth {
         return localStorage.getItem('empresaContextoNome') || null;
     }
 
+    getEmpresaContextoConfig() {
+        const usuario = this.getUsuario();
+        if (!usuario) return null;
+
+        let config = null;
+
+        if (usuario.role === 'master') {
+            const configRaw = localStorage.getItem('empresaContextoConfig');
+            if (configRaw) {
+                try {
+                    config = JSON.parse(configRaw);
+                } catch(e) {}
+            }
+            if (!config) {
+                const id = this.getEmpresaContextoId();
+                if (id) {
+                    const empresas = this.getEmpresas();
+                    const empresa = empresas.find(e => e.id === id);
+                    if (empresa && empresa.config) {
+                        try {
+                            config = typeof empresa.config === 'string' ? JSON.parse(empresa.config) : empresa.config;
+                        } catch(e) {}
+                    }
+                }
+            }
+        } else {
+            if (usuario.empresa_config) {
+                try {
+                    config = typeof usuario.empresa_config === 'string' ? JSON.parse(usuario.empresa_config) : usuario.empresa_config;
+                } catch(e) {}
+            }
+        }
+
+        return config;
+    }
+
     setEmpresaContexto(empresa) {
         localStorage.setItem('empresaContextoId', String(empresa.id));
         localStorage.setItem('empresaContextoNome', empresa.nome);
+        if (empresa.config) {
+            localStorage.setItem('empresaContextoConfig', typeof empresa.config === 'object' ? JSON.stringify(empresa.config) : String(empresa.config));
+        } else {
+            localStorage.removeItem('empresaContextoConfig');
+        }
         this.updateUserInfo();
+        this.applyThemeColor();
     }
 
     clearEmpresaContexto() {
         localStorage.removeItem('empresaContextoId');
         localStorage.removeItem('empresaContextoNome');
+        localStorage.removeItem('empresaContextoConfig');
+        this.clearInjectedPalette(document.body);
         this.updateUserInfo();
+        this.emitThemeChange();
     }
 
     ensureEmpresaContexto() {
@@ -196,38 +243,51 @@ class Auth {
 
     applyThemeColor() {
         try {
-            const usuario = this.getUsuario();
-            if (!usuario) return;
+            const config = this.getEmpresaContextoConfig();
+            const target = document.body;
 
-            let config = null;
-            if (usuario.role === 'master') {
-                const empresaId = this.getEmpresaContextoId();
-                const empresas = this.getEmpresas();
-                const empresa = empresas.find(e => e.id === empresaId);
-                if (empresa && empresa.config) {
-                    config = typeof empresa.config === 'string' ? JSON.parse(empresa.config) : empresa.config;
-                }
-            } else {
-                if (usuario.empresa_config) {
-                    config = typeof usuario.empresa_config === 'string' ? JSON.parse(usuario.empresa_config) : usuario.empresa_config;
-                }
+            this.clearInjectedPalette(target);
+
+            if (!config || (!config.temaCor && !config.temaCorSecundaria)) {
+                this.emitThemeChange();
+                return;
             }
 
-            if (config) {
-                const target = document.body;
-                const isDark = target.classList.contains('dark-theme');
+            const isDark = target.classList.contains('dark-theme');
 
-                if (config.temaCor) {
-                    this.injectPalette(target, 'primary', config.temaCor, isDark);
-                }
-
-                if (config.temaCorSecundaria) {
-                    this.injectPalette(target, 'secondary', config.temaCorSecundaria, isDark);
-                }
+            if (config.temaCor) {
+                this.injectPalette(target, 'primary', config.temaCor, isDark);
             }
+
+            if (config.temaCorSecundaria) {
+                this.injectPalette(target, 'secondary', config.temaCorSecundaria, isDark);
+            }
+
+            this.emitThemeChange();
         } catch (e) {
             console.error('Erro ao aplicar tema:', e);
         }
+    }
+
+    clearInjectedPalette(target) {
+        ['50', '100', '400', '500', '600', '700'].forEach(weight => {
+            target.style.removeProperty('--primary-' + weight);
+            target.style.removeProperty('--secondary-' + weight);
+        });
+        target.style.removeProperty('--on-primary');
+        target.style.removeProperty('--on-secondary');
+    }
+
+    emitThemeChange() {
+        const config = this.getEmpresaContextoConfig();
+        const isDark = document.body.classList.contains('dark-theme');
+        document.dispatchEvent(new CustomEvent('documentospro:themechange', {
+            detail: {
+                isDark,
+                primary: config?.temaCor || null,
+                secondary: config?.temaCorSecundaria || null
+            }
+        }));
     }
 
     injectPalette(target, prefix, baseHex, isDark) {

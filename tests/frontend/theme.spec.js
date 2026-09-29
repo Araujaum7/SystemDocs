@@ -49,7 +49,7 @@ function contrastRatio(first, second) {
 }
 
 test('light theme uses the approved neutral foundations', async ({ page }) => {
-  await openDashboard(page, { company: companies.amethyst });
+  await openDashboard(page, { company: companies.amethyst, darkTheme: false });
 
   await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(246, 245, 242)');
   await expect(page.locator('.panel').first()).toHaveCSS('background-color', 'rgb(255, 255, 255)');
@@ -62,14 +62,109 @@ test('dark theme uses charcoal foundations instead of violet-black', async ({ pa
   await expect(page.locator('.panel').first()).toHaveCSS('background-color', 'rgb(24, 28, 34)');
 });
 
+test('ausência de darkTheme inicia body.dark-theme', async ({ page }) => {
+  await openDashboard(page, { company: companies.amethyst, darkTheme: undefined });
+  await expect(page.locator('body')).toHaveClass(/dark-theme/);
+});
+
 for (const [name, company] of Object.entries(companies)) {
   test(`${name} company palette reaches semantic brand tokens`, async ({ page }) => {
-    await openDashboard(page, { company });
+    await openDashboard(page, { company, darkTheme: false });
 
     expect(await rootToken(page, '--primary-500')).toBe(company.temaCor.toLowerCase());
     expect(await rootToken(page, '--secondary-500')).toBe(company.temaCorSecundaria.toLowerCase());
   });
 }
+
+test('empresa verde aplica cor mesmo se somente a lista empresas contiver a config', async ({ page }) => {
+  await openDashboard(page, { company: companies.executive, omitContextConfig: true, darkTheme: false });
+  expect(await rootToken(page, '--primary-500')).toBe(companies.executive.temaCor.toLowerCase());
+});
+
+test('setEmpresaContexto() troca de roxo para verde sem reload', async ({ page }) => {
+  await openDashboard(page, { company: companies.amethyst, darkTheme: false });
+
+  await page.evaluate((executive) => {
+    window.auth.setEmpresaContexto({ id: executive.id, nome: executive.nome, config: { temaCor: executive.temaCor, temaCorSecundaria: executive.temaCorSecundaria } });
+  }, companies.executive);
+
+  expect(await rootToken(page, '--primary-500')).toBe(companies.executive.temaCor.toLowerCase());
+});
+
+test('troca de empresa remove o acento secundário que a nova empresa não fornece', async ({
+  page,
+}) => {
+  await openDashboard(page, { company: companies.amethyst, darkTheme: false });
+
+  await page.evaluate(() => {
+    window.auth.setEmpresaContexto({
+      id: 3,
+      nome: 'Marca Primária',
+      config: { temaCor: '#0F766E' },
+    });
+  });
+
+  const inlineSecondary = await page.evaluate(() =>
+    document.body.style.getPropertyValue('--secondary-500')
+  );
+  expect(inlineSecondary).toBe('');
+});
+
+test('clearEmpresaContexto() remove somente tokens injetados, sem apagar outros estilos inline do body', async ({ page }) => {
+  await openDashboard(page, { company: companies.amethyst, darkTheme: false });
+
+  await page.evaluate(() => {
+    document.body.style.margin = '10px';
+    window.auth.clearEmpresaContexto();
+  });
+
+  const inlinePrimary = await page.evaluate(() => document.body.style.getPropertyValue('--primary-500'));
+  expect(inlinePrimary.trim()).toBe('');
+  const margin = await page.evaluate(() => document.body.style.margin);
+  expect(margin).toBe('10px');
+});
+
+test('config inválida mantém fallbacks e não lança erro', async ({ page }) => {
+  await openDashboard(page, { company: companies.amethyst, darkTheme: false });
+
+  await page.evaluate(() => {
+    localStorage.setItem('empresaContextoConfig', 'invalid_json');
+    window.auth.applyThemeColor();
+  });
+
+  // Does not throw and returns empty or default
+  expect(await rootToken(page, '--primary-500')).not.toBe('');
+});
+
+test('evento documentospro:themechange é emitido após a empresa mudar', async ({ page }) => {
+  await openDashboard(page, { company: companies.amethyst, darkTheme: false });
+
+  const eventDetails = await page.evaluate((executive) => {
+    return new Promise(resolve => {
+      document.addEventListener('documentospro:themechange', (e) => resolve(e.detail), { once: true });
+      window.auth.setEmpresaContexto({ id: executive.id, nome: executive.nome, config: { temaCor: executive.temaCor, temaCorSecundaria: executive.temaCorSecundaria } });
+    });
+  }, companies.executive);
+
+  expect(eventDetails).toHaveProperty('isDark', false);
+  expect(eventDetails).toHaveProperty('primary', companies.executive.temaCor);
+});
+
+test('evento documentospro:themechange é emitido após o tema mudar', async ({ page }) => {
+  await openDashboard(page, { company: companies.amethyst, darkTheme: false });
+
+  const eventDetails = await page.evaluate(() => {
+    return new Promise((resolve) => {
+      document.addEventListener('documentospro:themechange', (event) => resolve(event.detail), {
+        once: true,
+      });
+      document.querySelector('.theme-toggle').click();
+    });
+  });
+
+  expect(eventDetails).toHaveProperty('isDark', true);
+  expect(eventDetails).toHaveProperty('primary', companies.amethyst.temaCor);
+});
 
 for (const company of [
   { ...companies.amethyst, temaCor: '#F5F5F5' },

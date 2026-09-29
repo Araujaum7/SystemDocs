@@ -17,7 +17,7 @@ const DEFAULT_RESPONSES = {
 
 export async function installSession(
   page,
-  { role = 'master', company = DEFAULT_COMPANY, darkTheme = false, sidebarCollapsed = false } = {}
+  { role = 'master', company = DEFAULT_COMPANY, darkTheme, sidebarCollapsed = false, omitContextConfig = false } = {}
 ) {
   const companyConfig = company
     ? {
@@ -39,16 +39,21 @@ export async function installSession(
   const empresas = company ? [{ id: company.id, nome: company.nome, config: companyConfig }] : [];
 
   await page.addInitScript(
-    ({ storedUser, storedCompanies, activeCompany, isDark, isCollapsed }) => {
+    ({ storedUser, storedCompanies, activeCompany, isDark, isCollapsed, activeConfig, omitConfig }) => {
       localStorage.setItem('token', 'ui-test-token');
       localStorage.setItem('usuario', JSON.stringify(storedUser));
       localStorage.setItem('empresas', JSON.stringify(storedCompanies));
-      localStorage.setItem('darkTheme', String(isDark));
+      if (isDark !== undefined) {
+        localStorage.setItem('darkTheme', String(isDark));
+      }
       localStorage.setItem('sidebarCollapsed', String(isCollapsed));
 
       if (activeCompany) {
         localStorage.setItem('empresaContextoId', String(activeCompany.id));
         localStorage.setItem('empresaContextoNome', activeCompany.nome);
+        if (!omitConfig && activeConfig) {
+          localStorage.setItem('empresaContextoConfig', JSON.stringify(activeConfig));
+        }
       }
     },
     {
@@ -57,6 +62,8 @@ export async function installSession(
       activeCompany: company,
       isDark: darkTheme,
       isCollapsed: sidebarCollapsed,
+      activeConfig: companyConfig,
+      omitConfig: omitContextConfig,
     }
   );
 }
