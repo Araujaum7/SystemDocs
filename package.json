@@ -14,6 +14,7 @@
     "test": "echo 'No tests specified'",
     "test:ui": "playwright test",
     "test:ui:update": "playwright test --update-snapshots",
+    "lint:frontend": "eslint frontend/js tests/frontend playwright.config.js eslint.config.js",
     "postinstall": "echo 'Instalação concluída'"
   },
   "dependencies": {
