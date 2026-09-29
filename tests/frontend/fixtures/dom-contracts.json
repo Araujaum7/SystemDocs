@@ -6,7 +6,7 @@
     "permissionClasses": []
   },
   "dashboard.html": {
-    "ids": ["contextAction", "contextBanner", "contextDescription", "contextTitle", "currentTime", "dashboardShell", "heroSubtitle", "heroTitle", "kpiCapacidade", "kpiCapacidadeTrend", "kpiClientes", "kpiClientesTrend", "kpiTemplates", "kpiTemplatesTrend", "kpiUsuarios", "kpiUsuariosTrend", "logoutBtn", "mainChart", "masterInsights", "masterPanel", "metaEmpresa", "metaHealth", "metaRole", "operationalInsights", "quickLinks", "recentActivity", "userInfo", "userName", "userRole"],
+    "ids": ["companyIdentityPanel", "companyInitial", "contextAction", "contextBanner", "contextDescription", "contextTitle", "currentTime", "dashboardPrimaryAction", "dashboardShell", "heroSubtitle", "heroTitle", "kpiCapacidade", "kpiCapacidadeTrend", "kpiClientes", "kpiClientesTrend", "kpiDocumentos", "kpiDocumentosTrend", "kpiTemplates", "kpiTemplatesTrend", "kpiUsuarios", "kpiUsuariosTrend", "logoutBtn", "mainChart", "masterInsights", "masterPanel", "metaEmpresa", "metaHealth", "metaRole", "operationalInsights", "quickLinks", "recentActivity", "topTemplatesChart", "topTemplatesLegend", "userInfo", "userName", "userRole"],
     "forms": [],
     "scripts": ["https://unpkg.com/@phosphor-icons/web", "https://cdn.jsdelivr.net/npm/chart.js", "js/auth.js?v=2", "js/sidebar.js?v=2", "js/dashboard.js?v=2", "js/ui-core.js?v=2"],
     "permissionClasses": ["admin-master-only", "master-only"]

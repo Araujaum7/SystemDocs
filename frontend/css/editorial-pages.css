@@ -7,6 +7,510 @@ html .login-page {
   background: var(--surface-app);
 }
 
+/* Dashboard Aurora Glass — composição aprovada */
+html .dashboard-page-header {
+  align-items: flex-end;
+}
+
+html .page-eyebrow {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--primary-500);
+  font-size: 0.6875rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+html .dashboard-heading-actions {
+  align-items: center;
+}
+
+html .dashboard-clock {
+  color: var(--text-subtle);
+  font-size: 0.75rem;
+}
+
+html .dashboard-shell {
+  display: grid;
+  width: 100%;
+  gap: var(--space-4);
+}
+
+html .kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+html .kpi-card {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 132px;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  overflow: hidden;
+  border-left: 1px solid var(--border-soft);
+}
+
+html .kpi-card::before {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 100%;
+  height: 2px;
+  margin: 0;
+  background: linear-gradient(90deg, var(--primary-500), transparent 72%);
+}
+
+html .kpi-card::after {
+  content: '';
+  position: absolute;
+  top: -55px;
+  left: -35px;
+  width: 120px;
+  height: 120px;
+  pointer-events: none;
+  background: var(--primary-500);
+  border-radius: 50%;
+  opacity: 0.08;
+  filter: blur(34px);
+}
+
+html .kpi-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--primary-500);
+  background: color-mix(in srgb, var(--primary-500) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary-500) 24%, transparent);
+  border-radius: 10px;
+  font-size: 1.1rem;
+}
+
+html .kpi-card.info .kpi-icon,
+html .kpi-card.secondary .kpi-icon {
+  color: var(--secondary-500);
+  background: color-mix(in srgb, var(--secondary-500) 14%, transparent);
+  border-color: color-mix(in srgb, var(--secondary-500) 24%, transparent);
+}
+
+html .kpi-card.success .kpi-icon {
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 14%, transparent);
+  border-color: color-mix(in srgb, var(--success) 24%, transparent);
+}
+
+html .kpi-label {
+  margin: 1px 0 4px;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+html .kpi-value {
+  color: var(--text-primary);
+  font-size: clamp(1.6rem, 2.5vw, 2rem);
+  font-weight: 750;
+  letter-spacing: -0.045em;
+  line-height: 1.1;
+}
+
+html .kpi-trend {
+  margin-top: 8px;
+  color: var(--text-subtle);
+  font-size: 0.6875rem;
+  line-height: 1.4;
+}
+
+html .dashboard-bento {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+html .dashboard-bento > .panel,
+html .dashboard-support-grid > .panel {
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-4);
+}
+
+html .dashboard-chart-panel,
+html .activity-panel {
+  grid-column: span 8;
+}
+
+html .company-identity-panel,
+html .templates-chart-panel {
+  grid-column: span 4;
+}
+
+html .dashboard-bento .panel-header,
+html .dashboard-support-grid .panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+}
+
+html .dashboard-bento .panel-header h3,
+html .dashboard-support-grid .panel-header h3 {
+  margin: 0 0 3px;
+  font-size: 0.9375rem;
+}
+
+html .dashboard-bento .panel-header small,
+html .dashboard-support-grid .panel-header small {
+  color: var(--text-subtle);
+  font-size: 0.6875rem;
+}
+
+html .dashboard-chart {
+  position: relative;
+  width: 100%;
+  height: 286px;
+}
+
+html .company-identity-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+html .company-identity-panel::after {
+  content: '';
+  position: absolute;
+  right: -54px;
+  bottom: -64px;
+  width: 190px;
+  height: 190px;
+  pointer-events: none;
+  background: var(--primary-500);
+  border-radius: 50%;
+  opacity: 0.12;
+  filter: blur(52px);
+}
+
+html .company-identity-mark {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  margin-bottom: var(--space-3);
+  place-items: center;
+  color: var(--on-primary);
+  background: linear-gradient(145deg, var(--primary-400), var(--primary-600));
+  border: 1px solid color-mix(in srgb, var(--primary-500) 46%, white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--brand-glow);
+  font-size: 1.75rem;
+  font-weight: 750;
+}
+
+html .company-identity-panel .context-banner {
+  display: block;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+
+html .company-identity-panel .context-title {
+  font-size: 1rem;
+}
+
+html .company-identity-panel .context-desc {
+  max-width: 32ch;
+}
+
+html .company-identity-panel #contextAction {
+  margin-top: var(--space-3);
+}
+
+html .company-identity-panel .hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: var(--space-4);
+}
+
+html .company-identity-panel .meta-pill {
+  min-height: 22px;
+  padding: 3px 7px;
+  font-size: 0.625rem;
+}
+
+html .company-theme-preview {
+  position: absolute;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  z-index: 1;
+  display: flex;
+  gap: 6px;
+}
+
+html .theme-swatch {
+  width: 16px;
+  height: 16px;
+  background: var(--primary-500);
+  border: 2px solid var(--surface-panel-strong);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--border-emphasis);
+}
+
+html .theme-swatch.secondary {
+  background: var(--secondary-500);
+}
+
+html .panel-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--primary-500);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+html :where(.activity-list, .insight-list, .chart-legend) {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+html .activity-item {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--border-soft);
+  border-radius: 0;
+}
+
+html .activity-item:last-child {
+  border-bottom: 0;
+}
+
+html .activity-avatar {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--primary-700);
+  background: var(--primary-100);
+  border-radius: 50%;
+  font-size: 0.6875rem;
+  font-weight: 750;
+}
+
+html .activity-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+html .activity-item .item-title,
+html .activity-item .item-sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html .activity-item time {
+  flex: 0 0 auto;
+  color: var(--text-subtle);
+  font-size: 0.6875rem;
+}
+
+html .donut-layout {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.9fr) minmax(120px, 1.1fr);
+  align-items: center;
+  gap: var(--space-3);
+}
+
+html .donut-chart {
+  position: relative;
+  height: 180px;
+}
+
+html .chart-legend li {
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-secondary);
+  font-size: 0.6875rem;
+}
+
+html .chart-legend li span:nth-child(2) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html .chart-legend strong {
+  color: var(--text-primary);
+  font-size: 0.6875rem;
+}
+
+html .legend-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--legend-color);
+  border-radius: 50%;
+}
+
+html .chart-legend .chart-empty {
+  display: block;
+  color: var(--text-subtle);
+}
+
+html .dashboard-support-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+html .quick-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+html .action-card {
+  display: flex;
+  min-width: 0;
+  min-height: 104px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: var(--space-3);
+  background: var(--surface-muted);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+}
+
+html .action-card > i {
+  margin-bottom: 5px;
+  color: var(--primary-500);
+  font-size: 1.15rem;
+}
+
+html .action-card strong {
+  color: var(--text-primary);
+  font-size: 0.75rem;
+}
+
+html .action-card span {
+  color: var(--text-subtle);
+  font-size: 0.6875rem;
+}
+
+html .insight-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 10px 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--border-soft);
+  border-radius: 0;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+html .insight-marker {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  margin-top: 6px;
+  background: var(--primary-500);
+  border-radius: 50%;
+}
+
+@media (max-width: 1180px) {
+  html .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  html .dashboard-chart-panel,
+  html .activity-panel {
+    grid-column: span 7;
+  }
+
+  html .company-identity-panel,
+  html .templates-chart-panel {
+    grid-column: span 5;
+  }
+
+  html .dashboard-support-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  html .dashboard-bento > .panel {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  html .dashboard-page-header {
+    align-items: stretch;
+  }
+
+  html .dashboard-heading-actions {
+    width: 100%;
+  }
+
+  html .dashboard-heading-actions .btn {
+    width: 100%;
+  }
+
+  html .dashboard-clock {
+    display: none;
+  }
+
+  html .kpi-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html .kpi-card {
+    min-height: 116px;
+  }
+
+  html .dashboard-chart {
+    height: 230px;
+  }
+
+  html .donut-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html .donut-chart {
+    height: 210px;
+  }
+
+  html .quick-links {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html .action-card {
+    min-height: 88px;
+  }
+}
+
 html .login-shell {
   display: grid;
   width: min(1080px, 100%);
@@ -744,7 +1248,7 @@ html #modalEditarCampos .modal-content {
 
 html #modalEditarCampos .modal-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 350px) !important;
+  grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr) !important;
   gap: var(--space-6) !important;
   padding: var(--space-6) !important;
 }
@@ -1393,5 +1897,137 @@ html .text-warning {
 
   html .content-wrapper {
     padding-inline: var(--space-4);
+  }
+}
+
+/* Mantém a composição Aurora acima das regras legadas desta folha. */
+html .dashboard-shell .kpi-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+html .dashboard-shell .kpi-card {
+  min-height: 132px;
+  padding: var(--space-4);
+  border-left-width: 1px;
+}
+
+html .dashboard-shell .kpi-card::before,
+html .dashboard-shell .kpi-card.info::before,
+html .dashboard-shell .kpi-card.success::before,
+html .dashboard-shell .kpi-card.warning::before {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 100%;
+  height: 2px;
+  margin: 0;
+  background: linear-gradient(90deg, var(--primary-500), transparent 72%);
+}
+
+html .dashboard-shell .kpi-label {
+  margin: 1px 0 4px;
+  font-size: 0.75rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+html .dashboard-shell .kpi-value {
+  font-size: clamp(1.6rem, 2.5vw, 2rem);
+}
+
+html .dashboard-shell .kpi-trend {
+  margin-top: 8px;
+}
+
+html .dashboard-bento .dashboard-chart-panel,
+html .dashboard-bento .activity-panel {
+  grid-column: span 8;
+}
+
+html .dashboard-bento .company-identity-panel,
+html .dashboard-bento .templates-chart-panel {
+  grid-column: span 4;
+}
+
+html .dashboard-shell .dashboard-chart {
+  height: 286px;
+}
+
+html .dashboard-shell .activity-item,
+html .dashboard-shell .insight-item {
+  padding: 10px 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--border-soft);
+  border-radius: 0;
+}
+
+html .dashboard-shell .action-card {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  grid-template-areas:
+    'icon title'
+    'icon copy';
+  align-content: center;
+  align-items: start;
+  column-gap: 9px;
+  row-gap: 3px;
+  min-height: 104px;
+  padding: var(--space-3);
+}
+
+html .dashboard-shell .action-card > i {
+  grid-area: icon;
+  margin: 2px 0 0;
+}
+
+html .dashboard-shell .action-card > strong {
+  grid-area: title;
+  min-width: 0;
+}
+
+html .dashboard-shell .action-card > span {
+  grid-area: copy;
+  min-width: 0;
+}
+
+@media (max-width: 1180px) {
+  html .dashboard-shell .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  html .dashboard-bento .dashboard-chart-panel,
+  html .dashboard-bento .activity-panel {
+    grid-column: span 7;
+  }
+
+  html .dashboard-bento .company-identity-panel,
+  html .dashboard-bento .templates-chart-panel {
+    grid-column: span 5;
+  }
+}
+
+@media (max-width: 900px) {
+  html .dashboard-bento > .panel {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  html .dashboard-shell .kpi-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html .dashboard-shell .kpi-card {
+    min-height: 116px;
+  }
+
+  html .dashboard-shell .dashboard-chart {
+    height: 230px;
+  }
+
+  html .dashboard-shell .action-card {
+    min-height: 88px;
   }
 }

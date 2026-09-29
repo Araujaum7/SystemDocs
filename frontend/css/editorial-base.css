@@ -5,6 +5,7 @@ html {
 }
 
 html body {
+  height: auto;
   min-height: 100%;
   font-family: var(--font-sans);
   background-color: var(--surface-app);

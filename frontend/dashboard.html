@@ -82,126 +82,91 @@
                 <div class="topbar-actions"></div>
             </header>
 
-            <header class="content-header page-header">
+            <header class="content-header page-header dashboard-page-header">
                 <div class="header-left">
                     <div>
-                        <h1>Dashboard Inteligente</h1>
-                        <div class="breadcrumb">Visão operacional para usuário e master</div>
+                        <span class="page-eyebrow">Visão geral</span>
+                        <h1 id="heroTitle">Olá! 👋</h1>
+                        <div class="breadcrumb" id="heroSubtitle">Acompanhe a operação da sua empresa hoje.</div>
                     </div>
                 </div>
-                <div class="header-actions"><span id="currentTime"></span></div>
+                <div class="header-actions dashboard-heading-actions">
+                    <span class="dashboard-clock" id="currentTime"></span>
+                    <a class="btn btn-primary" id="dashboardPrimaryAction" href="documentos.html">
+                        <i class="ph ph-file-plus" aria-hidden="true"></i>
+                        Gerar documento
+                    </a>
+                </div>
             </header>
 
             <main class="content">
                 <div class="dashboard-shell" id="dashboardShell">
-                    <section class="context-banner" id="contextBanner">
-                        <div>
-                            <div class="context-title" id="contextTitle">Carregando contexto...</div>
-                            <div class="context-desc" id="contextDescription">Aguarde enquanto consolidamos as
-                                informações.</div>
-                        </div>
-                        <div id="contextAction"></div>
-                    </section>
-
-                    <section class="dashboard-hero">
-                        <h2 id="heroTitle">Bem-vindo ao seu painel</h2>
-                        <p id="heroSubtitle">Este painel centraliza status, produtividade e próximos passos do dia.</p>
-                        <div class="hero-meta">
-                            <span class="meta-pill" id="metaRole">Perfil: -</span>
-                            <span class="meta-pill" id="metaEmpresa">Empresa: -</span>
-                            <span class="meta-pill" id="metaHealth">API: -</span>
-                        </div>
-                    </section>
-
-                    <section class="kpi-grid">
+                    <section class="kpi-grid" aria-label="Indicadores principais">
                         <article class="kpi-card primary">
-                            <p class="kpi-label">Clientes</p>
-                            <p class="kpi-value" id="kpiClientes">0</p>
-                            <p class="kpi-trend" id="kpiClientesTrend">Base de clientes da empresa ativa</p>
+                            <span class="kpi-icon"><i class="ph ph-file-text" aria-hidden="true"></i></span>
+                            <div><p class="kpi-label">Documentos gerados</p><p class="kpi-value" id="kpiDocumentos">0</p><p class="kpi-trend" id="kpiDocumentosTrend">Total registrado no sistema</p></div>
                         </article>
-
                         <article class="kpi-card info">
-                            <p class="kpi-label">Templates</p>
-                            <p class="kpi-value" id="kpiTemplates">0</p>
-                            <p class="kpi-trend" id="kpiTemplatesTrend">Modelos disponíveis para geração</p>
+                            <span class="kpi-icon"><i class="ph ph-users" aria-hidden="true"></i></span>
+                            <div><p class="kpi-label">Clientes</p><p class="kpi-value" id="kpiClientes">0</p><p class="kpi-trend" id="kpiClientesTrend">Base da empresa ativa</p></div>
                         </article>
-
+                        <article class="kpi-card secondary">
+                            <span class="kpi-icon"><i class="ph ph-copy" aria-hidden="true"></i></span>
+                            <div><p class="kpi-label">Templates</p><p class="kpi-value" id="kpiTemplates">0</p><p class="kpi-trend" id="kpiTemplatesTrend">Modelos disponíveis</p></div>
+                        </article>
                         <article class="kpi-card success">
-                            <p class="kpi-label">Usuários da Empresa</p>
-                            <p class="kpi-value" id="kpiUsuarios">0</p>
-                            <p class="kpi-trend" id="kpiUsuariosTrend">Controle de acesso por empresa</p>
-                        </article>
-
-                        <article class="kpi-card warning">
-                            <p class="kpi-label">Capacidade de Geração</p>
-                            <p class="kpi-value" id="kpiCapacidade">0</p>
-                            <p class="kpi-trend" id="kpiCapacidadeTrend">Clientes templates selecionáveis</p>
+                            <span class="kpi-icon"><i class="ph ph-user-circle" aria-hidden="true"></i></span>
+                            <div><p class="kpi-label">Usuários</p><p class="kpi-value" id="kpiUsuarios">0</p><p class="kpi-trend" id="kpiUsuariosTrend">Acessos ativos no contexto</p></div>
                         </article>
                     </section>
 
-                    <section class="dashboard-columns">
-                        <!-- Gráfico Principal -->
+                    <section class="dashboard-bento">
                         <article class="panel dashboard-chart-panel">
-                            <div class="panel-header">
-                                <h3>Evolução Operacional</h3>
-                                <small>Desempenho da Empresa (Demo)</small>
-                            </div>
-                            <div class="dashboard-chart">
-                                <canvas id="mainChart"></canvas>
-                            </div>
+                            <div class="panel-header"><div><h3>Documentos gerados</h3><small>Volume registrado por dia</small></div><span class="meta-pill">Dados reais</span></div>
+                            <div class="dashboard-chart"><canvas id="mainChart" aria-label="Gráfico de documentos gerados por dia"></canvas></div>
                         </article>
 
-                        <article class="panel">
-                            <div class="panel-header">
-                                <h3>Resumo Operacional</h3>
-                                <small>Indicadores práticos</small>
+                        <article class="panel company-identity-panel" id="companyIdentityPanel">
+                            <div class="panel-header"><div><h3>Empresa ativa</h3><small>Identidade e contexto atual</small></div></div>
+                            <div class="company-identity-mark" aria-hidden="true"><span id="companyInitial">D</span></div>
+                            <section class="context-banner" id="contextBanner">
+                                <div><div class="context-title" id="contextTitle">Carregando contexto...</div><div class="context-desc" id="contextDescription">Consolidando as informações.</div></div>
+                                <div id="contextAction"></div>
+                            </section>
+                            <div class="hero-meta">
+                                <span class="meta-pill" id="metaRole">Perfil: -</span>
+                                <span class="meta-pill" id="metaEmpresa">Empresa: -</span>
+                                <span class="meta-pill" id="metaHealth">API: -</span>
                             </div>
-                            <ul class="insight-list" id="operationalInsights"></ul>
+                            <div class="company-theme-preview" aria-label="Cores da empresa"><span class="theme-swatch primary"></span><span class="theme-swatch secondary"></span></div>
                         </article>
 
-                        <article class="panel">
-                            <div class="panel-header">
-                                <h3>Ações Rápidas</h3>
-                                <small>Acesso direto</small>
-                            </div>
-                            <div class="quick-links" id="quickLinks">
-                                <a href="clientes.html" class="action-card">
-                                    <strong>Novo cliente</strong>
-                                    <span>Cadastrar e manter base atualizada</span>
-                                </a>
-                                <a href="documentos.html" class="action-card">
-                                    <strong>Gerar documentos</strong>
-                                    <span>Word/PDF com download controlado</span>
-                                </a>
-                                <a href="templates.html" class="action-card">
-                                    <strong>Gerenciar templates</strong>
-                                    <span>Padronizar documentos por empresa</span>
-                                </a>
-                                <a href="empresas.html" class="action-card master-only">
-                                    <strong>Trocar empresa</strong>
-                                    <span>Alterar contexto de trabalho master</span>
-                                </a>
-                            </div>
-                        </article>
-                    </section>
-
-                    <section class="dashboard-columns">
-                        <article class="panel">
-                            <div class="panel-header">
-                                <h3>Atividade Relevante</h3>
-                                <small>Últimos registros da base</small>
-                            </div>
+                        <article class="panel activity-panel">
+                            <div class="panel-header"><div><h3>Atividade recente</h3><small>Últimos registros da empresa</small></div><a href="clientes.html" class="panel-link">Ver clientes <i class="ph ph-arrow-right"></i></a></div>
                             <ul class="activity-list" id="recentActivity"></ul>
                         </article>
 
-                        <article class="panel master-only" id="masterPanel">
-                            <div class="panel-header">
-                                <h3>Visão Master</h3>
-                                <small>Governança multiempresa</small>
-                            </div>
-                            <ul class="insight-list" id="masterInsights"></ul>
+                        <article class="panel templates-chart-panel">
+                            <div class="panel-header"><div><h3>Templates mais utilizados</h3><small>Distribuição registrada</small></div></div>
+                            <div class="donut-layout"><div class="donut-chart"><canvas id="topTemplatesChart" aria-label="Gráfico dos templates mais utilizados"></canvas></div><ul class="chart-legend" id="topTemplatesLegend"></ul></div>
                         </article>
                     </section>
+
+                    <section class="dashboard-support-grid">
+                        <article class="panel">
+                            <div class="panel-header"><div><h3>Ações rápidas</h3><small>Acesso direto</small></div></div>
+                            <div class="quick-links" id="quickLinks">
+                                <a href="clientes.html" class="action-card"><i class="ph ph-user-plus"></i><strong>Novo cliente</strong><span>Atualizar a base</span></a>
+                                <a href="documentos.html" class="action-card"><i class="ph ph-file-plus"></i><strong>Gerar documentos</strong><span>Produzir Word ou PDF</span></a>
+                                <a href="templates.html" class="action-card"><i class="ph ph-copy"></i><strong>Gerenciar templates</strong><span>Organizar modelos</span></a>
+                                <a href="empresas.html" class="action-card master-only"><i class="ph ph-buildings"></i><strong>Trocar empresa</strong><span>Alterar contexto</span></a>
+                            </div>
+                        </article>
+                        <article class="panel"><div class="panel-header"><div><h3>Resumo operacional</h3><small>Qualidade da base atual</small></div></div><ul class="insight-list" id="operationalInsights"></ul></article>
+                        <article class="panel master-only" id="masterPanel"><div class="panel-header"><div><h3>Visão Master</h3><small>Governança multiempresa</small></div></div><ul class="insight-list" id="masterInsights"></ul></article>
+                    </section>
+
+                    <div class="legacy-dashboard-contract" hidden><span id="kpiCapacidade">0</span><span id="kpiCapacidadeTrend"></span></div>
                 </div>
             </main>
         </div>

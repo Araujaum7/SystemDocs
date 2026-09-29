@@ -1,12 +1,15 @@
 class DashboardManager {
     constructor() {
         this.usuario = window.auth.getUsuario();
+        this.chartInstance = null;
+        this.topTemplatesChartInstance = null;
         this.state = {
             clientes: [],
             templates: [],
             usuarios: [],
             empresas: [],
             health: null,
+            stats: null,
         };
 
         if (!this.usuario) {
@@ -14,6 +17,7 @@ class DashboardManager {
             return;
         }
 
+        document.addEventListener('documentospro:themechange', () => this.refreshCharts());
         this.start();
     }
 
@@ -30,41 +34,38 @@ class DashboardManager {
     }
 
     startClock() {
-        const el = document.getElementById('currentTime');
-        if (!el) return;
+        const element = document.getElementById('currentTime');
+        if (!element) return;
 
         const update = () => {
-            el.textContent = new Date().toLocaleString('pt-BR');
+            element.textContent = new Date().toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit',
+            });
         };
 
         update();
-        setInterval(update, 1000);
+        setInterval(update, 60_000);
     }
 
     applyBaseIdentity() {
         const empresaNome = window.auth.getEmpresaContextoNome() || this.usuario.empresa_nome || 'Sem empresa';
         const role = this.usuario.role === 'master' ? 'Master' : 'Usuário';
+        const firstName = String(this.usuario.nome || '').trim().split(/\s+/)[0] || 'Olá';
 
+        document.getElementById('heroTitle').textContent = `Olá, ${firstName}! 👋`;
+        document.getElementById('heroSubtitle').textContent = 'Aqui está o panorama da sua empresa hoje.';
         document.getElementById('metaRole').textContent = `Perfil: ${role}`;
         document.getElementById('metaEmpresa').textContent = `Empresa: ${empresaNome}`;
-
-        if (this.usuario.role === 'master') {
-            document.getElementById('heroTitle').textContent = 'Painel de gestão multiempresa';
-            document.getElementById('heroSubtitle').textContent = 'Acompanhe contexto ativo, operação por empresa e ações administrativas em um único lugar.';
-        } else {
-            document.getElementById('heroTitle').textContent = `Olá, ${this.usuario.nome}`;
-            document.getElementById('heroSubtitle').textContent = 'Seu painel traz o status da empresa ativa e atalhos para produção de documentos.';
-        }
     }
 
     async fetchJson(url) {
         const response = await window.auth.fetchWithAuth(url);
         const data = await response.json();
 
-        if (!response.ok) {
-            throw new Error(data.error || `Falha em ${url}`);
-        }
-
+        if (!response.ok) throw new Error(data.error || `Falha em ${url}`);
         return data;
     }
 
@@ -72,15 +73,32 @@ class DashboardManager {
         const banner = document.getElementById('contextBanner');
         banner.classList.remove('warning', 'success');
         banner.classList.add(type);
-
         document.getElementById('contextTitle').textContent = title;
         document.getElementById('contextDescription').textContent = description;
         document.getElementById('contextAction').innerHTML = actionHtml;
     }
 
     setHealthStatus(ok) {
-        const value = ok ? 'API: Online' : 'API: Instável';
-        document.getElementById('metaHealth').textContent = value;
+        document.getElementById('metaHealth').textContent = ok ? 'API: Online' : 'API: Instável';
+    }
+
+    renderCompanyPanel({ active, name, description }) {
+        const companyName = name || 'Sem empresa selecionada';
+        const initial = companyName.trim().charAt(0).toUpperCase() || 'D';
+        document.getElementById('companyInitial').textContent = initial;
+        document.getElementById('metaEmpresa').textContent = `Empresa: ${companyName}`;
+
+        if (active) {
+            this.setContextBanner('success', companyName, description || 'Dados filtrados pela empresa ativa.');
+            return;
+        }
+
+        this.setContextBanner(
+            'warning',
+            'Contexto de empresa não selecionado',
+            'Escolha uma empresa para habilitar clientes, templates e documentos.',
+            '<a href="/empresas" class="btn btn-primary">Selecionar empresa</a>'
+        );
     }
 
     async loadMasterWithoutContext() {
@@ -90,32 +108,19 @@ class DashboardManager {
                 this.fetchJson('/api/health').catch(() => null),
             ]);
 
-            this.state.empresas = empresas;
+            this.state.empresas = Array.isArray(empresas) ? empresas : [];
             this.state.health = health;
-
             this.setHealthStatus(!!health?.ok);
-            this.setContextBanner(
-                'warning',
-                'Contexto de empresa não selecionado',
-                'Como master, escolha uma empresa para habilitar clientes, templates e geração de documentos.',
-                '<a href="/empresas" class="btn btn-primary">Selecionar Empresa</a>'
-            );
-
-            this.renderKpis({
-                clientes: 0,
-                templates: 0,
-                usuarios: 0,
-                capacidade: 0,
-            });
-
+            this.renderCompanyPanel({ active: false });
+            this.renderKpis({ documentos: 0, clientes: 0, templates: 0, usuarios: 0 });
             this.renderOperationalInsights([
-                `Empresas cadastradas: <strong>${empresas.length}</strong>`,
-                'Sem empresa ativa no momento: operações de cliente/template ficam bloqueadas.',
-                'Recomendação: entre em uma empresa e siga para o fluxo de geração.',
+                `Empresas cadastradas: <strong>${this.state.empresas.length}</strong>.`,
+                'Selecione uma empresa para liberar os indicadores operacionais.',
             ]);
-
-            this.renderRecentActivity([], 'Selecione uma empresa para visualizar atividade local.');
-            this.renderMasterInsights(empresas, null);
+            this.renderRecentActivity([], 'Selecione uma empresa para visualizar a atividade.');
+            this.renderMasterInsights(this.state.empresas, []);
+            this.renderDocumentsChart(null);
+            this.renderTopTemplatesChart(null);
         } catch (error) {
             window.auth.showNotification(error.message, 'error');
         }
@@ -136,34 +141,39 @@ class DashboardManager {
             }
 
             const results = await Promise.all(requests);
-
-            this.state.clientes = results[0] || [];
-            this.state.templates = results[1] || [];
+            this.state.clientes = Array.isArray(results[0]) ? results[0] : [];
+            this.state.templates = Array.isArray(results[1]) ? results[1] : [];
             this.state.health = results[2] || null;
             this.state.stats = results[3] || null;
-            this.state.usuarios = this.usuario.role === 'master' ? (results[4] || []) : [];
-            this.state.empresas = this.usuario.role === 'master' ? (results[5] || []) : [];
+            this.state.usuarios = this.usuario.role === 'master' && Array.isArray(results[4]) ? results[4] : [];
+            this.state.empresas = this.usuario.role === 'master' && Array.isArray(results[5]) ? results[5] : [];
+
+            const statsKpis = this.state.stats?.kpis || {};
+            const clientes = Number.isFinite(Number(statsKpis.clientes))
+                ? Number(statsKpis.clientes)
+                : this.state.clientes.length;
+            const documentos = Number.isFinite(Number(statsKpis.documentos))
+                ? Number(statsKpis.documentos)
+                : 0;
+            const usuarios = this.usuario.role === 'master' ? this.state.usuarios.length : 1;
+            const empresaNome = window.auth.getEmpresaContextoNome() || this.usuario.empresa_nome || 'Empresa ativa';
 
             this.setHealthStatus(!!this.state.health?.ok);
-
-            const empresaNome = window.auth.getEmpresaContextoNome() || this.usuario.empresa_nome || 'Empresa ativa';
-            this.setContextBanner(
-                'success',
-                `Contexto ativo: ${empresaNome}`,
-                'Tudo pronto para operar. Seus dados já estão filtrados por empresa.'
-            );
-
-            const capacidade = this.state.clientes.length * this.state.templates.length;
-            this.renderKpis({
-                clientes: this.state.clientes.length,
-                templates: this.state.templates.length,
-                usuarios: this.usuario.role === 'master' ? this.state.usuarios.length : 1,
-                capacidade,
+            this.renderCompanyPanel({
+                active: true,
+                name: empresaNome,
+                description: 'Ambiente pronto para operar com dados isolados.',
             });
-
-            this.renderOperationalInsights(this.buildOperationalInsights(capacidade));
+            this.renderKpis({
+                documentos,
+                clientes,
+                templates: this.state.templates.length,
+                usuarios,
+            });
+            this.renderOperationalInsights(this.buildOperationalInsights());
             this.renderRecentActivity(this.state.clientes);
-            this.renderChart(this.state.stats);
+            this.renderDocumentsChart(this.state.stats);
+            this.renderTopTemplatesChart(this.state.stats);
 
             if (this.usuario.role === 'master') {
                 this.renderMasterInsights(this.state.empresas, this.state.usuarios);
@@ -173,215 +183,170 @@ class DashboardManager {
         }
     }
 
-    buildOperationalInsights(capacidade) {
+    formatNumber(value) {
+        return new Intl.NumberFormat('pt-BR').format(Number(value) || 0);
+    }
+
+    renderKpis({ documentos, clientes, templates, usuarios }) {
+        const values = { kpiDocumentos: documentos, kpiClientes: clientes, kpiTemplates: templates, kpiUsuarios: usuarios };
+        Object.entries(values).forEach(([id, value]) => {
+            document.getElementById(id).textContent = this.formatNumber(value);
+        });
+
+        document.getElementById('kpiDocumentosTrend').textContent = documentos
+            ? 'Total registrado no sistema'
+            : 'Nenhum documento registrado';
+        document.getElementById('kpiClientesTrend').textContent = clientes
+            ? 'Base da empresa ativa'
+            : 'Cadastre clientes para começar';
+        document.getElementById('kpiTemplatesTrend').textContent = templates
+            ? 'Modelos disponíveis para produção'
+            : 'Cadastre um template para gerar';
+        document.getElementById('kpiUsuariosTrend').textContent = usuarios
+            ? 'Acessos ativos no contexto'
+            : 'Nenhum acesso no contexto';
+
+        const capacidade = (Number(clientes) || 0) * (Number(templates) || 0);
+        document.getElementById('kpiCapacidade').textContent = this.formatNumber(capacidade);
+        document.getElementById('kpiCapacidadeTrend').textContent = 'Clientes × templates';
+    }
+
+    buildOperationalInsights() {
         const clientes = this.state.clientes;
         const templates = this.state.templates;
-
-        const clientesComCpf = clientes.filter((c) => String(c?.dados?.cpf || '').trim() !== '').length;
-        const clientesComEmail = clientes.filter((c) => String(c?.dados?.email || '').trim() !== '').length;
-
-        const coberturaCpf = clientes.length ? Math.round((clientesComCpf / clientes.length) * 100) : 0;
-        const coberturaEmail = clientes.length ? Math.round((clientesComEmail / clientes.length) * 100) : 0;
-
+        const clientesComCpf = clientes.filter((cliente) => String(cliente?.dados?.cpf || '').trim()).length;
+        const clientesComEmail = clientes.filter((cliente) => String(cliente?.dados?.email || '').trim()).length;
         const mediaCampos = templates.length
-            ? Math.round(templates.reduce((sum, t) => sum + (Array.isArray(t.campos) ? t.campos.length : 0), 0) / templates.length)
+            ? Math.round(templates.reduce((sum, template) => sum + (Array.isArray(template.campos) ? template.campos.length : 0), 0) / templates.length)
             : 0;
 
         return [
-            `Cobertura de CPF: <strong>${coberturaCpf}%</strong> da base de clientes.`,
-            `Cobertura de e-mail: <strong>${coberturaEmail}%</strong> da base de clientes.`,
+            `Clientes com CPF: <strong>${clientesComCpf} de ${clientes.length}</strong>.`,
+            `Clientes com e-mail: <strong>${clientesComEmail} de ${clientes.length}</strong>.`,
             `Média de campos por template: <strong>${mediaCampos}</strong>.`,
-            `Capacidade imediata de geração: <strong>${capacidade}</strong> documentos por rodada.`,
         ];
     }
 
-    renderKpis({ clientes, templates, usuarios, capacidade }) {
-        document.getElementById('kpiClientes').textContent = clientes;
-        document.getElementById('kpiTemplates').textContent = templates;
-        document.getElementById('kpiUsuarios').textContent = usuarios;
-        document.getElementById('kpiCapacidade').textContent = capacidade;
-
-        document.getElementById('kpiClientesTrend').textContent = clientes === 0
-            ? 'Cadastre clientes para iniciar operações'
-            : 'Base de clientes da empresa ativa';
-
-        document.getElementById('kpiTemplatesTrend').textContent = templates === 0
-            ? 'Crie templates para liberar geração'
-            : 'Modelos disponíveis para produção';
-
-        document.getElementById('kpiUsuariosTrend').textContent = this.usuario.role === 'master'
-            ? 'Usuários vinculados ao contexto atual'
-            : 'Seu acesso está ativo nesta empresa';
-
-        document.getElementById('kpiCapacidadeTrend').textContent = capacidade === 0
-            ? 'Sem combinação suficiente para gerar documentos'
-            : 'Estimativa de documentos por seleção total';
-    }
-
     renderOperationalInsights(items) {
-        const container = document.getElementById('operationalInsights');
-        container.innerHTML = items.map((item) => `
-            <li class="insight-item">
-                <div class="item-title">${item}</div>
-            </li>
+        document.getElementById('operationalInsights').innerHTML = items.map((item) => `
+            <li class="insight-item"><span class="insight-marker" aria-hidden="true"></span><div class="item-title">${item}</div></li>
         `).join('');
     }
 
     renderRecentActivity(clientes, emptyMessage = 'Ainda não há atividade para exibir.') {
         const container = document.getElementById('recentActivity');
-
         if (!Array.isArray(clientes) || clientes.length === 0) {
-            container.innerHTML = `
-                <li class="activity-item">
-                    <div class="item-title">Sem registros recentes</div>
-                    <div class="item-sub">${emptyMessage}</div>
-                </li>
-            `;
+            container.innerHTML = `<li class="activity-item empty"><div class="item-title">Sem registros recentes</div><div class="item-sub">${emptyMessage}</div></li>`;
             return;
         }
 
         const sorted = [...clientes]
             .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
             .slice(0, 5);
-
         container.innerHTML = sorted.map((cliente) => {
             const nome = this.escapeHtml(cliente?.dados?.nome || 'Cliente sem nome');
             const cpf = this.escapeHtml(cliente?.dados?.cpf || 'CPF não informado');
             const created = cliente?.created_at ? new Date(cliente.created_at).toLocaleDateString('pt-BR') : '-';
-            return `
-                <li class="activity-item">
-                    <div class="item-title">${nome}</div>
-                    <div class="item-sub">CPF: ${cpf} • cadastrado em ${created}</div>
-                </li>
-            `;
+            const initial = nome.charAt(0).toUpperCase();
+            return `<li class="activity-item"><span class="activity-avatar">${initial}</span><div class="activity-copy"><div class="item-title">${nome}</div><div class="item-sub">Cliente cadastrado • ${cpf}</div></div><time>${created}</time></li>`;
         }).join('');
     }
 
     renderMasterInsights(empresas, usuarios) {
         const container = document.getElementById('masterInsights');
         if (!container) return;
-
-        const totalEmpresas = Array.isArray(empresas) ? empresas.length : 0;
-        const totalUsuariosContexto = Array.isArray(usuarios) ? usuarios.length : 0;
-        const empresaNome = window.auth.getEmpresaContextoNome() || 'Sem contexto';
-
         const items = [
-            {
-                title: `Empresas cadastradas: ${totalEmpresas}`,
-                sub: 'Use Empresas para trocar contexto e gerenciar isolamento dos dados.',
-                status: 'info',
-            },
-            {
-                title: `Usuários no contexto atual: ${totalUsuariosContexto}`,
-                sub: `Contexto ativo: ${this.escapeHtml(empresaNome)}.`,
-                status: totalUsuariosContexto > 0 ? 'success' : 'warning',
-            },
-            {
-                title: 'Boas práticas de governança',
-                sub: 'Mantenha templates específicos por empresa e revise permissões periodicamente.',
-                status: 'warning',
-            },
+            `Empresas cadastradas: <strong>${Array.isArray(empresas) ? empresas.length : 0}</strong>.`,
+            `Usuários no contexto: <strong>${Array.isArray(usuarios) ? usuarios.length : 0}</strong>.`,
+            'Revise permissões e identidade visual periodicamente.',
         ];
-
-        container.innerHTML = items.map((item) => `
-            <li class="insight-item">
-                <div class="item-title">${item.title}</div>
-                <div class="item-sub">${item.sub}</div>
-                <span class="status-chip ${item.status}">${this.statusLabel(item.status)}</span>
-            </li>
-        `).join('');
+        container.innerHTML = items.map((item) => `<li class="insight-item"><span class="insight-marker"></span><div class="item-title">${item}</div></li>`).join('');
     }
 
-    statusLabel(status) {
-        if (status === 'success') return 'OK';
-        if (status === 'warning') return 'Atenção';
-        return 'Info';
+    chartColors() {
+        const style = getComputedStyle(document.body);
+        return {
+            primary: style.getPropertyValue('--primary-500').trim() || '#7c3aed',
+            secondary: style.getPropertyValue('--secondary-500').trim() || '#2563eb',
+            text: style.getPropertyValue('--text-secondary').trim() || '#b6c5d9',
+            border: style.getPropertyValue('--border-soft').trim() || 'rgba(132, 180, 232, 0.16)',
+            panel: style.getPropertyValue('--surface-panel-strong').trim() || '#0e294a',
+            info: style.getPropertyValue('--info').trim() || '#72a2ed',
+        };
     }
 
-    escapeHtml(unsafe) {
-        if (!unsafe) return '';
-        return String(unsafe).replace(/[&<"'>]/g, (m) => {
-            switch (m) {
-                case '&': return '&amp;';
-                case '<': return '&lt;';
-                case '>': return '&gt;';
-                case '"': return '&quot;';
-                case "'": return '&#039;';
-                default: return m;
-            }
+    renderDocumentsChart(stats) {
+        const canvas = document.getElementById('mainChart');
+        if (!canvas || typeof window.Chart === 'undefined') return;
+        this.chartInstance?.destroy();
+
+        const colors = this.chartColors();
+        const points = Array.isArray(stats?.graficos?.docsPorDia) ? stats.graficos.docsPorDia : [];
+        const labels = points.length ? points.map((item) => item.data.split('-').reverse().join('/')) : ['Sem dados'];
+        const data = points.length ? points.map((item) => Number(item.quantidade) || 0) : [0];
+        const gradient = canvas.getContext('2d').createLinearGradient(0, 0, 0, 260);
+        gradient.addColorStop(0, colors.primary);
+        gradient.addColorStop(1, colors.secondary);
+
+        this.chartInstance = new window.Chart(canvas, {
+            type: 'bar',
+            data: { labels, datasets: [{ label: 'Documentos', data, backgroundColor: gradient, borderRadius: 5, borderSkipped: false, maxBarThickness: 28 }] },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 500 },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: colors.border }, ticks: { color: colors.text, precision: 0 } },
+                    x: { grid: { display: false }, ticks: { color: colors.text, maxRotation: 0 } },
+                },
+                plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+            },
         });
     }
 
-    renderChart(stats) {
-        const ctx = document.getElementById('mainChart');
-        if (!ctx) return;
-        
-        if (this.chartInstance) {
-            this.chartInstance.destroy();
-        }
+    renderTopTemplatesChart(stats) {
+        const canvas = document.getElementById('topTemplatesChart');
+        const legend = document.getElementById('topTemplatesLegend');
+        const items = Array.isArray(stats?.graficos?.topTemplates) ? stats.graficos.topTemplates : [];
+        const colors = this.chartColors();
+        const palette = [colors.primary, colors.secondary, colors.info, colors.text];
 
-        const rootStyle = getComputedStyle(document.body);
-        const gridColor = rootStyle.getPropertyValue('--border-soft').trim() || '#e2e0da';
-        const textColor = rootStyle.getPropertyValue('--text-secondary').trim() || '#60646c';
-        const primaryColorHex = rootStyle.getPropertyValue('--primary-500').trim() || '#7c3aed';
-        
-        // Converte hex para rgba para o background
-        const hexToRgb = (hex) => {
-            let h = hex.replace('#', '');
-            if(h.length === 3) h = h.split('').map(c => c+c).join('');
-            return parseInt(h, 16);
-        };
-        const num = hexToRgb(primaryColorHex);
-        const r = (num >> 16) & 255;
-        const g = (num >> 8) & 255;
-        const b = num & 255;
-        const primaryBg = `rgba(${r}, ${g}, ${b}, 0.2)`;
+        legend.innerHTML = items.length
+            ? items.map((item, index) => `<li><span class="legend-dot" style="--legend-color: ${palette[index % palette.length]}"></span><span>${this.escapeHtml(item.nome || item.label || 'Template')}</span><strong>${this.formatNumber(item.quantidade)}</strong></li>`).join('')
+            : '<li class="chart-empty">Sem dados de utilização</li>';
 
-        const labels = stats?.graficos?.docsPorDia?.map(d => d.data.split('-').reverse().join('/')) || ['Sem dados'];
-        const data = stats?.graficos?.docsPorDia?.map(d => d.quantidade) || [0];
-
-        this.chartInstance = new Chart(ctx, {
-            type: 'line',
+        if (!canvas || typeof window.Chart === 'undefined') return;
+        this.topTemplatesChartInstance?.destroy();
+        this.topTemplatesChartInstance = new window.Chart(canvas, {
+            type: 'doughnut',
             data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Documentos Gerados',
-                    data: data,
-                    backgroundColor: primaryBg,
-                    borderColor: primaryColorHex,
-                    borderWidth: 2,
-                    pointBackgroundColor: primaryColorHex,
-                    pointBorderColor: rootStyle.getPropertyValue('--surface-panel').trim() || '#ffffff',
-                    pointRadius: 3,
-                    pointHoverRadius: 5,
-                    tension: 0.3,
-                    fill: true
-                }]
+                labels: items.length ? items.map((item) => item.nome || item.label || 'Template') : ['Sem dados'],
+                datasets: [{ data: items.length ? items.map((item) => Number(item.quantidade) || 0) : [1], backgroundColor: items.length ? palette.slice(0, items.length) : [colors.border], borderColor: colors.panel, borderWidth: 3, hoverOffset: 2 }],
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                animation: {
-                    duration: 2000,
-                    easing: 'easeOutQuart'
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: gridColor },
-                        ticks: { color: textColor, stepSize: 1 }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: textColor }
-                    }
-                },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { mode: 'index', intersect: false }
-                }
-            }
+                cutout: '70%',
+                animation: { duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 500 },
+                plugins: { legend: { display: false } },
+            },
         });
+    }
+
+    refreshCharts() {
+        this.renderDocumentsChart(this.state.stats);
+        this.renderTopTemplatesChart(this.state.stats);
+    }
+
+    escapeHtml(unsafe) {
+        if (!unsafe) return '';
+        return String(unsafe).replace(/[&<"'>]/g, (character) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            '\'': '&#039;',
+        })[character]);
     }
 }
 

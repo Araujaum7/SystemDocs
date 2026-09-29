@@ -13,12 +13,30 @@ const dashboardResponses = {
     ],
   },
   '/api/templates': { status: 200, body: [{ id: 1, nome: 'Contrato', campos: ['nome', 'cpf'] }] },
-  '/api/usuarios': { status: 200, body: [{ id: 1, nome: 'Marina Costa' }] },
+  '/api/usuarios': { status: 200, body: Array.from({ length: 12 }, (_, index) => ({ id: index + 1, nome: `Usuário ${index + 1}` })) },
   '/api/empresas': { status: 200, body: [{ id: 1, nome: 'Amethyst Legal' }] },
   '/api/health': { status: 200, body: { ok: true } },
   '/api/dashboard/stats': {
     status: 200,
-    body: { graficos: { docsPorDia: [{ data: '2026-09-28', quantidade: 4 }] } },
+    body: {
+      kpis: { documentos: 1248, clientes: 284 },
+      graficos: {
+        docsPorDia: [
+          { data: '2026-09-22', quantidade: 32 },
+          { data: '2026-09-23', quantidade: 41 },
+          { data: '2026-09-24', quantidade: 37 },
+          { data: '2026-09-25', quantidade: 56 },
+          { data: '2026-09-26', quantidade: 48 },
+          { data: '2026-09-27', quantidade: 63 },
+          { data: '2026-09-28', quantidade: 71 },
+        ],
+        topTemplates: [
+          { nome: 'Contratos', quantidade: 42 },
+          { nome: 'Procurações', quantidade: 24 },
+          { nome: 'Declarações', quantidade: 18 },
+        ],
+      },
+    },
   },
 };
 
@@ -35,7 +53,7 @@ test('login is an editorial form with explicit labels and no Tailwind runtime', 
   await expect(page.getByRole('button', { name: /entrar no sistema/i })).toBeVisible();
 });
 
-test('dashboard presents editorial KPIs, chart, actions and master governance', async ({
+test('dashboard reproduces the approved Aurora bento with truthful data', async ({
   page,
 }) => {
   await installSession(page, { role: 'master' });
@@ -43,11 +61,27 @@ test('dashboard presents editorial KPIs, chart, actions and master governance', 
   await page.goto('/dashboard.html');
 
   await expect(page.locator('.kpi-card')).toHaveCount(4);
-  await expect(page.locator('#kpiClientes')).toHaveText('1');
+  await expect(page.locator('.kpi-card .kpi-label')).toHaveText([
+    'Documentos gerados',
+    'Clientes',
+    'Templates',
+    'Usuários',
+  ]);
+  await expect(page.locator('#kpiDocumentos')).toHaveText('1.248');
+  await expect(page.locator('#kpiClientes')).toHaveText('284');
+  await expect(page.locator('#kpiTemplates')).toHaveText('1');
+  await expect(page.locator('#kpiUsuarios')).toHaveText('12');
+  await expect(page.locator('#dashboardPrimaryAction')).toHaveText(/gerar documento/i);
   await expect(page.locator('#mainChart')).toBeVisible();
+  await expect(page.locator('#topTemplatesChart')).toBeVisible();
+  await expect(page.locator('#topTemplatesLegend')).toContainText('Contratos');
+  await expect(page.locator('#topTemplatesLegend')).toContainText('42');
+  await expect(page.locator('#companyIdentityPanel')).toContainText('Amethyst Legal');
+  await expect(page.locator('#recentActivity')).toContainText('Ana Martins');
   await expect(page.locator('#quickLinks .action-card')).toHaveCount(4);
   await expect(page.locator('#masterPanel')).toBeVisible();
-  await expect(page.locator('.dashboard-hero')).toHaveCSS('box-shadow', /none|rgba\(27, 31, 36/);
+  const kpiSubtexts = await page.locator('.kpi-trend').allTextContents();
+  expect(kpiSubtexts.every((text) => !/[↑↓]|\d+%/.test(text))).toBeTruthy();
 });
 
 for (const viewport of [
