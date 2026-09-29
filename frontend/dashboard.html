@@ -100,8 +100,12 @@
             </header>
 
             <main class="content">
-                <div class="dashboard-shell" id="dashboardShell">
-                    <section class="kpi-grid" aria-label="Indicadores principais">
+                <div class="dashboard-shell" id="dashboardShell" data-state="loading" aria-busy="true">
+                    <div class="dashboard-state" id="dashboardStatus" role="status">
+                        <i class="ph ph-circle-notch" aria-hidden="true"></i>
+                        <span>Carregando o panorama da empresa...</span>
+                    </div>
+                    <section class="kpi-grid" aria-label="Indicadores principais" data-dashboard-section="kpis">
                         <article class="kpi-card primary">
                             <span class="kpi-icon"><i class="ph ph-file-text" aria-hidden="true"></i></span>
                             <div><p class="kpi-label">Documentos gerados</p><p class="kpi-value" id="kpiDocumentos">0</p><p class="kpi-trend" id="kpiDocumentosTrend">Total registrado no sistema</p></div>
@@ -120,10 +124,11 @@
                         </article>
                     </section>
 
-                    <section class="dashboard-bento">
+                    <section class="dashboard-bento" data-dashboard-section="operations">
                         <article class="panel dashboard-chart-panel">
                             <div class="panel-header"><div><h3>Documentos gerados</h3><small>Volume registrado por dia</small></div><span class="meta-pill">Dados reais</span></div>
-                            <div class="dashboard-chart"><canvas id="mainChart" aria-label="Gráfico de documentos gerados por dia"></canvas></div>
+                            <div class="dashboard-chart"><canvas id="mainChart" aria-label="Gráfico de documentos gerados por dia" aria-describedby="documentsChartSummary"></canvas></div>
+                            <p class="chart-summary" id="documentsChartSummary" aria-live="polite">Consolidando o volume de documentos...</p>
                         </article>
 
                         <article class="panel company-identity-panel" id="companyIdentityPanel">
@@ -148,11 +153,12 @@
 
                         <article class="panel templates-chart-panel">
                             <div class="panel-header"><div><h3>Templates mais utilizados</h3><small>Distribuição registrada</small></div></div>
-                            <div class="donut-layout"><div class="donut-chart"><canvas id="topTemplatesChart" aria-label="Gráfico dos templates mais utilizados"></canvas></div><ul class="chart-legend" id="topTemplatesLegend"></ul></div>
+                            <div class="donut-layout"><div class="donut-chart"><canvas id="topTemplatesChart" aria-label="Gráfico dos templates mais utilizados" aria-describedby="templatesChartSummary"></canvas></div><ul class="chart-legend" id="topTemplatesLegend"></ul></div>
+                            <p class="chart-summary" id="templatesChartSummary" aria-live="polite">Consolidando a utilização dos templates...</p>
                         </article>
                     </section>
 
-                    <section class="dashboard-support-grid">
+                    <section class="dashboard-support-grid" data-dashboard-section="support">
                         <article class="panel">
                             <div class="panel-header"><div><h3>Ações rápidas</h3><small>Acesso direto</small></div></div>
                             <div class="quick-links" id="quickLinks">

@@ -81,6 +81,49 @@ html .dashboard-shell {
   gap: var(--space-4);
 }
 
+html .dashboard-state {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px var(--space-4);
+  color: var(--text-secondary);
+  background: var(--surface-panel);
+  border: 1px solid var(--border-soft);
+  border-left: 3px solid var(--primary-500);
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+}
+
+html .dashboard-state[hidden] {
+  display: none;
+}
+
+html .dashboard-state--loading > i {
+  color: var(--primary-500);
+  animation: dashboard-state-spin 0.8s linear infinite;
+}
+
+html .dashboard-state--error {
+  border-left-color: var(--danger);
+}
+
+html .dashboard-state--error > i {
+  color: var(--danger);
+  font-size: 1.25rem;
+}
+
+html .dashboard-state--error > span {
+  min-width: 0;
+  flex: 1;
+}
+
+@keyframes dashboard-state-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 html .kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -226,6 +269,14 @@ html .dashboard-chart {
 html .company-identity-panel {
   position: relative;
   overflow: hidden;
+}
+
+html .company-identity-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary-500), var(--secondary-500), transparent 88%);
 }
 
 html .company-identity-panel::after {
@@ -420,6 +471,15 @@ html .chart-legend .chart-empty {
   color: var(--text-subtle);
 }
 
+html .chart-summary {
+  margin: var(--space-3) 0 0;
+  padding-top: var(--space-3);
+  color: var(--text-subtle);
+  border-top: 1px solid var(--border-soft);
+  font-size: 0.6875rem;
+  line-height: 1.5;
+}
+
 html .dashboard-support-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -510,6 +570,15 @@ html .insight-marker {
 }
 
 @media (max-width: 640px) {
+  html .dashboard-state--error {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  html .dashboard-state--error .btn {
+    width: 100%;
+  }
+
   html .dashboard-page-header {
     align-items: stretch;
   }

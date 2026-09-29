@@ -156,12 +156,81 @@ test('dashboard reproduces the approved Aurora bento with truthful data', async 
   await expect(page.locator('#topTemplatesChart')).toBeVisible();
   await expect(page.locator('#topTemplatesLegend')).toContainText('Contratos');
   await expect(page.locator('#topTemplatesLegend')).toContainText('42');
+  await expect(page.locator('#documentsChartSummary')).toContainText('71 documentos');
+  await expect(page.locator('#templatesChartSummary')).toContainText('Contratos');
   await expect(page.locator('#companyIdentityPanel')).toContainText('Amethyst Legal');
   await expect(page.locator('#recentActivity')).toContainText('Ana Martins');
   await expect(page.locator('#quickLinks .action-card')).toHaveCount(4);
   await expect(page.locator('#masterPanel')).toBeVisible();
   const kpiSubtexts = await page.locator('.kpi-trend').allTextContents();
   expect(kpiSubtexts.every((text) => !/[↑↓]|\d+%/.test(text))).toBeTruthy();
+
+  const hierarchy = await page.locator('[data-dashboard-section]').evaluateAll((sections) =>
+    sections.map((section) => section.getAttribute('data-dashboard-section'))
+  );
+  expect(hierarchy).toEqual(['kpis', 'operations', 'support']);
+});
+
+test('dashboard exposes loading and api failure as distinct states', async ({ page }) => {
+  let releaseFailure;
+  const failureGate = new Promise((resolve) => {
+    releaseFailure = resolve;
+  });
+  await installSession(page, { role: 'admin' });
+  await mockApi(page, {
+    ...dashboardResponses,
+    '/api/clientes': async (route) => {
+      await failureGate;
+      await route.fulfill({
+        status: 503,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Serviço temporariamente indisponível' }),
+      });
+    },
+  });
+  await page.goto('/dashboard.html');
+
+  await expect(page.locator('#dashboardShell')).toHaveAttribute('aria-busy', 'true');
+  await expect(page.getByRole('status')).toContainText(/carregando/i);
+  releaseFailure();
+  await expect(page.locator('#dashboardStatus[role="alert"]')).toContainText(/não foi possível carregar/i);
+  await expect(page.locator('#dashboardShell')).toHaveAttribute('data-state', 'error');
+  await expect(page.locator('#dashboardRetry')).toHaveAttribute('href', 'dashboard.html');
+});
+
+test('dashboard distinguishes an empty company from master without company context', async ({
+  page,
+}) => {
+  await installSession(page, { role: 'master', company: null });
+  await mockApi(page, {
+    '/api/empresas': { status: 200, body: [{ id: 4, nome: 'Empresa disponível' }] },
+    '/api/health': { status: 200, body: { ok: true } },
+  });
+  await page.goto('/dashboard.html');
+
+  await expect(page.locator('#dashboardShell')).toHaveAttribute('data-state', 'no-company');
+  await expect(page.locator('#contextBanner')).toContainText('Contexto de empresa não selecionado');
+  await expect(page.locator('#dashboardPrimaryAction')).toHaveAttribute('href', 'empresas.html');
+  await expect(page.locator('#dashboardPrimaryAction')).toContainText('Selecionar empresa');
+  await expect(page.locator('#documentsChartSummary')).toContainText(/selecione uma empresa/i);
+
+  await page.evaluate(() => {
+    localStorage.setItem('empresaContextoId', '4');
+    localStorage.setItem('empresaContextoNome', 'Empresa disponível');
+  });
+  await mockApi(page, {
+    '/api/clientes': { status: 200, body: [] },
+    '/api/templates': { status: 200, body: [] },
+    '/api/usuarios': { status: 200, body: [] },
+    '/api/empresas': { status: 200, body: [{ id: 4, nome: 'Empresa disponível' }] },
+    '/api/health': { status: 200, body: { ok: true } },
+    '/api/dashboard/stats': { status: 200, body: { kpis: {}, graficos: {} } },
+  });
+  await page.reload();
+
+  await expect(page.locator('#dashboardShell')).toHaveAttribute('data-state', 'empty');
+  await expect(page.locator('#documentsChartSummary')).toContainText(/nenhum documento/i);
+  await expect(page.locator('#templatesChartSummary')).toContainText(/nenhum template/i);
 });
 
 for (const viewport of [

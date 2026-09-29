@@ -24,6 +24,7 @@ class DashboardManager {
     async start() {
         this.startClock();
         this.applyBaseIdentity();
+        this.setDashboardState('loading', 'Carregando o panorama da empresa...');
 
         if (this.usuario.role === 'master' && !window.auth.ensureEmpresaContexto()) {
             await this.loadMasterWithoutContext();
@@ -82,6 +83,36 @@ class DashboardManager {
         document.getElementById('metaHealth').textContent = ok ? 'API: Online' : 'API: Instável';
     }
 
+    setDashboardState(state, message = '') {
+        const shell = document.getElementById('dashboardShell');
+        const status = document.getElementById('dashboardStatus');
+        if (!shell || !status) return;
+
+        shell.dataset.state = state;
+        shell.setAttribute('aria-busy', String(state === 'loading'));
+        status.className = `dashboard-state dashboard-state--${state}`;
+        status.hidden = !['loading', 'error'].includes(state);
+        status.setAttribute('role', state === 'error' ? 'alert' : 'status');
+
+        if (state === 'error') {
+            status.innerHTML = `
+                <i class="ph ph-warning-circle" aria-hidden="true"></i>
+                <span><strong>Não foi possível carregar o dashboard.</strong> ${this.escapeHtml(message)}</span>
+                <a class="btn btn-secondary" id="dashboardRetry" href="dashboard.html">Tentar novamente</a>
+            `;
+            return;
+        }
+
+        status.innerHTML = `<i class="ph ph-circle-notch" aria-hidden="true"></i><span>${this.escapeHtml(message)}</span>`;
+    }
+
+    setPrimaryAction({ href, label, icon }) {
+        const action = document.getElementById('dashboardPrimaryAction');
+        if (!action) return;
+        action.href = href;
+        action.innerHTML = `<i class="ph ${icon}" aria-hidden="true"></i>${this.escapeHtml(label)}`;
+    }
+
     renderCompanyPanel({ active, name, description }) {
         const companyName = name || 'Sem empresa selecionada';
         const initial = companyName.trim().charAt(0).toUpperCase() || 'D';
@@ -119,10 +150,13 @@ class DashboardManager {
             ]);
             this.renderRecentActivity([], 'Selecione uma empresa para visualizar a atividade.');
             this.renderMasterInsights(this.state.empresas, []);
-            this.renderDocumentsChart(null);
-            this.renderTopTemplatesChart(null);
+            this.renderDocumentsChart(null, 'Selecione uma empresa para visualizar os documentos.');
+            this.renderTopTemplatesChart(null, 'Selecione uma empresa para visualizar os templates.');
+            this.setPrimaryAction({ href: 'empresas.html', label: 'Selecionar empresa', icon: 'ph-buildings' });
+            this.setDashboardState('no-company');
         } catch (error) {
             window.auth.showNotification(error.message, 'error');
+            this.setDashboardState('error', error.message);
         }
     }
 
@@ -175,11 +209,16 @@ class DashboardManager {
             this.renderDocumentsChart(this.state.stats);
             this.renderTopTemplatesChart(this.state.stats);
 
+            const hasOperationalData = documentos > 0 || clientes > 0 || this.state.templates.length > 0;
+            this.setPrimaryAction({ href: 'documentos.html', label: 'Gerar documento', icon: 'ph-file-plus' });
+            this.setDashboardState(hasOperationalData ? 'ready' : 'empty');
+
             if (this.usuario.role === 'master') {
                 this.renderMasterInsights(this.state.empresas, this.state.usuarios);
             }
         } catch (error) {
             window.auth.showNotification(error.message, 'error');
+            this.setDashboardState('error', error.message);
         }
     }
 
@@ -275,13 +314,21 @@ class DashboardManager {
         };
     }
 
-    renderDocumentsChart(stats) {
+    renderDocumentsChart(stats, emptyMessage = 'Nenhum documento gerado no período.') {
         const canvas = document.getElementById('mainChart');
+        const points = Array.isArray(stats?.graficos?.docsPorDia) ? stats.graficos.docsPorDia : [];
+        const summary = document.getElementById('documentsChartSummary');
+        if (summary) {
+            const lastPoint = points.at(-1);
+            summary.textContent = lastPoint
+                ? `Último registro: ${this.formatNumber(lastPoint.quantidade)} documentos em ${lastPoint.data.split('-').reverse().join('/')}.`
+                : emptyMessage;
+        }
+
         if (!canvas || typeof window.Chart === 'undefined') return;
         this.chartInstance?.destroy();
 
         const colors = this.chartColors();
-        const points = Array.isArray(stats?.graficos?.docsPorDia) ? stats.graficos.docsPorDia : [];
         const labels = points.length ? points.map((item) => item.data.split('-').reverse().join('/')) : ['Sem dados'];
         const data = points.length ? points.map((item) => Number(item.quantidade) || 0) : [0];
         const gradient = canvas.getContext('2d').createLinearGradient(0, 0, 0, 260);
@@ -304,9 +351,10 @@ class DashboardManager {
         });
     }
 
-    renderTopTemplatesChart(stats) {
+    renderTopTemplatesChart(stats, emptyMessage = 'Nenhum template utilizado no período.') {
         const canvas = document.getElementById('topTemplatesChart');
         const legend = document.getElementById('topTemplatesLegend');
+        const summary = document.getElementById('templatesChartSummary');
         const items = Array.isArray(stats?.graficos?.topTemplates) ? stats.graficos.topTemplates : [];
         const colors = this.chartColors();
         const palette = [colors.primary, colors.secondary, colors.info, colors.text];
@@ -314,6 +362,13 @@ class DashboardManager {
         legend.innerHTML = items.length
             ? items.map((item, index) => `<li><span class="legend-dot" style="--legend-color: ${palette[index % palette.length]}"></span><span>${this.escapeHtml(item.nome || item.label || 'Template')}</span><strong>${this.formatNumber(item.quantidade)}</strong></li>`).join('')
             : '<li class="chart-empty">Sem dados de utilização</li>';
+
+        if (summary) {
+            const topTemplate = items[0];
+            summary.textContent = topTemplate
+                ? `Mais utilizado: ${topTemplate.nome || topTemplate.label || 'Template'}, com ${this.formatNumber(topTemplate.quantidade)} documentos.`
+                : emptyMessage;
+        }
 
         if (!canvas || typeof window.Chart === 'undefined') return;
         this.topTemplatesChartInstance?.destroy();
