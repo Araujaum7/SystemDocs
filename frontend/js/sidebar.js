@@ -152,12 +152,12 @@ document.addEventListener('DOMContentLoaded', function() {
     syncMobileToggle(false);
 });
 
-function openModal(modalId) {
+window.openModal = function(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) modal.style.display = 'flex';
-}
+};
 
-function closeModal(modalId) {
+window.closeModal = function(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) modal.style.display = 'none';
-}
+};

@@ -17,5 +17,6 @@ process.env.DATABASE_PATH = databasePath;
 process.env.PORT = '7101';
 process.env.MASTER_BOOTSTRAP_PASSWORD = 'admin123456';
 process.env.JWT_SECRET = 'documentospro_ui_tests_secret_1234567890';
+process.env.DOCUMENTOSPRO_UI_TEST = 'true';
 
 await import('../../backend/server.js');

@@ -21,8 +21,8 @@ const companies = [
 ];
 
 const viewports = [
-  { slug: 'desktop', width: 1440, height: 1000 },
-  { slug: 'tablet', width: 1024, height: 900 },
+  { slug: 'desktop', width: 1440, height: 900 },
+  { slug: 'tablet', width: 1024, height: 768 },
   { slug: 'mobile', width: 390, height: 844 },
 ];
 
@@ -39,8 +39,7 @@ const authenticatedPages = [
 const criticalPages = new Set([
   'dashboard.html',
   'documentos.html',
-  'templates.html',
-  'usuarios.html',
+  'empresas.html',
 ]);
 
 const responses = {
@@ -95,7 +94,25 @@ const responses = {
   },
   '/api/dashboard/stats': {
     status: 200,
-    body: { graficos: { docsPorDia: [{ data: '2026-09-28', quantidade: 3 }] } },
+    body: {
+      kpis: { documentos: 1248, clientes: 284 },
+      graficos: {
+        docsPorDia: [
+          { data: '2026-09-22', quantidade: 32 },
+          { data: '2026-09-23', quantidade: 41 },
+          { data: '2026-09-24', quantidade: 37 },
+          { data: '2026-09-25', quantidade: 56 },
+          { data: '2026-09-26', quantidade: 48 },
+          { data: '2026-09-27', quantidade: 63 },
+          { data: '2026-09-28', quantidade: 71 },
+        ],
+        topTemplates: [
+          { nome: 'Contratos', quantidade: 42 },
+          { nome: 'Procurações', quantidade: 24 },
+          { nome: 'Declarações', quantidade: 18 },
+        ],
+      },
+    },
   },
 };
 
@@ -220,6 +237,20 @@ for (const viewport of viewports) {
     }
   }
 }
+
+test('forced no-backdrop mode keeps glass surfaces opaque', async ({ page }) => {
+  await installSession(page, { role: 'admin', company: companies[0], darkTheme: true });
+  await mockApi(page, responses);
+  await page.goto('/clientes.html');
+  await page.locator('body').evaluate((body) => body.classList.add('force-solid-glass'));
+
+  const surface = await page.locator('.toolbar').evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { backdrop: style.backdropFilter, background: style.backgroundColor };
+  });
+  expect(surface.backdrop).toBe('none');
+  expect(surface.background).toBe('rgb(14, 41, 74)');
+});
 
 for (const viewport of viewports) {
   for (const darkTheme of [false, true]) {

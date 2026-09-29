@@ -423,6 +423,12 @@ html .error-state {
   }
 }
 
+html body.force-solid-glass :where(.panel, .card, .kpi-card, .stat-card, .actions-panel, .toolbar, .table-container, .table-responsive, .data-table-wrapper, .modal-content) {
+  background: var(--surface-panel-strong);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
 @keyframes modal-enter {
   from {
     opacity: 0;

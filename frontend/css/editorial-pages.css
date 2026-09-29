@@ -2507,6 +2507,10 @@ html .dashboard-shell .action-card {
   padding: var(--space-3);
 }
 
+html body.user-master .dashboard-shell .action-card.master-only {
+  display: grid !important;
+}
+
 html .dashboard-shell .action-card > i {
   grid-area: icon;
   margin: 2px 0 0;

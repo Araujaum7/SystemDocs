@@ -3,6 +3,7 @@ import rateLimit from 'express-rate-limit';
 export const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
   max: 1000, // Limite de 1000 requisições por IP por janela de tempo
+  skip: () => process.env.DOCUMENTOSPRO_UI_TEST === 'true',
   message: { error: 'Muitas requisições deste IP, tente novamente após 15 minutos.' },
   standardHeaders: true,
   legacyHeaders: false,

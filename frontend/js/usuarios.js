@@ -257,7 +257,3 @@ class UsuariosManager {
 document.addEventListener('DOMContentLoaded', () => {
     window.usuariosManager = new UsuariosManager();
 });
-
-function closeUsuarioModal() {
-    closeModal('modalUsuario');
-}

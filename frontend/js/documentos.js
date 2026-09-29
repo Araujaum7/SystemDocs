@@ -601,7 +601,7 @@ class DocumentosManager {
         if (currentMode === 'folder' || currentMode === 'auto') {
             try {
                 await this.downloadAllDocuments(documentos);
-            } catch (_error) {
+            } catch {
                 // Usuario pode cancelar a selecao de pasta ou download falhar.
             }
         }

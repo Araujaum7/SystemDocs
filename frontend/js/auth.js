@@ -180,7 +180,7 @@ class Auth {
             if (configRaw) {
                 try {
                     config = JSON.parse(configRaw);
-                } catch(e) {}
+                } catch {}
             }
             if (!config) {
                 const id = this.getEmpresaContextoId();
@@ -190,7 +190,7 @@ class Auth {
                     if (empresa && empresa.config) {
                         try {
                             config = typeof empresa.config === 'string' ? JSON.parse(empresa.config) : empresa.config;
-                        } catch(e) {}
+                        } catch {}
                     }
                 }
             }
@@ -198,7 +198,7 @@ class Auth {
             if (usuario.empresa_config) {
                 try {
                     config = typeof usuario.empresa_config === 'string' ? JSON.parse(usuario.empresa_config) : usuario.empresa_config;
-                } catch(e) {}
+                } catch {}
             }
         }
 

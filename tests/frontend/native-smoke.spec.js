@@ -4,10 +4,13 @@ test('isolated native flow creates context, navigates, toggles theme and logs ou
   page,
 }) => {
   await page.goto('/');
+  await page.evaluate(() => localStorage.removeItem('darkTheme'));
+  await page.reload();
   await page.getByLabel('E-mail').fill('admin@admin.com');
   await page.getByLabel('Senha').fill('admin123456');
   await page.getByRole('button', { name: /entrar no sistema/i }).click();
   await expect(page).toHaveURL(/\/empresas(?:\.html)?$/);
+  await expect(page.locator('body')).toHaveClass(/dark-theme/);
 
   const promptAnswers = ['Empresa Smoke UI', '#0F766E', '#B45309'];
   page.on('dialog', async (dialog) => {
@@ -23,8 +26,8 @@ test('isolated native flow creates context, navigates, toggles theme and logs ou
 
   const themeToggle = page.locator('.theme-toggle');
   await themeToggle.click();
-  await expect(page.locator('body')).toHaveClass(/dark-theme/);
-  await expect.poll(() => page.evaluate(() => localStorage.getItem('darkTheme'))).toBe('true');
+  await expect(page.locator('body')).not.toHaveClass(/dark-theme/);
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('darkTheme'))).toBe('false');
 
   for (const destination of [
     'clientes.html',
