@@ -13,6 +13,14 @@ const companies = [
   },
 ];
 
+const companiesWithLongIdentity = [
+  {
+    ...companies[0],
+    nome: 'Amethyst Consultoria Jurídica e Operações Documentais Empresariais',
+    slug: 'amethyst-consultoria-juridica-operacoes-documentais-empresariais',
+  },
+];
+
 const users = [
   {
     id: 8,
@@ -63,9 +71,30 @@ test('master company cards retain context and management actions', async ({ page
   await expect(card.locator('.company-palette-swatch')).toHaveCount(2);
   await expect(card.locator('.company-palette-code')).toHaveText(['#7C3AED', '#2563EB']);
   await expect(card).toContainText('120');
+  await expect(card.locator('.active-company-label')).toContainText('Empresa ativa');
   await expect(card.getByRole('button', { name: /empresa ativa/i })).toBeVisible();
   await expect(card.getByRole('button', { name: 'Editar' })).toBeVisible();
   await expect(card.getByRole('button', { name: 'Excluir' })).toBeVisible();
+});
+
+test('audit api error remains distinct from an empty log and offers retry', async ({ page }) => {
+  await installSession(page, { role: 'admin' });
+  await mockApi(page, {
+    '/api/auditoria': { status: 503, body: { error: 'Auditoria indisponível' } },
+  });
+  await page.goto('/auditoria.html');
+
+  await expect(page.locator('#logsTableBody')).toHaveAttribute('data-state', 'error');
+  await expect(page.locator('#logsTableBody [role="alert"]')).toContainText(/não foi possível carregar/i);
+  await expect(page.locator('#retryAuditBtn')).toContainText('Tentar novamente');
+
+  await page.route('**/api/auditoria', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
+  });
+  await page.locator('#retryAuditBtn').click();
+  await expect(page.locator('#logsTableBody')).toHaveAttribute('data-state', 'empty');
+  await expect(page.locator('#logsTableBody')).toContainText('Nenhum registro encontrado');
+  await expect(page.locator('#logsTableBody [role="alert"]')).toHaveCount(0);
 });
 
 test('company management remains master-only', async ({ page }) => {
@@ -101,7 +130,7 @@ for (const pageName of ['auditoria.html', 'empresas.html', 'usuarios.html']) {
     await installSession(page, { role: pageName === 'empresas.html' ? 'master' : 'admin' });
     await mockApi(page, {
       '/api/auditoria': { status: 200, body: logs },
-      '/api/empresas': { status: 200, body: companies },
+      '/api/empresas': { status: 200, body: companiesWithLongIdentity },
       '/api/usuarios': { status: 200, body: users },
     });
     await page.goto(`/${pageName}`);
@@ -110,5 +139,22 @@ for (const pageName of ['auditoria.html', 'empresas.html', 'usuarios.html']) {
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth
     );
     expect(overflow).toBeLessThanOrEqual(1);
+
+    const card = page.locator('.empresa-card, .usuario-card').first();
+    if (await card.count()) {
+      const cardBox = await card.boundingBox();
+      const actionBoxes = await card.locator('.card-footer .btn').evaluateAll((buttons) =>
+        buttons.map((button) => {
+          const rect = button.getBoundingClientRect();
+          return { left: rect.left, right: rect.right };
+        })
+      );
+      for (const actionBox of actionBoxes) {
+        expect(actionBox.left).toBeGreaterThanOrEqual(cardBox.x - 1);
+        expect(actionBox.right).toBeLessThanOrEqual(cardBox.x + cardBox.width + 1);
+      }
+      const actionLabels = await card.locator('.card-footer .btn').allTextContents();
+      expect(actionLabels.at(-1)).toContain('Excluir');
+    }
   });
 }

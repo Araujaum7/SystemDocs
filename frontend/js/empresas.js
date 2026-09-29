@@ -89,7 +89,9 @@ class EmpresasManager {
                         <span class="company-monogram">${monogram}</span>
                         <div><span class="data-card-eyebrow">Empresa</span><h3>${this.escapeHtml(empresa.nome)}</h3><small>${this.escapeHtml(empresa.slug || '-')}</small></div>
                     </div>
-                    <span class="badge${isActive ? ' active' : ''}">${isActive ? 'Ativa' : `ID ${empresa.id}`}</span>
+                    ${isActive
+                        ? '<span class="active-company-label"><i class="ph ph-check-circle" aria-hidden="true"></i>Empresa ativa</span>'
+                        : `<span class="badge">ID ${empresa.id}</span>`}
                 </div>
                 <div class="card-body">
                     <div class="company-metrics">

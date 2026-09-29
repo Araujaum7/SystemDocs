@@ -9,22 +9,24 @@ class AuditoriaManager {
 
     async carregarLogs() {
         const tbody = document.getElementById('logsTableBody');
-        tbody.innerHTML = '<tr><td colspan="5" class="table-state">Carregando...</td></tr>';
+        tbody.dataset.state = 'loading';
+        tbody.innerHTML = '<tr><td colspan="5" class="table-state"><span role="status">Carregando logs...</span></td></tr>';
         
         try {
             const response = await window.auth.fetchWithAuth('/api/auditoria');
-            if (!response.ok) throw new Error('Erro ao carregar auditoria');
-            
             const logs = await response.json();
+            if (!response.ok) throw new Error(logs.error || 'Erro ao carregar auditoria');
             
             const countEl = document.getElementById('totalLogsCount');
             if (countEl) countEl.textContent = logs.length;
 
             if (logs.length === 0) {
+                tbody.dataset.state = 'empty';
                 tbody.innerHTML = '<tr><td colspan="5" class="table-state">Nenhum registro encontrado.</td></tr>';
                 return;
             }
 
+            tbody.dataset.state = 'ready';
             tbody.innerHTML = logs.map(log => {
                 const data = new Date(log.created_at).toLocaleString('pt-BR');
                 const user = log.usuario_nome || 'Sistema';
@@ -53,7 +55,21 @@ class AuditoriaManager {
             
         } catch (error) {
             console.error('Erro:', error);
-            tbody.innerHTML = '<tr><td colspan="5" class="table-state error">Falha ao carregar logs.</td></tr>';
+            const countEl = document.getElementById('totalLogsCount');
+            if (countEl) countEl.textContent = '-';
+            tbody.dataset.state = 'error';
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="table-state error">
+                        <div class="table-state__content" role="alert">
+                            <strong>N&atilde;o foi poss&iacute;vel carregar os logs.</strong>
+                            <span>${this.escapeHtml(error.message)}</span>
+                            <button class="btn btn-secondary" id="retryAuditBtn" type="button">Tentar novamente</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            document.getElementById('retryAuditBtn')?.addEventListener('click', () => this.carregarLogs());
         }
     }
 

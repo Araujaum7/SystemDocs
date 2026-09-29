@@ -2045,6 +2045,8 @@ html #progressModal strong {
 html .empresa-card,
 html .usuario-card {
   position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   min-width: 0;
   padding: 0;
   overflow: hidden;
@@ -2053,6 +2055,21 @@ html .usuario-card {
 html .empresa-card.is-active {
   border-color: color-mix(in srgb, var(--primary-500) 55%, var(--border-soft));
   box-shadow: var(--brand-glow);
+}
+
+html .active-company-label {
+  display: inline-flex;
+  min-height: 28px;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  color: var(--primary-700);
+  background: var(--primary-100);
+  border: 1px solid color-mix(in srgb, var(--primary-500) 34%, var(--border-soft));
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 750;
 }
 
 html :where(.company-card-identity, .user-card-identity) {
@@ -2387,6 +2404,23 @@ html .table-state {
   padding: var(--space-8);
   color: var(--text-secondary);
   text-align: center;
+}
+
+html .table-state__content {
+  display: grid;
+  max-width: 460px;
+  justify-items: center;
+  gap: var(--space-2);
+  margin-inline: auto;
+}
+
+html .table-state__content strong {
+  color: var(--danger);
+  font-size: 0.875rem;
+}
+
+html .table-state__content .btn {
+  margin-top: var(--space-2);
 }
 
 html .table-state.error {
