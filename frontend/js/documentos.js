@@ -480,10 +480,14 @@ class DocumentosManager {
             modal.id = 'progressModal';
             modal.className = 'modal progress-modal';
             modal.innerHTML = `
-                <div class="progress-dialog">
+                <div class="progress-dialog" role="dialog" aria-modal="true" aria-labelledby="progressDialogTitle" aria-describedby="progressDialogDescription" tabindex="-1">
                     <div class="progress-dialog__header">
-                        <span class="progress-dialog__icon"><i class="ph-fill ph-gear-six"></i></span>
-                        <h2>Gerando Documentos</h2>
+                        <span class="progress-dialog__icon" aria-hidden="true"><i class="ph-fill ph-files"></i></span>
+                        <div class="progress-dialog__heading">
+                            <span>Central de gera&ccedil;&atilde;o</span>
+                            <h2 id="progressDialogTitle">Gerando documentos</h2>
+                            <p id="progressDialogDescription">Acompanhe o processamento e baixe os arquivos quando estiverem prontos.</p>
+                        </div>
                     </div>
                     <div class="progress-dialog__body">
                         <div class="progress-container">
@@ -498,16 +502,22 @@ class DocumentosManager {
                         </div>
                         <div id="progressResults" class="progress-results" style="display:none;">
                             <div class="progress-results__header">
-                                <h3>
-                                    <i class="ph-fill ph-check-circle"></i> Concluído
-                                </h3>
+                                <div class="generation-complete-summary" role="status" aria-live="polite">
+                                    <span class="generation-complete-summary__icon" aria-hidden="true">
+                                        <i class="ph-fill ph-check"></i>
+                                    </span>
+                                    <div class="generation-complete-summary__copy">
+                                        <h3 id="generationResultTitle">Processamento conclu&iacute;do</h3>
+                                        <p id="generationResultSummary">Seus arquivos est&atilde;o prontos para download.</p>
+                                    </div>
+                                </div>
                                 <div class="result-actions" id="resultActions"></div>
                             </div>
                             <div id="generatedDocuments" class="generated-documents"></div>
                         </div>
                     </div>
                     <div class="progress-dialog__footer">
-                        <button id="closeProgressBtn" class="btn btn-secondary" style="display:none;">Concluir e Fechar</button>
+                        <button id="closeProgressBtn" class="btn btn-secondary" style="display:none;"><i class="ph ph-x"></i> Fechar</button>
                     </div>
                 </div>
             `;
@@ -516,6 +526,7 @@ class DocumentosManager {
         }
 
         document.getElementById('progressModal').style.display = 'block';
+        document.querySelector('.progress-dialog')?.classList.remove('has-results', 'is-failed');
         document.getElementById('progressFill').style.width = '0%';
         document.getElementById('progressStatus').textContent = 'Iniciando...';
         document.getElementById('progressDetails').textContent = '0 de 0';
@@ -532,10 +543,12 @@ class DocumentosManager {
         if (generatedDocuments) generatedDocuments.innerHTML = '';
         document.getElementById('progressResults').style.display = 'none';
         document.getElementById('closeProgressBtn').style.display = 'none';
+        window.requestAnimationFrame(() => document.querySelector('.progress-dialog')?.focus());
     }
 
     showGenerationError(message) {
         const feedback = document.getElementById('progressFeedback');
+        document.querySelector('.progress-dialog')?.classList.add('is-failed');
         document.querySelector('.progress-container')?.classList.add('is-error');
         document.getElementById('progressStatus').textContent = 'Falha na gera\u00e7\u00e3o';
         if (feedback) {
@@ -564,7 +577,7 @@ class DocumentosManager {
                 const percentage = data.total > 0 ? (data.completed / data.total) * 100 : 0;
                 document.getElementById('progressFill').style.width = `${percentage}%`;
                 document.getElementById('progressDetails').textContent = `${data.completed} de ${data.total}`;
-                document.getElementById('progressStatus').textContent = data.status === 'completed' ? 'Concluido' : 'Gerando...';
+                document.getElementById('progressStatus').textContent = data.status === 'completed' ? 'Conclu\u00eddo' : 'Gerando...';
 
                 if (data.status === 'completed' || data.status === 'failed') {
                     clearInterval(poll);
@@ -584,15 +597,29 @@ class DocumentosManager {
         const results = document.getElementById('progressResults');
         const list = document.getElementById('generatedDocuments');
         const resultActions = document.getElementById('resultActions');
+        const resultTitle = document.getElementById('generationResultTitle');
+        const resultSummary = document.getElementById('generationResultSummary');
+        const resultBanner = results.querySelector('.generation-complete-summary');
+        const resultIcon = resultBanner?.querySelector('i');
+        const dialog = document.querySelector('.progress-dialog');
         results.style.display = 'block';
 
         const documentos = Array.isArray(progress.documentos) ? progress.documentos : [];
         const downloadableDocuments = documentos.filter((doc) => doc.docxDownloadUrl || doc.pdfDownloadUrl);
-        const resultTitle = results.querySelector('.progress-results__header h3');
+        const isFailed = progress.status === 'failed';
+        dialog?.classList.add('has-results');
+        dialog?.classList.toggle('is-failed', isFailed);
+        resultBanner?.classList.toggle('is-error', isFailed);
+        if (resultIcon) resultIcon.className = isFailed ? 'ph-fill ph-warning' : 'ph-fill ph-check';
         if (resultTitle) {
-            resultTitle.innerHTML = progress.status === 'failed'
-                ? '<i class="ph-fill ph-warning-circle"></i> Gera&ccedil;&atilde;o interrompida'
-                : '<i class="ph-fill ph-check-circle"></i> Conclu&iacute;do';
+            resultTitle.textContent = isFailed
+                ? 'Gera\u00e7\u00e3o interrompida'
+                : `${documentos.length} ${documentos.length === 1 ? 'documento pronto' : 'documentos prontos'}`;
+        }
+        if (resultSummary) {
+            resultSummary.textContent = isFailed
+                ? 'Confira os detalhes abaixo e tente novamente se necess\u00e1rio.'
+                : 'Escolha um formato abaixo ou baixe todos os arquivos dispon\u00edveis.';
         }
         resultActions.innerHTML = '';
 
@@ -617,17 +644,21 @@ class DocumentosManager {
             return `
             <div class="generated-document">
                 <div class="generated-document__row">
+                    <span class="generated-document__icon" aria-hidden="true">
+                        <i class="ph-fill ph-file-text"></i>
+                    </span>
                     <div class="generated-document__copy">
-                        <strong title="${this.escapeHtml(displayName)}">
+                        <strong class="generated-document__filename" title="${this.escapeHtml(displayName)}">
                             ${this.escapeHtml(displayName)}
                         </strong>
-                        <small>
-                            <i class="ph-fill ph-user"></i>${this.escapeHtml(doc.nomeCliente || doc.cliente || '-')}
-                        </small>
+                        <span class="generated-document__client">
+                            <i class="ph ph-user"></i>
+                            <span>${this.escapeHtml(doc.nomeCliente || doc.cliente || '-')}</span>
+                        </span>
                     </div>
-                    <div class="generated-document__actions">
-                        ${doc.docxDownloadUrl ? `<button class="btn btn-secondary" data-type="docx" data-index="${index}"><i class="ph-fill ph-file-doc"></i> Word</button>` : ''}
-                        ${doc.pdfDownloadUrl ? `<button class="btn btn-danger" data-type="pdf" data-index="${index}"><i class="ph-fill ph-file-pdf"></i> PDF</button>` : ''}
+                    <div class="generated-document__actions" aria-label="Downloads de ${this.escapeHtml(displayName)}">
+                        ${doc.docxDownloadUrl ? `<button class="btn btn-secondary generated-document__download generated-document__download--docx" data-type="docx" data-index="${index}"><i class="ph-fill ph-file-doc"></i> Baixar Word</button>` : ''}
+                        ${doc.pdfDownloadUrl ? `<button class="btn btn-secondary generated-document__download generated-document__download--pdf" data-type="pdf" data-index="${index}"><i class="ph-fill ph-file-pdf"></i> Baixar PDF</button>` : ''}
                         ${!hasDownload ? '<span class="generated-document__unavailable"><i class="ph ph-warning-circle"></i> Arquivo indispon&iacute;vel para download</span>' : ''}
                     </div>
                 </div>
@@ -660,7 +691,10 @@ class DocumentosManager {
             `;
         }
 
-        window.auth.showNotification(`${documentos.length} documento(s) gerado(s)`);
+        const generationMessage = documentos.length === 1
+            ? '1 documento gerado'
+            : `${documentos.length} documentos gerados`;
+        window.auth.showNotification(generationMessage);
         const currentMode = this.getDownloadMode();
         if (currentMode === 'folder' || currentMode === 'auto') {
             try {

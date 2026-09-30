@@ -116,6 +116,43 @@ test('a completed item without a download url is not presented as downloadable',
   await expect(page.locator('.generated-document__actions button')).toHaveCount(0);
 });
 
+test('completed generation keeps long file names contained in a clear result summary', async ({ page }) => {
+  await openDocuments(page, { width: 1280, height: 800 });
+  await page.route('**/api/gerar-documentos/progresso/ui-generation', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        status: 'completed',
+        completed: 1,
+        total: 1,
+        documentos: [{
+          nomeArquivo: 'Autorizacao de Pagamento Terceiros ATT - JAQUELINE DOS SANTOS - Caixa Economica Federal - 878772409843-0.docx',
+          nomeCliente: 'JAQUELINE DOS SANTOS',
+          pdfDownloadUrl: '/api/download/pdf',
+        }],
+      }),
+    });
+  });
+
+  await page.locator('#cliente_doc_1').check();
+  await page.locator('#template_doc_2').check();
+  await page.locator('#gerarDocumentosBtn').click();
+
+  const dialog = page.getByRole('dialog', { name: /gerando documentos/i });
+  await expect(dialog).toBeVisible({ timeout: 3_000 });
+  await expect(dialog.locator('.generation-complete-summary')).toContainText(/1 documento pronto/i);
+  await expect(page.locator('.notification')).toContainText('1 documento gerado');
+  await expect(dialog.locator('.generated-document__filename')).toHaveCSS('overflow', 'hidden');
+  await expect(dialog.locator('.generated-document__actions button')).toHaveCSS('min-height', '44px');
+
+  const overflow = await dialog.locator('.generated-document').evaluate((card) => ({
+    scrollWidth: card.scrollWidth,
+    clientWidth: card.clientWidth,
+  }));
+  expect(overflow.scrollWidth).toBeLessThanOrEqual(overflow.clientWidth + 1);
+});
+
 test('specific-field editor keeps fields and history in a contained modal', async ({ page }) => {
   await openDocuments(page);
   await page.locator('#cliente_doc_1').check();
