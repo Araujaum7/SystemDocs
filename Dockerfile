@@ -10,8 +10,7 @@ RUN apk add --no-cache \
     font-noto \
     font-ubuntu \
     font-liberation \
-    font-carlito \
-    font-caladea && \
+    font-carlito && \
     update-ms-fonts && \
     mkdir -p /usr/share/fonts/custom && \
     fc-cache -fv
