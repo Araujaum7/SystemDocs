@@ -1,6 +1,8 @@
 node_modules/
 uploads/
 database.db
+*.db-shm
+*.db-wal
 .env
 test-results/
 playwright-report/

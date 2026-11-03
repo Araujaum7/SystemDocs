@@ -1,13 +1,20 @@
 FROM node:18-alpine
 
-# Instala LibreOffice, Java e fontes MS para conversão de DOCX para PDF
+# Instala LibreOffice, Java e fontes MS/Extras para conversão de DOCX para PDF
 RUN apk add --no-cache \
     libreoffice \
     libreoffice-common \
     openjdk11-jre \
-    msttcorefonts-installer fontconfig && \
+    msttcorefonts-installer \
+    fontconfig \
+    font-noto \
+    font-ubuntu \
+    font-liberation \
+    font-carlito \
+    font-caladea && \
     update-ms-fonts && \
-    fc-cache -f
+    mkdir -p /usr/share/fonts/custom && \
+    fc-cache -fv
 
 # Criar diretório da aplicação
 WORKDIR /app
@@ -24,5 +31,5 @@ COPY . .
 # Expor porta 7000
 EXPOSE 7000
 
-# Comando de inicialização
-CMD ["npm", "start"]
+# Comando de inicialização (atualiza cache de fontes customizadas da pasta ./fonts ao iniciar)
+CMD ["sh", "-c", "fc-cache -f && npm start"]

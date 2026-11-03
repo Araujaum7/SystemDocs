@@ -16,6 +16,7 @@ services:
     volumes:
       - ./backend/data:/app/backend/data
       - ./backend/uploads:/app/backend/uploads
+      - ./fonts:/usr/share/fonts/custom
     # Limita recursos do Docker (opcional, bom para não travar a VPS inteira se o LibreOffice pesar)
     deploy:
       resources:
